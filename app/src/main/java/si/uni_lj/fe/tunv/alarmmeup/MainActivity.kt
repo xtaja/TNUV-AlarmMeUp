@@ -8,7 +8,7 @@ import si.uni_lj.fe.tunv.alarmmeup.ui.StoreScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.NavBar
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.NavBarButton
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.NavBarStats
-
+import android.util.Log
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -57,7 +57,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 label = "24", //change to number
                 iconSize = 32.dp
             )
-            NavBarStats(
+            NavBarStats( //XP and SunCoins
                 numOfXP = 120,
                 numOfSunCoins= 520
             )
@@ -80,12 +80,17 @@ fun MainScreen(modifier: Modifier = Modifier) {
         ) {
             when (selectedScreen) {
                 "StreakCalendar" -> StreakScreen()
-                "Profile" -> ProfileScreen()
+                "Profile" -> ProfileScreen(
+                    resourceId = R.drawable.placeholder_profile_picture,
+                    name = "Amy",
+                    surname = "Adams",
+                    username = "@amyzams")
                 "Leaderboard" -> LeaderboardScreen()
                 "Home" -> HomeScreen()
                 "Store" -> StoreScreen()
                 else -> Text("Unknown screen")
             }
+
         }
 
         // Bottom Navigation Bar
