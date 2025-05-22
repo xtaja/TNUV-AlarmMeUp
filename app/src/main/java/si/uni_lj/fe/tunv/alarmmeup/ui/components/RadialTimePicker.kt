@@ -2,21 +2,51 @@ package si.uni_lj.fe.tunv.alarmmeup.ui.components
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
-import androidx.compose.runtime.*
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import kotlin.math.*
+import androidx.compose.ui.unit.sp
+import kotlin.math.abs
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.hypot
+import kotlin.math.min
+import kotlin.math.roundToInt
+import kotlin.math.sin
 
 @Composable
 fun RadialTimePicker(
@@ -28,12 +58,26 @@ fun RadialTimePicker(
     onTimeChange: (Int, Int, Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var hourInput by remember { mutableStateOf(selectedHour.toString().padStart(2, '0')) }
-    var minuteInput by remember { mutableStateOf(selectedMinute.toString().padStart(2, '0')) }
+    var hourInput by remember { mutableStateOf(TextFieldValue(selectedHour.toString().padStart(2, '0'))) }
+    var minuteInput by remember { mutableStateOf(TextFieldValue(selectedMinute.toString().padStart(2, '0'))) }
+
+    var hourFocused by remember { mutableStateOf(false) }
+    var minuteFocused by remember { mutableStateOf(false) }
+
+    val hourFocusRequester = remember { FocusRequester() }
+    val minuteFocusRequester = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
+
+    var localHour by remember { mutableStateOf(selectedHour) }
+    var localMinute by remember { mutableStateOf(selectedMinute) }
 
 
-    LaunchedEffect(selectedHour) { hourInput = selectedHour.toString().padStart(2, '0') }
-    LaunchedEffect(selectedMinute) { minuteInput = selectedMinute.toString().padStart(2, '0') }
+    LaunchedEffect(selectedHour, selectedMinute) {
+        if (!hourFocused) hourInput = TextFieldValue(selectedHour.toString().padStart(2, '0'))
+        if (!minuteFocused) minuteInput = TextFieldValue(selectedMinute.toString().padStart(2, '0'))
+        localHour = selectedHour
+        localMinute = selectedMinute
+    }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -48,39 +92,99 @@ fun RadialTimePicker(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .height(80.dp)
-                    .width(120.dp)
+                    .width(175.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     TextField(
                         value = hourInput,
                         onValueChange = {
-                            if (it.length <= 2 && it.all { c -> c.isDigit() }) {
-                                hourInput = it
-                                val hour = it.toIntOrNull()?.coerceIn(1, 12) ?: selectedHour
-                                val minute = minuteInput.toIntOrNull()?.coerceIn(0, 59) ?: selectedMinute
-                                onTimeChange(hour, minute, isAm)
+                            val hourText = it.text
+                            if (hourText.length <= 2 && hourText.all { c -> c.isDigit() }) {
+                                val hourVal = hourText.toIntOrNull()
+                                if (hourVal == null || (hourVal in 0..24)) {
+                                    hourInput = it
+                                    val hour = hourVal ?: selectedHour
+                                    val minute = minuteInput.text.toIntOrNull()?.coerceIn(0, 59) ?: selectedMinute
+                                    onTimeChange(hour, minute, isAm)
+                                    if (hourText.length == 2) {
+                                        focusManager.clearFocus()
+                                        minuteFocusRequester.requestFocus()
+                                    }
+                                }
                             }
                         },
                         singleLine = true,
-                        modifier = Modifier.width(50.dp)
+                        modifier = Modifier
+                            .width(75.dp)
+                            .focusRequester(hourFocusRequester)
+                            .onFocusChanged { focusState ->
+                                if (focusState.isFocused && minuteFocused) {
+                                    // Only clear focus from minute if hour is being focused
+                                    minuteFocused = false
+                                }
+                                hourFocused = focusState.isFocused
+                                if (focusState.isFocused) {
+                                    hourInput = hourInput.copy(selection = TextRange(0, hourInput.text.length))
+                                }
+                            },
+                        colors =TextFieldDefaults.colors(
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedContainerColor = Color.LightGray,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Black,
+                            disabledIndicatorColor = Color.Transparent
+                        ),
+                        textStyle = TextStyle(
+                            fontSize = 40.sp
+                        )
                     )
                     Text(
                         text = ":",
                         style = MaterialTheme.typography.headlineLarge,
-                        modifier = Modifier.padding(horizontal = 4.dp)
+                        modifier = Modifier.padding(horizontal =2.dp),
+                        fontSize = 40.sp
+
                     )
                     TextField(
                         value = minuteInput,
                         onValueChange = {
-                            if (it.length <= 2 && it.all { c -> c.isDigit() }) {
-                                minuteInput = it
-                                val hour = hourInput.toIntOrNull()?.coerceIn(1, 12) ?: selectedHour
-                                val minute = it.toIntOrNull()?.coerceIn(0, 59) ?: selectedMinute
-                                onTimeChange(hour, minute, isAm)
+                            val MinutesText = it.text
+                            if (MinutesText.length <= 2 && MinutesText.all { c -> c.isDigit() }) {
+                                val minuteVal = MinutesText.toIntOrNull()
+                                if (minuteVal == null || (minuteVal in 0..59)) {
+                                    minuteInput = it
+                                    val hour = hourInput.text.toIntOrNull()?.coerceIn(0, 24) ?: selectedHour
+                                    val minute = minuteVal ?: selectedMinute
+                                    onTimeChange(hour, minute, isAm)
+                                    if (MinutesText.length == 2) {
+                                        focusManager.clearFocus()
+                                    }
+                                }
                             }
                         },
                         singleLine = true,
-                        modifier = Modifier.width(50.dp)
+                        modifier = Modifier
+                            .width(75.dp)
+                            .focusRequester(minuteFocusRequester)
+                            .onFocusChanged { focusState ->
+                                if (focusState.isFocused && hourFocused) {
+                                    hourFocused = false
+                                }
+                                minuteFocused = focusState.isFocused
+                                if (focusState.isFocused) {
+                                    minuteInput = minuteInput.copy(selection = TextRange(0, minuteInput.text.length))
+                                }
+                            },
+                        colors =TextFieldDefaults.colors(
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedContainerColor = Color.LightGray,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Black,
+                            disabledIndicatorColor = Color.Transparent
+                        ),
+                        textStyle = TextStyle(
+                            fontSize = 40.sp
+                        )
                     )
                 }
             }
@@ -131,12 +235,14 @@ fun RadialTimePicker(
                         if (hourDist < minuteDist) {
                             val angle = (atan2(dy, dx).toDouble() * 180 / Math.PI + 360 + 90) % 360
                             val hour = ((angle / 30).roundToInt() + 12) % 12
-                            onTimeChange(if (hour == 0) 12 else hour, selectedMinute, isAm)
+                            localHour = if (hour == 0) 12 else hour
+                            onTimeChange(localHour, localMinute, isAm)
                             onSelectionChange(true)
                         } else {
                             val angle = (atan2(dy, dx).toDouble() * 180 / Math.PI + 360 + 90) % 360
                             val minute = ((angle / 6).roundToInt()) % 60
-                            onTimeChange(selectedHour, minute, isAm)
+                            localMinute = minute
+                            onTimeChange(localHour, localMinute, isAm)
                             onSelectionChange(false)
                         }
                     }

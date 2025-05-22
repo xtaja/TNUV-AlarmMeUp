@@ -20,6 +20,15 @@ fun HomeScreen() {
     var minute by remember { mutableStateOf(0) }
     var isAm by remember { mutableStateOf(true) }
     var isSelectingHour by remember { mutableStateOf(true) }
+    var wakeUpTime by remember { mutableStateOf("Not set") }
+
+    // Helper to format time as a string
+    fun formatTime(hour: Int, minute: Int, isAm: Boolean): String {
+        val h = hour.toString().padStart(2, '0')
+        val m = minute.toString().padStart(2, '0')
+        val ampm = if (isAm) "AM" else "PM"
+        return "$h:$m $ampm"
+    }
 
     MaterialTheme {
         Box(
@@ -28,22 +37,37 @@ fun HomeScreen() {
                 .padding(32.dp),
             contentAlignment = Alignment.Center
         ) {
-            RadialTimePicker(
-                selectedHour = hour,
-                selectedMinute = minute,
-                isAm = isAm,
-                isSelectingHour = isSelectingHour,
-                //onSelectionChange = { isSelectingHour = it },
-                onTimeChange = { newHour, newMinute, newIsAm ->
-                    Log.d("TimePicker", "Hour: $newHour, Minute: $newMinute, isAm: $newIsAm")
-                    hour = newHour
-                    minute = newMinute
-                    isAm = newIsAm
-                }, onSelectionChange = { selectingHour ->
-                    Log.d("TimePicker", "isSelectingHour: $selectingHour")
-                    isSelectingHour = selectingHour
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "The current wakeup time is set to: $wakeUpTime",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(bottom = 24.dp)
+                )
+                RadialTimePicker(
+                    selectedHour = hour,
+                    selectedMinute = minute,
+                    isAm = isAm,
+                    isSelectingHour = isSelectingHour,
+                    onTimeChange = { newHour, newMinute, newIsAm ->
+                        hour = newHour
+                        minute = newMinute
+                        isAm = newIsAm
+                    },
+                    onSelectionChange = { selectingHour ->
+                        isSelectingHour = selectingHour
+                    }
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                Button(
+                    onClick = {
+                        wakeUpTime = formatTime(hour, minute, isAm)
+                    }
+                ) {
+                    Text("SET")
                 }
-            )
+            }
         }
     }
 }
