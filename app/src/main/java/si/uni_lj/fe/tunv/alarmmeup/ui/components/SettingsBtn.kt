@@ -23,13 +23,13 @@ fun SettingsBtn(
     onSettingsClick: () -> Unit
 ) {
     val isActive = currentScreen == Screen.Settings
-    val outerColor = if (isActive) Color.LightGray else Color.White
-    val innerColor = if (isActive) Color.LightGray else Color.LightGray
+    val outerColor = if (isActive) Color.White else Color.White
+    val innerColor = if (isActive) Color.LightGray else Color(0xF2F2F2F2)
 
     IconButton(
         onClick = { if (currentScreen == Screen.Profile) onSettingsClick() },
         modifier = Modifier
-            .offset(x = 150.dp, y =-320.dp)
+            .offset(x = 150.dp, y =-300.dp)
             .size(60.dp)
     ) {
         Box(

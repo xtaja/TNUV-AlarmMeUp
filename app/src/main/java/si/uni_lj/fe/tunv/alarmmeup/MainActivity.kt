@@ -21,7 +21,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import si.uni_lj.fe.tunv.alarmmeup.ui.components.Screen
 import si.uni_lj.fe.tunv.alarmmeup.ui.HomeScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.LeaderboardScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.ProfileScreen
@@ -31,6 +30,7 @@ import si.uni_lj.fe.tunv.alarmmeup.ui.StreakScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.NavBar
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.NavBarButton
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.NavBarStats
+import si.uni_lj.fe.tunv.alarmmeup.ui.components.Screen
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.SettingsBtn
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.AlarmMeUpTheme
 
@@ -51,6 +51,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen(modifier: Modifier = Modifier) {
     var selectedScreen by remember { mutableStateOf("Home") }
+    var profileTabClickCount by remember { mutableStateOf(0) }
 
     Column(
         modifier = modifier.fillMaxSize()
@@ -72,8 +73,8 @@ fun MainScreen(modifier: Modifier = Modifier) {
             NavBarButton(
                 iconResId = R.drawable.ic_profile,
                 contentDescription = "Profile",
-                onClick = { selectedScreen = "Profile" },
-                isActive = selectedScreen == "Profile"
+                onClick = { selectedScreen = "Profile"; profileTabClickCount++ },
+                isActive = selectedScreen == "Profile" || selectedScreen == "Settings",
 
             )
         }
@@ -92,7 +93,8 @@ fun MainScreen(modifier: Modifier = Modifier) {
                     resourceId = R.drawable.placeholder_profile_picture,
                     name = "Amy",
                     surname = "Adams",
-                    username = "@amyzams")
+                    username = "@amyzams",
+                    resetKey = profileTabClickCount)
                 "Leaderboard" -> LeaderboardScreen()
                 "Home" -> HomeScreen()
                 "Store" -> StoreScreen()

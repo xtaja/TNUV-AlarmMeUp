@@ -1,6 +1,5 @@
 package si.uni_lj.fe.tunv.alarmmeup.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -15,7 +14,9 @@ import androidx.compose.ui.platform.LocalContext
 private val DarkColorScheme = darkColorScheme(
     primary = Color.LightGray,
     secondary = Color.Gray,
-    tertiary = Color.DarkGray
+    tertiary = Color.DarkGray,
+    onBackground = Color.Black,
+    onSurface = Color.Black,
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -28,8 +29,8 @@ private val LightColorScheme = lightColorScheme(
     onPrimary = Color.White,
     onSecondary = Color.White,
     onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
+    onBackground = Color.Black,
+    onSurface = Color.Black,
 
 )
 
