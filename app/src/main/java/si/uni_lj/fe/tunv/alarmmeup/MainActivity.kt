@@ -1,9 +1,15 @@
 package si.uni_lj.fe.tunv.alarmmeup
 
+import android.accounts.AccountManager
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,6 +33,8 @@ import si.uni_lj.fe.tunv.alarmmeup.ui.ProfileScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.SettingsScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.StoreScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.StreakScreen
+import si.uni_lj.fe.tunv.alarmmeup.ui.AuthenticationScreen
+import si.uni_lj.fe.tunv.alarmmeup.ui.LoadingScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.NavBar
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.NavBarButton
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.NavBarStats
@@ -35,48 +43,73 @@ import si.uni_lj.fe.tunv.alarmmeup.ui.components.SettingsBtn
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.AlarmMeUpTheme
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var accountPickerLauncher: ActivityResultLauncher<Intent>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        accountPickerLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val account = result.data?.getStringExtra(AccountManager.KEY_ACCOUNT_NAME)
+                Log.d("AccountPicker", "Selected account: $account")
+            }
+        }
+
         enableEdgeToEdge()
         setContent {
+            val onGoogleClick = {
+                val intent = AccountManager.newChooseAccountIntent(
+                    null, null, arrayOf("com.google"), null, null, null, null
+                )
+                accountPickerLauncher.launch(intent)
+            }
+
             AlarmMeUpTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    MainScreen(modifier = Modifier.padding(innerPadding))
+                    MainScreen(
+                        modifier = Modifier.padding(innerPadding),
+                        onGoogleClick = onGoogleClick
+                    )
                 }
             }
         }
     }
 }
 
+
 @Composable
-fun MainScreen(modifier: Modifier = Modifier) {
-    var selectedScreen by remember { mutableStateOf("Home") }
+fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit) {
+    var selectedScreen by remember { mutableStateOf("Auth") }
     var profileTabClickCount by remember { mutableStateOf(0) }
 
     Column(
         modifier = modifier.fillMaxSize()
     ) {
         // Top Navigation Bar
-        NavBar(backgroundAlignment = Alignment.TopStart) {
-            NavBarButton(
-                iconResId = R.drawable.ic_streak,
-                contentDescription = "Streak Calendar",
-                onClick = { selectedScreen = "StreakCalendar" },
-                isActive = selectedScreen == "StreakCalendar",
-                label = "24", //change to number
-                iconSize = 32.dp
-            )
-            NavBarStats( //XP and SunCoins
-                numOfXP = 120,
-                numOfSunCoins= 520
-            )
-            NavBarButton(
-                iconResId = R.drawable.ic_profile,
-                contentDescription = "Profile",
-                onClick = { selectedScreen = "Profile"; profileTabClickCount++ },
-                isActive = selectedScreen == "Profile" || selectedScreen == "Settings",
-
-            )
+        if (selectedScreen !in listOf("Auth", "Loading")) {
+            NavBar(backgroundAlignment = Alignment.TopStart) {
+                NavBarButton(
+                    iconResId = R.drawable.ic_streak,
+                    contentDescription = "Streak Calendar",
+                    onClick = { selectedScreen = "StreakCalendar" },
+                    isActive = selectedScreen == "StreakCalendar",
+                    label = "24", //change to number
+                    iconSize = 32.dp
+                )
+                NavBarStats( //XP and SunCoins
+                    numOfXP = 120,
+                    numOfSunCoins = 520
+                )
+                NavBarButton(
+                    iconResId = R.drawable.ic_profile,
+                    contentDescription = "Profile",
+                    onClick = { selectedScreen = "Profile"; profileTabClickCount++ },
+                    isActive = selectedScreen == "Profile" || selectedScreen == "Settings",
+                )
+            }
         }
 
         // Main Content
@@ -88,7 +121,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
             contentAlignment = Alignment.Center
         ) {
             when (selectedScreen) {
-                "StreakCalendar" -> StreakScreen()
+                "StreakCalendar" -> StreakScreen(R.drawable.snooze, R.drawable.fire, R.drawable.check, R.drawable.close)
                 "Profile" -> ProfileScreen(
                     resourceId = R.drawable.placeholder_profile_picture,
                     name = "Amy",
@@ -99,6 +132,14 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 "Home" -> HomeScreen()
                 "Store" -> StoreScreen()
                 "Settings" -> SettingsScreen()
+                "Auth" -> AuthenticationScreen(
+                    iconResId = R.drawable.ic_original_logo,
+                    onAuthenticated = { selectedScreen = "Loading" },
+                    onGoogleClick = onGoogleClick
+                )
+                "Loading" -> LoadingScreen(R.layout.onboarding_step1,
+                    onFinished = { selectedScreen = "Home" }
+                )
                 else -> Text("Unknown screen")
             }
             if (selectedScreen == "Profile" || selectedScreen == "Settings") {
@@ -111,28 +152,30 @@ fun MainScreen(modifier: Modifier = Modifier) {
         }
 
         // Bottom Navigation Bar
-        NavBar(backgroundAlignment = Alignment.BottomStart) {
-            NavBarButton(
-                iconResId = R.drawable.ic_leaderboard,
-                contentDescription = "Leaderboard",
-                onClick = { selectedScreen = "Leaderboard" },
-                isActive = selectedScreen == "Leaderboard"
+        if (selectedScreen !in listOf("Auth", "Loading")) {
+            NavBar(backgroundAlignment = Alignment.BottomStart) {
+                NavBarButton(
+                    iconResId = R.drawable.ic_leaderboard,
+                    contentDescription = "Leaderboard",
+                    onClick = { selectedScreen = "Leaderboard" },
+                    isActive = selectedScreen == "Leaderboard"
 
-            )
-            NavBarButton(
-                iconResId = R.drawable.ic_home,
-                contentDescription = "Home",
-                onClick = { selectedScreen = "Home" },
-                isActive = selectedScreen == "Home"
+                )
+                NavBarButton(
+                    iconResId = R.drawable.ic_home,
+                    contentDescription = "Home",
+                    onClick = { selectedScreen = "Home" },
+                    isActive = selectedScreen == "Home"
 
-            )
-            NavBarButton(
-                iconResId = R.drawable.ic_store,
-                contentDescription = "Store",
-                onClick = { selectedScreen = "Store" },
-                isActive = selectedScreen == "Store"
+                )
+                NavBarButton(
+                    iconResId = R.drawable.ic_store,
+                    contentDescription = "Store",
+                    onClick = { selectedScreen = "Store" },
+                    isActive = selectedScreen == "Store"
 
-            )
+                )
+            }
         }
     }
 }
