@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun ScanQRCodeToggle(
@@ -60,7 +61,8 @@ fun ScanQRCodeToggle(
                 Text(
                     text = "My code",
                     color = if (!isScan) Color.Black else Color.Black,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
                 )
             }
             Box(
@@ -70,7 +72,8 @@ fun ScanQRCodeToggle(
                 Text(
                     text = "Scan",
                     color = if (isScan) Color.Black else Color.Black,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
                 )
             }
         }

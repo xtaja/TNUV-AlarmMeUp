@@ -1,17 +1,30 @@
 package si.uni_lj.fe.tunv.alarmmeup.ui
 
 
-import si.uni_lj.fe.tunv.alarmmeup.ui.components.RadialTimePicker
-
-import android.graphics.Color
-import android.util.Log
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import java.util.*
+import androidx.compose.ui.unit.sp
+import si.uni_lj.fe.tunv.alarmmeup.ui.components.RadialTimePicker
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -22,7 +35,6 @@ fun HomeScreen() {
     var isSelectingHour by remember { mutableStateOf(true) }
     var wakeUpTime by remember { mutableStateOf("Not set") }
 
-    // Helper to format time as a string
     fun formatTime(hour: Int, minute: Int, isAm: Boolean): String {
         val h = hour.toString().padStart(2, '0')
         val m = minute.toString().padStart(2, '0')
@@ -33,18 +45,12 @@ fun HomeScreen() {
     MaterialTheme {
         Box(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(32.dp),
-            contentAlignment = Alignment.Center
+                .fillMaxSize(),
+            contentAlignment = Alignment.TopCenter
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = "The current wakeup time is set to: $wakeUpTime",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(bottom = 24.dp)
-                )
                 RadialTimePicker(
                     selectedHour = hour,
                     selectedMinute = minute,
@@ -59,14 +65,37 @@ fun HomeScreen() {
                         isSelectingHour = selectingHour
                     }
                 )
-                Spacer(modifier = Modifier.height(24.dp))
-                Button(
-                    onClick = {
-                        wakeUpTime = formatTime(hour, minute, isAm)
-                    }
+                Text(
+                    text = "The current wakeup time is set to: $wakeUpTime",
+                    color = Color.Black,
+                    fontSize = 18.sp,
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .height(60.dp)
+                        .width(100.dp)
+                        .background(
+                            color = Color.LightGray,
+                            shape = RoundedCornerShape(55)
+                        )
                 ) {
-                    Text("SET")
+                    Button(
+                        onClick = {
+                            wakeUpTime = formatTime(hour, minute, isAm)
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray),
+
+
+                    ) {
+                        Text(
+                            text = if (wakeUpTime == "Not set") "SET" else "RESET",
+                            color = Color.Black,
+                            fontSize = 18.sp)
+                    }
                 }
+
             }
         }
     }

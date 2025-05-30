@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,7 +20,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import si.uni_lj.fe.tunv.alarmmeup.R
 
 @Composable
@@ -70,18 +71,19 @@ fun NavBarStats(
             ) {
                 Text(
                     text = "XP",
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                        color = Color.Black
-                    )
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = numOfXP.toString(),
-                    style = MaterialTheme.typography.bodyMedium,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Normal,
                     color = Color.Black
                 )
             }
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(2.dp))
             // Suncoin row
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -90,13 +92,14 @@ fun NavBarStats(
                 Icon(
                     painter = painterResource(id = R.drawable.ic_suncoin),
                     contentDescription = "suncoin",
-                    modifier = Modifier.size(20.dp),
+                    modifier = Modifier.size(28.dp),
                     tint = Color.Unspecified
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = numOfSunCoins.toString(),
-                    style = MaterialTheme.typography.bodyMedium,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Normal,
                     color = Color.Black
                 )
             }
