@@ -41,6 +41,7 @@ android {
 
 dependencies {
 
+    implementation("androidx.compose.material:material-icons-extended")
     implementation("com.airbnb.android:lottie:3.4.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -58,6 +59,7 @@ dependencies {
     implementation ("androidx.camera:camera-view:1.3.0")
     implementation ("com.google.accompanist:accompanist-permissions:0.34.0")
     implementation("com.kizitonwose.calendar:compose:2.7.0")
+    implementation(libs.androidx.foundation.layout.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
