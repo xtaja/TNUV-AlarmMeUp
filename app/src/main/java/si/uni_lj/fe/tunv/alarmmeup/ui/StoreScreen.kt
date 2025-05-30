@@ -196,7 +196,7 @@ val initialSampleCategories = listOf(
             ),
             StoreItemData(
                 17,
-                "Productivity Boost",
+                "Productivity",
                 cost = 100,
                 description = "Kickstart your morning",
                 soundResourceId = R.raw.alarm_sound
