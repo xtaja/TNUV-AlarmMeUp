@@ -1,6 +1,9 @@
 package si.uni_lj.fe.tunv.alarmmeup.ui
 
 import android.media.MediaPlayer
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.util.Log
 import android.view.LayoutInflater
 import androidx.compose.foundation.background
@@ -44,6 +47,9 @@ import androidx.compose.ui.viewinterop.AndroidView
 import si.uni_lj.fe.tunv.alarmmeup.R
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.StoreCategory
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.StoreItemData
+import android.content.Context
+import androidx.compose.ui.platform.LocalContext
+
 
 @Composable
 fun SettingsScreenWithLottieOverlay(showLottie: Boolean) {
@@ -71,60 +77,84 @@ val initialSampleCategories = listOf(
         name = "Featured Sounds",
         items = listOf(
             StoreItemData(
-                1,
-                "Birds",
+                id = 1,
+                name = "Birds",
                 cost = 100,
                 description = "Peaceful forest ambience",
-                soundResourceId = R.raw.alarm_sound
+                soundResourceId = R.raw.alarm_sound,
+                vibrationPattern = longArrayOf(0, 500L, 200L),
+                vibrationAmplitudes = intArrayOf(0, 255, 0),
+                vibrationRepeat = 1
             ),
             StoreItemData(
-                2,
-                "Rain",
+                id = 2,
+                name = "Rain",
                 cost = 100,
                 description = "Soothing rainfall at night",
-                soundResourceId = R.raw.alarm_sound
+                soundResourceId = R.raw.alarm_sound,
+                vibrationPattern = longArrayOf(0, 100L, 50L, 100L, 50L, 100L, 50L),
+                vibrationAmplitudes = intArrayOf(0, 200, 0, 200, 0, 200, 0),
+                vibrationRepeat = 1
             ),
             StoreItemData(
-                3,
-                "Waves",
+                id = 3,
+                name = "Waves",
                 cost = 100,
                 description = "Gentle ocean tides",
-                soundResourceId = R.raw.alarm_sound
+                soundResourceId = R.raw.alarm_sound,
+                vibrationPattern = longArrayOf(0, 200L, 100L, 200L),
+                vibrationAmplitudes = intArrayOf(0, 255, 0, 255),
+                vibrationRepeat = 1
             ),
             StoreItemData(
-                4,
-                "Fireplace",
+                id = 4,
+                name = "Fireplace",
                 cost = 100,
                 description = "Crackling warm fire",
-                soundResourceId = R.raw.alarm_sound
+                soundResourceId = R.raw.alarm_sound,
+                vibrationPattern = longArrayOf(0, 200L, 100L, 200L),
+                vibrationAmplitudes = intArrayOf(0, 255, 0, 255),
+                vibrationRepeat = 1
             ),
             StoreItemData(
-                5,
-                "Wind",
+                id = 5,
+                name = "Wind",
                 cost = 100,
                 description = "Soft mountain breeze",
-                soundResourceId = R.raw.alarm_sound
+                soundResourceId = R.raw.alarm_sound,
+                vibrationPattern = longArrayOf(0, 200L, 100L, 200L),
+                vibrationAmplitudes = intArrayOf(0, 255, 0, 255),
+                vibrationRepeat = 1
             ),
             StoreItemData(
-                6,
-                "Chimes",
+                id = 6,
+                name = "Chimes",
                 cost = 100,
                 description = "Light bell sounds",
-                soundResourceId = R.raw.alarm_sound
+                soundResourceId = R.raw.alarm_sound,
+                vibrationPattern = longArrayOf(0, 200L, 100L, 200L),
+                vibrationAmplitudes = intArrayOf(0, 255, 0, 255),
+                vibrationRepeat = 1
             ),
             StoreItemData(
-                7,
-                "Stream",
+                id = 7,
+                name = "Stream",
                 cost = 100,
                 description = "Running water flow",
-                soundResourceId = R.raw.alarm_sound
+                soundResourceId = R.raw.alarm_sound,
+                vibrationPattern = longArrayOf(0, 200L, 100L, 200L),
+                vibrationAmplitudes = intArrayOf(0, 255, 0, 255),
+                vibrationRepeat = 1
             ),
             StoreItemData(
-                8,
-                "Thunder",
+                id = 8,
+                name = "Thunder",
                 cost = 100,
                 description = "Distant storm rumbles",
-                soundResourceId = R.raw.alarm_sound
+                soundResourceId = R.raw.alarm_sound,
+                vibrationPattern = longArrayOf(0, 300L, 100L),
+                vibrationAmplitudes = intArrayOf(0, 255, 0),
+                vibrationRepeat = 1
             )
         )
     ),
@@ -133,46 +163,64 @@ val initialSampleCategories = listOf(
         name = "Popular Themes",
         items = listOf(
             StoreItemData(
-                9,
-                "Zen Garden",
+                id = 9,
+                name = "Zen Garden",
                 cost = 100,
                 description = "Minimal and focused",
-                soundResourceId = R.raw.alarm_sound
+                soundResourceId = R.raw.alarm_sound,
+                vibrationPattern = longArrayOf(0, 250L, 250L),
+                vibrationAmplitudes = intArrayOf(0, 150, 0),
+                vibrationRepeat = 1
             ),
             StoreItemData(
-                10,
-                "Adventure",
+                id = 10,
+                name = "Adventure",
                 cost = 100,
                 description = "Dynamic and epic",
-                soundResourceId = R.raw.alarm_sound
+                soundResourceId = R.raw.alarm_sound,
+                vibrationPattern = longArrayOf(0, 80L, 40L, 80L, 40L, 80L, 40L, 80L, 40L, 80L, 40L),
+                vibrationAmplitudes = intArrayOf(0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0),
+                vibrationRepeat = 1
             ),
             StoreItemData(
-                11,
-                "Retro",
+                id = 11,
+                name = "Retro",
                 cost = 100,
                 description = "Old-school pixel sounds",
-                soundResourceId = R.raw.alarm_sound
+                soundResourceId = R.raw.alarm_sound,
+                vibrationPattern = longArrayOf(0, 1000L, 500L),
+                vibrationAmplitudes = intArrayOf(0, 180, 0),
+                vibrationRepeat = 1
             ),
             StoreItemData(
-                12,
-                "Sci-Fi",
+                id = 12,
+                name = "Sci-Fi",
                 cost = 100,
                 description = "Futuristic beeps",
-                soundResourceId = R.raw.alarm_sound
+                soundResourceId = R.raw.alarm_sound,
+                vibrationPattern = longArrayOf(0, 150L, 75L, 150L, 75L, 150L, 75L),
+                vibrationAmplitudes = intArrayOf(0, 255, 0, 255, 0, 255, 0),
+                vibrationRepeat = 1
             ),
             StoreItemData(
-                13,
-                "Forest Camp",
+                id = 13,
+                name = "Forest Camp",
                 cost = 100,
                 description = "Crickets and fire",
-                soundResourceId = R.raw.alarm_sound
+                soundResourceId = R.raw.alarm_sound,
+                vibrationPattern = longArrayOf(0, 200L, 100L, 200L),
+                vibrationAmplitudes = intArrayOf(0, 255, 0, 255),
+                vibrationRepeat = 1
             ),
             StoreItemData(
-                14,
-                "City Morning",
+                id = 14,
+                name = "City Morning",
                 cost = 100,
                 description = "Urban buzz",
-                soundResourceId = R.raw.alarm_sound
+                soundResourceId = R.raw.alarm_sound,
+                vibrationPattern = longArrayOf(0, 400L, 200L),
+                vibrationAmplitudes = intArrayOf(0, 220, 0),
+                vibrationRepeat = 1
             )
         )
     ),
@@ -181,74 +229,104 @@ val initialSampleCategories = listOf(
         name = "New Alarm Packs",
         items = listOf(
             StoreItemData(
-                15,
-                "Focus Pack",
+                id = 15,
+                name = "Focus Pack",
                 cost = 100,
                 description = "Designed to help you concentrate",
-                soundResourceId = R.raw.alarm_sound
+                soundResourceId = R.raw.alarm_sound,
+                vibrationPattern = longArrayOf(0, 80L, 40L, 80L, 40L, 80L, 40L, 80L, 40L, 80L, 40L),
+                vibrationAmplitudes = intArrayOf(0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0),
+                vibrationRepeat = 1
             ),
             StoreItemData(
-                16,
-                "Relax Pack",
+                id = 16,
+                name = "Relax Pack",
                 cost = 100,
                 description = "Wind down your day gently",
-                soundResourceId = R.raw.alarm_sound
+                soundResourceId = R.raw.alarm_sound,
+                vibrationPattern = longArrayOf(0, 600L, 400L),
+                vibrationAmplitudes = intArrayOf(0, 100, 0),
+                vibrationRepeat = 1
             ),
             StoreItemData(
-                17,
-                "Productivity",
+                id = 17,
+                name = "Productivity",
                 cost = 100,
                 description = "Kickstart your morning",
-                soundResourceId = R.raw.alarm_sound
+                soundResourceId = R.raw.alarm_sound,
+                vibrationPattern = longArrayOf(0, 150L, 50L, 150L, 50L, 150L, 50L),
+                vibrationAmplitudes = intArrayOf(0, 255, 0, 255, 0, 255, 0),
+                vibrationRepeat = 1
             ),
             StoreItemData(
-                18,
-                "Meditation",
+                id = 18,
+                name = "Meditation",
                 cost = 100,
                 description = "Breathing rhythm guidance",
-                soundResourceId = R.raw.alarm_sound
+                soundResourceId = R.raw.alarm_sound,
+                vibrationPattern = longArrayOf(0, 800L, 800L),
+                vibrationAmplitudes = intArrayOf(0, 80, 0),
+                vibrationRepeat = 1
             ),
             StoreItemData(
-                19,
-                "Creative Vibes",
+                id = 19,
+                name = "Creative Vibes",
                 cost = 100,
                 description = "For artists & thinkers",
-                soundResourceId = R.raw.alarm_sound
+                soundResourceId = R.raw.alarm_sound,
+                vibrationPattern = longArrayOf(0, 120L, 60L, 120L, 60L, 120L, 60L, 120L, 60L),
+                vibrationAmplitudes = intArrayOf(0, 200, 0, 200, 0, 200, 0, 200, 0),
+                vibrationRepeat = 1
             ),
             StoreItemData(
-                20,
-                "Daily Energy",
+                id = 20,
+                name = "Daily Energy",
                 cost = 100,
                 description = "Music to energize",
-                soundResourceId = R.raw.alarm_sound
+                soundResourceId = R.raw.alarm_sound,
+                vibrationPattern = longArrayOf(0, 200L, 50L, 200L, 50L, 200L, 50L),
+                vibrationAmplitudes = intArrayOf(0, 255, 0, 255, 0, 255, 0),
+                vibrationRepeat = 1
             ),
             StoreItemData(
-                21,
-                "Explorer Pack",
+                id = 21,
+                name = "Explorer Pack",
                 cost = 100,
                 description = "Nature meets melody",
-                soundResourceId = R.raw.alarm_sound
+                soundResourceId = R.raw.alarm_sound,
+                vibrationPattern = longArrayOf(0, 200L, 100L, 200L),
+                vibrationAmplitudes = intArrayOf(0, 255, 0, 255),
+                vibrationRepeat = 1
             ),
             StoreItemData(
-                22,
-                "Studio Set",
+                id = 22,
+                name = "Studio Set",
                 cost = 100,
                 description = "Clean tones for focus",
-                soundResourceId = R.raw.alarm_sound
+                soundResourceId = R.raw.alarm_sound,
+                vibrationPattern = longArrayOf(0, 300L, 100L, 300L, 100L, 300L, 100L),
+                vibrationAmplitudes = intArrayOf(0, 180, 0, 180, 0, 180, 0),
+                vibrationRepeat = 1
             ),
             StoreItemData(
-                23,
-                "Momentum",
+                id = 23,
+                name = "Momentum",
                 cost = 100,
                 description = "Steady and sharp alarms",
-                soundResourceId = R.raw.alarm_sound
+                soundResourceId = R.raw.alarm_sound,
+                vibrationPattern = longArrayOf(0, 600L, 300L),
+                vibrationAmplitudes = intArrayOf(0, 255, 0),
+                vibrationRepeat = 1
             ),
             StoreItemData(
-                24,
-                "Gentle Wake",
+                id = 24,
+                name = "Gentle Wake",
                 cost = 100,
                 description = "Wake up without stress",
-                soundResourceId = R.raw.alarm_sound
+                soundResourceId = R.raw.alarm_sound,
+                vibrationPattern = longArrayOf(0, 400L, 400L),
+                vibrationAmplitudes = intArrayOf(0, 120, 0),
+                vibrationRepeat = 1
             )
         )
     )
@@ -262,28 +340,26 @@ fun StoreScreenPreview() {
 
 @Composable
 fun StoreScreen() {
+
     var categories by remember { mutableStateOf(initialSampleCategories) }
     var mediaPlayer by remember { mutableStateOf<MediaPlayer?>(null) }
     val context = LocalContext.current
-
-    DisposableEffect(Unit) {
-        onDispose {
-            Log.d("StoreScreen", "Disposing MediaPlayer")
-            mediaPlayer?.stop()
-            mediaPlayer?.release()
-            mediaPlayer = null
-        }
+    val globalVibrator = remember {
+        context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
     }
+
 
     val onTogglePlay = { clickedItem: StoreItemData ->
         val wasPlayingThisItem = clickedItem.playing
         val targetItemIdForPlaying =
             if (!wasPlayingThisItem) clickedItem.id else null
 
+        Log.d("StoreScreen", "Disposing MediaPlayer")
         mediaPlayer?.stop()
         mediaPlayer?.release()
+        globalVibrator.cancel()
+
         mediaPlayer = null
-        Log.d("StoreScreen", "MediaPlayer stopped and released.")
 
         categories = categories.map { category ->
             category.copy(items = category.items.map { item ->
@@ -364,7 +440,8 @@ fun StoreScreen() {
             item {
                 StoreCategoryRow(
                     category = category,
-                    onTogglePlay = onTogglePlay
+                    onTogglePlay = onTogglePlay,
+                    globalVibrator
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -375,7 +452,8 @@ fun StoreScreen() {
 @Composable
 fun StoreCategoryRow(
     category: StoreCategory,
-    onTogglePlay: (StoreItemData) -> Unit
+    onTogglePlay: (StoreItemData) -> Unit,
+    globalVibrator: Vibrator
 ) {
     Column {
         Text(
@@ -388,7 +466,7 @@ fun StoreCategoryRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(category.items, key = { it.id }) { storeItem ->
-                StoreItemCard(item = storeItem, onTogglePlay = onTogglePlay)
+                StoreItemCard(item = storeItem, onTogglePlay = onTogglePlay, globalVibrator)
             }
         }
     }
@@ -397,9 +475,40 @@ fun StoreCategoryRow(
 @Composable
 fun StoreItemCard(
     item: StoreItemData,
-    isDefault: Boolean = false,
-    onTogglePlay: (StoreItemData) -> Unit
+    onTogglePlay: (StoreItemData) -> Unit,
+    globalVibrator: Vibrator
 ) {
+    val context: Context = LocalContext.current
+
+    DisposableEffect(key1 = item.playing) {
+        if (item.playing) {
+            val pattern = item.vibrationPattern
+            val amps    = item.vibrationAmplitudes
+            if (pattern != null && amps != null) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    globalVibrator.vibrate(
+                        VibrationEffect.createWaveform(
+                            pattern,
+                            amps,
+                            item.vibrationRepeat
+                        )
+                    )
+                } else {
+                    @Suppress("DEPRECATION")
+                    globalVibrator.vibrate(pattern, item.vibrationRepeat)
+                }
+            }
+        } else {
+            Log.e("StoreItemCard", "Vibrator canceled for item: ${item.name}")
+            globalVibrator.cancel()
+        }
+
+        onDispose {
+            Log.e("StoreItemCard", "Vibrator canceled for item: ${item.name}")
+            globalVibrator.cancel()
+        }
+    }
+
     Card(
         modifier = Modifier
             .width(140.dp),
@@ -447,7 +556,9 @@ fun StoreItemCard(
                     Icon(
                         painter = painterResource(id = R.drawable.ic_suncoin),
                         contentDescription = "Current Streak",
-                        modifier = Modifier.width(16.dp).height(16.dp),
+                        modifier = Modifier
+                            .width(16.dp)
+                            .height(16.dp),
                         tint = Color(0xFFFFA500)
                     )
                 }
