@@ -1,4 +1,5 @@
 package si.uni_lj.fe.tunv.alarmmeup.ui.data
+import si.uni_lj.fe.tunv.alarmmeup.R
 
 /**
  * @param id                  Unique ID of this store item
@@ -7,6 +8,7 @@ package si.uni_lj.fe.tunv.alarmmeup.ui.data
  * @param playing             Is this currently “playing”? (toggled in StoreScreen)
  * @param imageUrl            (Optional) image URL or resource name
  * @param description         Short description
+ * @param type                Whether this item is a SOUND or a VIBRATION
  * @param soundResourceId     Android raw resource ID for the alarm sound (R.raw.xxx) or null
  * @param vibrationPattern    [delay₀, vibrate₁, pause₂, vibrate₃, …] (in ms), or null if no vib
  * @param vibrationAmplitudes [amp₀…] matching each index of vibrationPattern, where 0 = silent, 1..255 = strength, or null
@@ -20,6 +22,7 @@ data class StoreItemData(
     var playing: Boolean = false,
     val imageUrl: String? = null,
     val description: String = "",
+    val type: AlarmType,
     val soundResourceId: Int? = null,
     val vibrationPattern: LongArray? = null,
     val vibrationAmplitudes: IntArray? = null,

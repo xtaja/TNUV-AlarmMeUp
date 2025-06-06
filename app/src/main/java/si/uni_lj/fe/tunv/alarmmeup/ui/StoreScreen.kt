@@ -48,7 +48,10 @@ import si.uni_lj.fe.tunv.alarmmeup.R
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.StoreCategory
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.StoreItemData
 import android.content.Context
+import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.ui.platform.LocalContext
+import si.uni_lj.fe.tunv.alarmmeup.ui.data.AlarmType
 
 
 @Composable
@@ -81,9 +84,10 @@ val initialSampleCategories = listOf(
                 name = "Birds",
                 cost = 100,
                 description = "Peaceful forest ambience",
+                type = AlarmType.SOUND,
                 soundResourceId = R.raw.alarm_sound,
-                vibrationPattern = longArrayOf(0, 500L, 200L),
-                vibrationAmplitudes = intArrayOf(0, 255, 0),
+                vibrationPattern = null,
+                vibrationAmplitudes = null,
                 vibrationRepeat = 1
             ),
             StoreItemData(
@@ -91,9 +95,10 @@ val initialSampleCategories = listOf(
                 name = "Rain",
                 cost = 100,
                 description = "Soothing rainfall at night",
-                soundResourceId = R.raw.alarm_sound,
-                vibrationPattern = longArrayOf(0, 100L, 50L, 100L, 50L, 100L, 50L),
-                vibrationAmplitudes = intArrayOf(0, 200, 0, 200, 0, 200, 0),
+                type = AlarmType.SOUND,
+                soundResourceId = R.raw.alarm,
+                vibrationPattern = null,
+                vibrationAmplitudes = null,
                 vibrationRepeat = 1
             ),
             StoreItemData(
@@ -101,9 +106,10 @@ val initialSampleCategories = listOf(
                 name = "Waves",
                 cost = 100,
                 description = "Gentle ocean tides",
-                soundResourceId = R.raw.alarm_sound,
-                vibrationPattern = longArrayOf(0, 200L, 100L, 200L),
-                vibrationAmplitudes = intArrayOf(0, 255, 0, 255),
+                type = AlarmType.SOUND,
+                soundResourceId = R.raw.alarm_clock,
+                vibrationPattern = null,
+                vibrationAmplitudes = null,
                 vibrationRepeat = 1
             ),
             StoreItemData(
@@ -111,9 +117,10 @@ val initialSampleCategories = listOf(
                 name = "Fireplace",
                 cost = 100,
                 description = "Crackling warm fire",
-                soundResourceId = R.raw.alarm_sound,
-                vibrationPattern = longArrayOf(0, 200L, 100L, 200L),
-                vibrationAmplitudes = intArrayOf(0, 255, 0, 255),
+                type = AlarmType.SOUND,
+                soundResourceId = R.raw.chiptune_alarm_ringtone_song,
+                vibrationPattern = null,
+                vibrationAmplitudes = null,
                 vibrationRepeat = 1
             ),
             StoreItemData(
@@ -121,9 +128,10 @@ val initialSampleCategories = listOf(
                 name = "Wind",
                 cost = 100,
                 description = "Soft mountain breeze",
-                soundResourceId = R.raw.alarm_sound,
-                vibrationPattern = longArrayOf(0, 200L, 100L, 200L),
-                vibrationAmplitudes = intArrayOf(0, 255, 0, 255),
+                type = AlarmType.SOUND,
+                soundResourceId = R.raw.clock_alarm,
+                vibrationPattern = null,
+                vibrationAmplitudes = null,
                 vibrationRepeat = 1
             ),
             StoreItemData(
@@ -131,9 +139,10 @@ val initialSampleCategories = listOf(
                 name = "Chimes",
                 cost = 100,
                 description = "Light bell sounds",
-                soundResourceId = R.raw.alarm_sound,
-                vibrationPattern = longArrayOf(0, 200L, 100L, 200L),
-                vibrationAmplitudes = intArrayOf(0, 255, 0, 255),
+                type = AlarmType.SOUND,
+                soundResourceId = R.raw.digital_alarm,
+                vibrationPattern = null,
+                vibrationAmplitudes = null,
                 vibrationRepeat = 1
             ),
             StoreItemData(
@@ -141,9 +150,10 @@ val initialSampleCategories = listOf(
                 name = "Stream",
                 cost = 100,
                 description = "Running water flow",
-                soundResourceId = R.raw.alarm_sound,
-                vibrationPattern = longArrayOf(0, 200L, 100L, 200L),
-                vibrationAmplitudes = intArrayOf(0, 255, 0, 255),
+                type = AlarmType.SOUND,
+                soundResourceId = R.raw.digital_alarm_clock,
+                vibrationPattern = null,
+                vibrationAmplitudes = null,
                 vibrationRepeat = 1
             ),
             StoreItemData(
@@ -151,9 +161,43 @@ val initialSampleCategories = listOf(
                 name = "Thunder",
                 cost = 100,
                 description = "Distant storm rumbles",
-                soundResourceId = R.raw.alarm_sound,
-                vibrationPattern = longArrayOf(0, 300L, 100L),
-                vibrationAmplitudes = intArrayOf(0, 255, 0),
+                type = AlarmType.SOUND,
+                soundResourceId = R.raw.dont_need_alarms,
+                vibrationPattern = null,
+                vibrationAmplitudes = null,
+                vibrationRepeat = 1
+            ),
+            StoreItemData(
+                id = 9,
+                name = "Gentle Wake",
+                cost = 100,
+                description = "Wake up without stress",
+                type = AlarmType.SOUND,
+                soundResourceId = R.raw.tropical_alarm_clock,
+                vibrationPattern = null,
+                vibrationAmplitudes = null,
+                vibrationRepeat = 1
+            ),
+            StoreItemData(
+                id = 10,
+                name = "Gentle Wake",
+                cost = 100,
+                description = "Wake up without stress",
+                type = AlarmType.SOUND,
+                soundResourceId = R.raw.wake_up_call,
+                vibrationPattern = null,
+                vibrationAmplitudes = null,
+                vibrationRepeat = 1
+            ),
+            StoreItemData(
+                id = 11,
+                name = "Gentle Wake",
+                cost = 100,
+                description = "Wake up without stress",
+                type = AlarmType.SOUND,
+                soundResourceId = R.raw.alarm_siren_sound_effect,
+                vibrationPattern = null,
+                vibrationAmplitudes = null,
                 vibrationRepeat = 1
             )
         )
@@ -163,61 +207,67 @@ val initialSampleCategories = listOf(
         name = "Popular Themes",
         items = listOf(
             StoreItemData(
-                id = 9,
+                id = 11,
                 name = "Zen Garden",
                 cost = 100,
                 description = "Minimal and focused",
-                soundResourceId = R.raw.alarm_sound,
+                type = AlarmType.VIBRATION,
+                soundResourceId = null,
                 vibrationPattern = longArrayOf(0, 250L, 250L),
                 vibrationAmplitudes = intArrayOf(0, 150, 0),
                 vibrationRepeat = 1
             ),
             StoreItemData(
-                id = 10,
+                id = 12,
                 name = "Adventure",
                 cost = 100,
                 description = "Dynamic and epic",
-                soundResourceId = R.raw.alarm_sound,
+                type = AlarmType.VIBRATION,
+                soundResourceId = null,
                 vibrationPattern = longArrayOf(0, 80L, 40L, 80L, 40L, 80L, 40L, 80L, 40L, 80L, 40L),
                 vibrationAmplitudes = intArrayOf(0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0),
                 vibrationRepeat = 1
             ),
             StoreItemData(
-                id = 11,
+                id = 13,
                 name = "Retro",
                 cost = 100,
                 description = "Old-school pixel sounds",
-                soundResourceId = R.raw.alarm_sound,
+                type = AlarmType.VIBRATION,
+                soundResourceId = null,
                 vibrationPattern = longArrayOf(0, 1000L, 500L),
                 vibrationAmplitudes = intArrayOf(0, 180, 0),
                 vibrationRepeat = 1
             ),
             StoreItemData(
-                id = 12,
+                id = 14,
                 name = "Sci-Fi",
                 cost = 100,
                 description = "Futuristic beeps",
-                soundResourceId = R.raw.alarm_sound,
+                type = AlarmType.VIBRATION,
+                soundResourceId = null,
                 vibrationPattern = longArrayOf(0, 150L, 75L, 150L, 75L, 150L, 75L),
                 vibrationAmplitudes = intArrayOf(0, 255, 0, 255, 0, 255, 0),
                 vibrationRepeat = 1
             ),
             StoreItemData(
-                id = 13,
+                id = 15,
                 name = "Forest Camp",
                 cost = 100,
                 description = "Crickets and fire",
-                soundResourceId = R.raw.alarm_sound,
+                type = AlarmType.VIBRATION,
+                soundResourceId = null,
                 vibrationPattern = longArrayOf(0, 200L, 100L, 200L),
                 vibrationAmplitudes = intArrayOf(0, 255, 0, 255),
                 vibrationRepeat = 1
             ),
             StoreItemData(
-                id = 14,
+                id = 16,
                 name = "City Morning",
                 cost = 100,
                 description = "Urban buzz",
-                soundResourceId = R.raw.alarm_sound,
+                type = AlarmType.VIBRATION,
+                soundResourceId = null,
                 vibrationPattern = longArrayOf(0, 400L, 200L),
                 vibrationAmplitudes = intArrayOf(0, 220, 0),
                 vibrationRepeat = 1
@@ -229,103 +279,196 @@ val initialSampleCategories = listOf(
         name = "New Alarm Packs",
         items = listOf(
             StoreItemData(
-                id = 15,
+                id = 17,
                 name = "Focus Pack",
                 cost = 100,
                 description = "Designed to help you concentrate",
-                soundResourceId = R.raw.alarm_sound,
+                type = AlarmType.SOUND,
+                soundResourceId = R.raw.drippling_drops,
+                vibrationPattern = null,
+                vibrationAmplitudes = null,
+                vibrationRepeat = 1
+            ),
+            StoreItemData(
+                id = 18,
+                name = "Relax Pack",
+                cost = 100,
+                description = "Wind down your day gently",
+                type = AlarmType.SOUND,
+                soundResourceId = R.raw.funny_alarm,
+                vibrationPattern = null,
+                vibrationAmplitudes = null,
+                vibrationRepeat = 1
+            ),
+            StoreItemData(
+                id = 19,
+                name = "Productivity",
+                cost = 100,
+                description = "Kickstart your morning",
+                type = AlarmType.SOUND,
+                soundResourceId = R.raw.golden_time,
+                vibrationPattern = null,
+                vibrationAmplitudes = null,
+                vibrationRepeat = 1
+            ),
+            StoreItemData(
+                id = 20,
+                name = "Meditation",
+                cost = 100,
+                description = "Breathing rhythm guidance",
+                type = AlarmType.SOUND,
+                soundResourceId = R.raw.good_morning,
+                vibrationPattern = null,
+                vibrationAmplitudes = null,
+                vibrationRepeat = 1
+            ),
+            StoreItemData(
+                id = 21,
+                name = "Creative Vibes",
+                cost = 100,
+                description = "For artists & thinkers",
+                type = AlarmType.SOUND,
+                soundResourceId = R.raw.jingle_bells_alarm_clock,
+                vibrationPattern = null,
+                vibrationAmplitudes = null,
+                vibrationRepeat = 1
+            ),
+            StoreItemData(
+                id = 22,
+                name = "Daily Energy",
+                cost = 100,
+                description = "Music to energize",
+                type = AlarmType.SOUND,
+                soundResourceId = R.raw.kirby_alarm_clock,
+                vibrationPattern = null,
+                vibrationAmplitudes = null,
+                vibrationRepeat = 1
+            ),
+            StoreItemData(
+                id = 23,
+                name = "Explorer Pack",
+                cost = 100,
+                description = "Nature meets melody",
+                type = AlarmType.SOUND,
+                soundResourceId = R.raw.lofi_alarm_clock,
+                vibrationPattern = null,
+                vibrationAmplitudes = null,
+                vibrationRepeat = 1
+            ),
+            StoreItemData(
+                id = 24,
+                name = "Studio Set",
+                cost = 100,
+                description = "Clean tones for focus",
+                type = AlarmType.SOUND,
+                soundResourceId = R.raw.majestic_voyage,
+                vibrationPattern = null,
+                vibrationAmplitudes = null,
+                vibrationRepeat = 1
+            ),
+            StoreItemData(
+                id = 25,
+                name = "Momentum",
+                cost = 100,
+                description = "Steady and sharp alarms",
+                type = AlarmType.SOUND,
+                soundResourceId = R.raw.memphis,
+                vibrationPattern = null,
+                vibrationAmplitudes = null,
+                vibrationRepeat = 1
+            ),
+            StoreItemData(
+                id = 26,
+                name = "Gentle Wake",
+                cost = 100,
+                description = "Wake up without stress",
+                type = AlarmType.SOUND,
+                soundResourceId = R.raw.phone_anime,
+                vibrationPattern = null,
+                vibrationAmplitudes = null,
+                vibrationRepeat = 1
+            ),
+            StoreItemData(
+                id = 27,
+                name = "Gentle Wake",
+                cost = 100,
+                description = "Wake up without stress",
+                type = AlarmType.SOUND,
+                soundResourceId = R.raw.siren_police_trap,
+                vibrationPattern = null,
+                vibrationAmplitudes = null,
+                vibrationRepeat = 1
+            )
+        )
+    ),
+    StoreCategory(
+        id = 2,
+        name = "Popular Themes",
+        items = listOf(
+            StoreItemData(
+                id = 28,
+                name = "Zen Garden",
+                cost = 100,
+                description = "Minimal and focused",
+                type = AlarmType.VIBRATION,
+                soundResourceId = null,
+                vibrationPattern = longArrayOf(0, 250L, 250L),
+                vibrationAmplitudes = intArrayOf(0, 150, 0),
+                vibrationRepeat = 1
+            ),
+            StoreItemData(
+                id = 29,
+                name = "Adventure",
+                cost = 100,
+                description = "Dynamic and epic",
+                type = AlarmType.VIBRATION,
+                soundResourceId = null,
                 vibrationPattern = longArrayOf(0, 80L, 40L, 80L, 40L, 80L, 40L, 80L, 40L, 80L, 40L),
                 vibrationAmplitudes = intArrayOf(0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0),
                 vibrationRepeat = 1
             ),
             StoreItemData(
-                id = 16,
-                name = "Relax Pack",
+                id = 30,
+                name = "Retro",
                 cost = 100,
-                description = "Wind down your day gently",
-                soundResourceId = R.raw.alarm_sound,
-                vibrationPattern = longArrayOf(0, 600L, 400L),
-                vibrationAmplitudes = intArrayOf(0, 100, 0),
+                description = "Old-school pixel sounds",
+                type = AlarmType.VIBRATION,
+                soundResourceId = null,
+                vibrationPattern = longArrayOf(0, 1000L, 500L),
+                vibrationAmplitudes = intArrayOf(0, 180, 0),
                 vibrationRepeat = 1
             ),
             StoreItemData(
-                id = 17,
-                name = "Productivity",
+                id = 31,
+                name = "Sci-Fi",
                 cost = 100,
-                description = "Kickstart your morning",
-                soundResourceId = R.raw.alarm_sound,
-                vibrationPattern = longArrayOf(0, 150L, 50L, 150L, 50L, 150L, 50L),
+                description = "Futuristic beeps",
+                type = AlarmType.VIBRATION,
+                soundResourceId = null,
+                vibrationPattern = longArrayOf(0, 150L, 75L, 150L, 75L, 150L, 75L),
                 vibrationAmplitudes = intArrayOf(0, 255, 0, 255, 0, 255, 0),
                 vibrationRepeat = 1
             ),
             StoreItemData(
-                id = 18,
-                name = "Meditation",
+                id = 32,
+                name = "Forest Camp",
                 cost = 100,
-                description = "Breathing rhythm guidance",
-                soundResourceId = R.raw.alarm_sound,
-                vibrationPattern = longArrayOf(0, 800L, 800L),
-                vibrationAmplitudes = intArrayOf(0, 80, 0),
-                vibrationRepeat = 1
-            ),
-            StoreItemData(
-                id = 19,
-                name = "Creative Vibes",
-                cost = 100,
-                description = "For artists & thinkers",
-                soundResourceId = R.raw.alarm_sound,
-                vibrationPattern = longArrayOf(0, 120L, 60L, 120L, 60L, 120L, 60L, 120L, 60L),
-                vibrationAmplitudes = intArrayOf(0, 200, 0, 200, 0, 200, 0, 200, 0),
-                vibrationRepeat = 1
-            ),
-            StoreItemData(
-                id = 20,
-                name = "Daily Energy",
-                cost = 100,
-                description = "Music to energize",
-                soundResourceId = R.raw.alarm_sound,
-                vibrationPattern = longArrayOf(0, 200L, 50L, 200L, 50L, 200L, 50L),
-                vibrationAmplitudes = intArrayOf(0, 255, 0, 255, 0, 255, 0),
-                vibrationRepeat = 1
-            ),
-            StoreItemData(
-                id = 21,
-                name = "Explorer Pack",
-                cost = 100,
-                description = "Nature meets melody",
-                soundResourceId = R.raw.alarm_sound,
+                description = "Crickets and fire",
+                type = AlarmType.VIBRATION,
+                soundResourceId = null,
                 vibrationPattern = longArrayOf(0, 200L, 100L, 200L),
                 vibrationAmplitudes = intArrayOf(0, 255, 0, 255),
                 vibrationRepeat = 1
             ),
             StoreItemData(
-                id = 22,
-                name = "Studio Set",
+                id = 33,
+                name = "City Morning",
                 cost = 100,
-                description = "Clean tones for focus",
-                soundResourceId = R.raw.alarm_sound,
-                vibrationPattern = longArrayOf(0, 300L, 100L, 300L, 100L, 300L, 100L),
-                vibrationAmplitudes = intArrayOf(0, 180, 0, 180, 0, 180, 0),
-                vibrationRepeat = 1
-            ),
-            StoreItemData(
-                id = 23,
-                name = "Momentum",
-                cost = 100,
-                description = "Steady and sharp alarms",
-                soundResourceId = R.raw.alarm_sound,
-                vibrationPattern = longArrayOf(0, 600L, 300L),
-                vibrationAmplitudes = intArrayOf(0, 255, 0),
-                vibrationRepeat = 1
-            ),
-            StoreItemData(
-                id = 24,
-                name = "Gentle Wake",
-                cost = 100,
-                description = "Wake up without stress",
-                soundResourceId = R.raw.alarm_sound,
-                vibrationPattern = longArrayOf(0, 400L, 400L),
-                vibrationAmplitudes = intArrayOf(0, 120, 0),
+                description = "Urban buzz",
+                type = AlarmType.VIBRATION,
+                soundResourceId = null,
+                vibrationPattern = longArrayOf(0, 400L, 200L),
+                vibrationAmplitudes = intArrayOf(0, 220, 0),
                 vibrationRepeat = 1
             )
         )
@@ -336,6 +479,35 @@ val initialSampleCategories = listOf(
 @Composable
 fun StoreScreenPreview() {
     MaterialTheme { StoreScreen() }
+}
+
+@Composable
+fun SectionDivider(
+    title: String,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        HorizontalDivider(
+            modifier = Modifier.weight(1f),
+            thickness = 1.dp,
+            color = Color.Gray
+        )
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(horizontal = 8.dp)
+        )
+        HorizontalDivider(
+            modifier = Modifier.weight(1f),
+            thickness = 1.dp,
+            color = Color.Gray
+        )
+    }
 }
 
 @Composable
@@ -421,6 +593,18 @@ fun StoreScreen() {
         }
     }
 
+    val soundCategories = categories.map { cat ->
+        cat.copy(
+            items = cat.items.filter { it.type == AlarmType.SOUND }
+        )
+    }.filter { it.items.isNotEmpty() }
+
+    val vibCategories = categories.map { cat ->
+        cat.copy(
+            items = cat.items.filter { it.type == AlarmType.VIBRATION }
+        )
+    }.filter { it.items.isNotEmpty() }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(vertical = 16.dp)
@@ -436,12 +620,27 @@ fun StoreScreen() {
             )
         }
 
-        categories.forEach { category ->
+        item { SectionDivider("SOUNDS") }
+
+        soundCategories.forEach { cat ->
             item {
                 StoreCategoryRow(
-                    category = category,
+                    category = cat,
                     onTogglePlay = onTogglePlay,
-                    globalVibrator
+                    globalVibrator = globalVibrator
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
+
+        item { SectionDivider("VIBRATIONS") }
+
+        vibCategories.forEach { cat ->
+            item {
+                StoreCategoryRow(
+                    category = cat,
+                    onTogglePlay = onTogglePlay,
+                    globalVibrator = globalVibrator
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }

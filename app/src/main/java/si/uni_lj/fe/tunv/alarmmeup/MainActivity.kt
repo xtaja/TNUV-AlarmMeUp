@@ -51,6 +51,7 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var accountPickerLauncher: ActivityResultLauncher<Intent>
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
