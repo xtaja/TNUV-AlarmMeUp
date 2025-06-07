@@ -15,20 +15,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import si.uni_lj.fe.tunv.alarmmeup.R
 
-
 @Composable
-fun SettingsBtn(
-    currentScreen: SettingsEnum,
+fun ProfileSettingsBtn(
     onSettingsClick: () -> Unit
 ) {
-    val isActive = currentScreen == SettingsEnum.Settings
-    val outerColor = if (isActive) Color.White else Color.White
-    val innerColor = if (isActive) Color.LightGray else Color(0xF2F2F2F2)
+    val outerColor = Color.White
+    val innerColor = Color(0xF2F2F2F2)
 
     IconButton(
         onClick = { onSettingsClick() },
         modifier = Modifier
-            .offset(x = 150.dp, y =-300.dp)
+            .offset(x = 0.dp, y = -30.dp)
             .size(60.dp)
     ) {
         Box(

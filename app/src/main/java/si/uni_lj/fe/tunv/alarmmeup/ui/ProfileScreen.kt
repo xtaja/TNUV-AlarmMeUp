@@ -24,9 +24,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.CloudsDecoration
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.ProfilePicture
+import si.uni_lj.fe.tunv.alarmmeup.ui.components.ProfileSettingsBtn
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.QrCodeView
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.QrScanToggleAndText
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.ScanView
+import si.uni_lj.fe.tunv.alarmmeup.ui.components.SettingsEnum
 
 sealed class ProfileTabScreen {
     object Main : ProfileTabScreen()
@@ -40,7 +42,8 @@ fun ProfileScreen(
     name: String,
     surname: String,
     username: String,
-    resetKey: Int
+    resetKey: Int,
+    onSettingsClick: () -> Unit
 ) {
     var currentScreen by remember { mutableStateOf<ProfileTabScreen>(ProfileTabScreen.Main) }
     androidx.compose.runtime.LaunchedEffect(resetKey) {
@@ -86,6 +89,16 @@ fun ProfileScreen(
                             }
                         }
                     }
+                }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 25.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    ProfileSettingsBtn(
+                        onSettingsClick
+                    )
                 }
             }
         }

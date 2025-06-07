@@ -250,6 +250,7 @@ fun MorphingAuthBox(
 
                 OutlinedButton(
                     onClick = {
+                        onContinue()
                         showError = (showEmail && email.isBlank()) ||
                                 (showEmailOrUsername && emailOrUsername.isBlank()) ||
                                 (showPassword && password.isBlank()) ||

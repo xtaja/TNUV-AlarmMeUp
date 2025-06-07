@@ -40,10 +40,12 @@ import si.uni_lj.fe.tunv.alarmmeup.ui.StoreScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.StreakScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.AuthenticationScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.LoadingScreen
+import si.uni_lj.fe.tunv.alarmmeup.ui.ProfileSettingsScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.NavBar
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.NavBarButton
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.NavBarStats
-import si.uni_lj.fe.tunv.alarmmeup.ui.components.Screen
+import si.uni_lj.fe.tunv.alarmmeup.ui.components.ProfileSettingsBtn
+import si.uni_lj.fe.tunv.alarmmeup.ui.components.SettingsEnum
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.SettingsBtn
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.AlarmMeUpTheme
 
@@ -124,7 +126,7 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit) {
                     iconResId = R.drawable.ic_profile,
                     contentDescription = "Profile",
                     onClick = { selectedScreen = "Profile"; profileTabClickCount++ },
-                    isActive = selectedScreen == "Profile" || selectedScreen == "Settings",
+                    isActive = selectedScreen == "Profile",
                 )
             }
         }
@@ -144,7 +146,8 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit) {
                     name = "Amy",
                     surname = "Adams",
                     username = "@amyzams",
-                    resetKey = profileTabClickCount)
+                    resetKey = profileTabClickCount,
+                    onSettingsClick = { selectedScreen = "ProfileSettings" })
                 "Leaderboard" -> LeaderboardScreen()
                 "Home" -> HomeScreen()
                 "Store" -> StoreScreen()
@@ -157,11 +160,12 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit) {
                 "Loading" -> LoadingScreen(R.layout.onboarding_step1,
                     onFinished = { selectedScreen = "Home" }
                 )
+                "ProfileSettings" -> ProfileSettingsScreen(resourceId = R.drawable.placeholder_profile_picture)
                 else -> Text("Unknown screen")
             }
-            if (selectedScreen == "Profile" || selectedScreen == "Settings") {
+            if (selectedScreen == "Profile" || selectedScreen == "ProfileSettings" || selectedScreen == "Settings") {
                 SettingsBtn(
-                    currentScreen = if (selectedScreen == "Settings") Screen.Settings else Screen.Profile,
+                    currentScreen = SettingsEnum.fromString(selectedScreen),
                     onSettingsClick = { selectedScreen = "Settings" }
                 )
             }
