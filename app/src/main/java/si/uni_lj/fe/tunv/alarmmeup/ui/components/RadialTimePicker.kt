@@ -65,6 +65,7 @@ fun RadialTimePicker(
     val hourFocusRequester = remember { FocusRequester() }
     val minuteFocusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
+    var prevHourLength by remember { mutableStateOf(hourInput.text.length) }
 
     var localHour by remember { mutableStateOf(selectedHour) }
     var localMinute by remember { mutableStateOf(selectedMinute) }
@@ -105,10 +106,12 @@ fun RadialTimePicker(
                                     val hour = hourVal ?: selectedHour
                                     val minute = minuteInput.text.toIntOrNull()?.coerceIn(0, 59) ?: selectedMinute
                                     onTimeChange(hour, minute, isAm)
-                                    if (hourText.length == 2) {
-                                        focusManager.clearFocus()
+                                    // Only move focus if user just entered the 2nd digit
+                                    if (prevHourLength < 2 && hourText.length == 2 && hourFocused) {
+                                        hourFocused = false
                                         minuteFocusRequester.requestFocus()
                                     }
+                                    prevHourLength = hourText.length
                                 }
                             }
                         },
@@ -117,12 +120,9 @@ fun RadialTimePicker(
                             .width(80.dp)
                             .focusRequester(hourFocusRequester)
                             .onFocusChanged { focusState ->
-                                if (focusState.isFocused && minuteFocused) {
-                                    // Only clear focus from minute if hour is being focused
-                                    minuteFocused = false
-                                }
                                 hourFocused = focusState.isFocused
                                 if (focusState.isFocused) {
+                                    minuteFocused = false
                                     hourInput = hourInput.copy(selection = TextRange(0, hourInput.text.length))
                                 }
                             }
@@ -158,6 +158,7 @@ fun RadialTimePicker(
                                     val minute = minuteVal ?: selectedMinute
                                     onTimeChange(hour, minute, isAm)
                                     if (MinutesText.length == 2) {
+                                        minuteFocused = false
                                         focusManager.clearFocus()
                                     }
                                 }
@@ -168,11 +169,9 @@ fun RadialTimePicker(
                             .width(80.dp)
                             .focusRequester(minuteFocusRequester)
                             .onFocusChanged { focusState ->
-                                if (focusState.isFocused && hourFocused) {
-                                    hourFocused = false
-                                }
                                 minuteFocused = focusState.isFocused
                                 if (focusState.isFocused) {
+                                    hourFocused = false
                                     minuteInput = minuteInput.copy(selection = TextRange(0, minuteInput.text.length))
                                 }
                             }

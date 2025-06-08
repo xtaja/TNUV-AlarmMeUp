@@ -37,7 +37,6 @@ import si.uni_lj.fe.tunv.alarmmeup.AlarmReceiver
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.RadialTimePicker
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.SessionRepo
 import java.util.Calendar
-import kotlin.math.min
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -192,4 +191,13 @@ fun to24Hour(hour: Int, isAm: Boolean): Int {
         !isAm && hour != 12 -> hour + 12
         else -> hour
     }
+}
+
+fun snoozeAlarm(context: Context) {
+    val calendar = Calendar.getInstance().apply {
+        add(Calendar.MINUTE, 5)
+    }
+    val hour = calendar.get(Calendar.HOUR_OF_DAY)
+    val minute = calendar.get(Calendar.MINUTE)
+    scheduleAlarm(context, hour, minute)
 }

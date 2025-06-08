@@ -2,10 +2,9 @@ package si.uni_lj.fe.tunv.alarmmeup
 
 import android.Manifest
 import android.accounts.AccountManager
-import android.app.Activity
 import android.content.Intent
-import android.os.Build
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -23,7 +22,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.currentComposer
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -38,25 +36,29 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.launch
-import si.uni_lj.fe.tunv.alarmmeup.ui.HomeScreen
+import si.uni_lj.fe.tunv.alarmmeup.ui.AuthenticationScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.LeaderboardScreen
+import si.uni_lj.fe.tunv.alarmmeup.ui.LoadingScreen
+import si.uni_lj.fe.tunv.alarmmeup.ui.MorningScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.ProfileScreen
+import si.uni_lj.fe.tunv.alarmmeup.ui.ProfileSettingsScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.SettingsScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.StoreScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.StreakScreen
-import si.uni_lj.fe.tunv.alarmmeup.ui.AuthenticationScreen
-import si.uni_lj.fe.tunv.alarmmeup.ui.LoadingScreen
-import si.uni_lj.fe.tunv.alarmmeup.ui.ProfileSettingsScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.NavBar
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.NavBarButton
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.NavBarStats
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.ProfilePictureEnum
-import si.uni_lj.fe.tunv.alarmmeup.ui.components.ProfileSettingsBtn
-import si.uni_lj.fe.tunv.alarmmeup.ui.components.SettingsEnum
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.SettingsBtn
+import si.uni_lj.fe.tunv.alarmmeup.ui.components.SettingsEnum
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.AppDatabase
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.SessionRepo
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.userPrefs
+import si.uni_lj.fe.tunv.alarmmeup.ui.minigames.MathGame
+import si.uni_lj.fe.tunv.alarmmeup.ui.minigames.MemoryGame
+import si.uni_lj.fe.tunv.alarmmeup.ui.minigames.TypingGame
+import si.uni_lj.fe.tunv.alarmmeup.ui.minigames.WordleGame
+import si.uni_lj.fe.tunv.alarmmeup.ui.snoozeAlarm
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.AlarmMeUpTheme
 
 class MainActivity : ComponentActivity() {
@@ -113,6 +115,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit) {
     var selectedScreen by remember { mutableStateOf("Auth") }
+    val minigameScreens = listOf("MathGame", "TypingGame", "MemoryGame", "WordleGame")
     var profileTabClickCount by remember { mutableStateOf(0) }
 
     var profilePicture by remember {mutableStateOf(R.drawable.man1)}
@@ -133,7 +136,7 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit) {
         modifier = modifier.fillMaxSize()
     ) {
         // Top Navigation Bar
-        if (selectedScreen !in listOf("Auth", "Loading")) {
+        if (selectedScreen !in listOf("Auth", "Loading") && selectedScreen !in minigameScreens) {
             NavBar(backgroundAlignment = Alignment.TopStart) {
                 NavBarButton(
                     iconResId = R.drawable.ic_streak,
@@ -171,10 +174,16 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit) {
                     resetKey = profileTabClickCount,
                     onSettingsClick = { selectedScreen = "ProfileSettings" })
                 "Leaderboard" -> LeaderboardScreen()
-                "Home" -> HomeScreen(repo = sessionRepo, clockChangeable,
+                "Home" -> MorningScreen(
+                    onMathClick = { selectedScreen = "MathGame" },
+                    onTypingClick = { selectedScreen = "TypingGame" },
+                    onMemoryClick = { selectedScreen = "MemoryGame" },
+                    onWordleClick = { selectedScreen = "WordleGame" },
+                    onSnoozeClick = { snoozeAlarm(ctx) }
+                ) /*HomeScreen(repo = sessionRepo, clockChangeable,
                     onEditableChange = { b ->
                         clockChangeable = b
-                    })
+                    })*/  //<-will make this work in the morning:)
                 "Store" -> StoreScreen(repo = sessionRepo, onChangeClicked = {
                     selectedScreen = "Home"
                     clockChangeable = true
@@ -247,6 +256,10 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit) {
                     onProfilesClick = { selectedScreen = "ChooseAvatar" },
                     goToAuthorizationScreen = { selectedScreen = "Auth" }
                 )
+                "MathGame" -> MathGame(onExit = { selectedScreen = "Home" })
+                "TypingGame" -> TypingGame(onExit = { selectedScreen = "Home" })
+                "MemoryGame" -> MemoryGame(onExit = { selectedScreen = "Home" })
+                "WordleGame" -> WordleGame(onExit = { selectedScreen = "Home" })
                 else -> Text("Unknown screen")
             }
             if (selectedScreen == "Profile" || selectedScreen == "ProfileSettings" || selectedScreen == "Settings") {
@@ -259,7 +272,7 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit) {
         }
 
         // Bottom Navigation Bar
-        if (selectedScreen !in listOf("Auth", "Loading")) {
+        if (selectedScreen !in listOf("Auth", "Loading") && selectedScreen !in minigameScreens) {
             NavBar(backgroundAlignment = Alignment.BottomStart) {
                 NavBarButton(
                     iconResId = R.drawable.ic_leaderboard,
@@ -286,5 +299,7 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit) {
         }
     }
 }
+
+
 
 
