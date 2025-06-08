@@ -49,11 +49,18 @@ import si.uni_lj.fe.tunv.alarmmeup.ui.data.StoreCategory
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.StoreItemData
 import android.content.Context
 import androidx.annotation.RequiresApi
+import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.launch
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.AlarmType
+import si.uni_lj.fe.tunv.alarmmeup.ui.data.SessionRepo
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 
 
 @Composable
@@ -193,7 +200,7 @@ val initialSampleCategories = listOf(
             ),
             StoreItemData(
                 id = 11,
-                name = "Siren 1",
+                name = "Siren 2",
                 cost = 100,
                 description = "Loud pitch sounds",
                 type = AlarmType.SOUND,
@@ -477,13 +484,6 @@ val initialSampleCategories = listOf(
     )
 )
 
-@RequiresApi(Build.VERSION_CODES.O)
-@Preview(showBackground = true)
-@Composable
-fun StoreScreenPreview() {
-    MaterialTheme { StoreScreen() }
-}
-
 @Composable
 fun SectionDivider(
     title: String,
@@ -515,11 +515,15 @@ fun SectionDivider(
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun StoreScreen() {
+fun StoreScreen(
+    repo: SessionRepo,
+    onChangeClicked: () -> Unit,
+) {
 
     var categories by remember { mutableStateOf(initialSampleCategories) }
     var mediaPlayer by remember { mutableStateOf<MediaPlayer?>(null) }
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val globalVibrator = remember {
         context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
     }
@@ -529,6 +533,24 @@ fun StoreScreen() {
             .flatMap { it.items }
             .find { it.playing }
     }
+
+    val user by repo.currentUser.collectAsState(initial = null)
+    var showAlert by remember { mutableStateOf(false) }
+
+    if (user == null) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("Loading Images")
+        }
+        return
+    }
+
+
+    val alarmEntity by repo
+        .getClock(user!!.id)
+        .collectAsState(initial = null)
+
+    val hour   = alarmEntity?.hour   ?: 0
+    val minute = alarmEntity?.minute ?: 0
 
     DisposableEffect(actualItemToVibrate) {
         Log.d("CentralEffect", "Current actualItemToVibrate: NAME: ${actualItemToVibrate?.name}, ID: ${actualItemToVibrate?.id}, TYPE: ${actualItemToVibrate?.type}, HAS_PATTERN: ${actualItemToVibrate?.vibrationPattern != null}, HAS_AMPS: ${actualItemToVibrate?.vibrationAmplitudes != null}")
@@ -647,13 +669,27 @@ fun StoreScreen() {
     ) {
         item {
             Text(
-                text = "Store",
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(
-                    horizontal = 16.dp,
-                    vertical = 8.dp
-                )
+                text = "Your preferred time is set to:",
+                style = MaterialTheme.typography.bodyLarge
             )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(top = 8.dp)
+            ) {
+                Text(
+                    text = "%02d : %02d".format(hour, minute),
+                    style = MaterialTheme.typography.headlineMedium
+                )
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            Button(
+                onClick = {
+                    showAlert = true
+                },
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(text = "Change for 200🪙")
+            }
         }
 
         item { SectionDivider("SOUNDS") }
@@ -680,6 +716,33 @@ fun StoreScreen() {
             }
         }
     }
+
+    if (showAlert){
+        AlertDialog(
+            onDismissRequest = { showAlert = false },
+            title = { Text("Confirm Action")},
+            text = { Text("Are you sure you want to change the time?")},
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showAlert = false
+                        onChangeClicked()
+                    })
+                {
+                    Text("Yes")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showAlert = false })
+                {
+                    Text("No")
+                }
+            }
+        )
+    }
+
+
 }
 
 @Composable

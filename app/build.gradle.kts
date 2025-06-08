@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("org.jetbrains.kotlin.kapt")
 }
 
 android {
@@ -40,10 +41,17 @@ android {
 }
 
 dependencies {
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
+    implementation("androidx.room:room-runtime:2.7.1")
+    implementation("androidx.room:room-ktx:2.7.1")
+    implementation(libs.androidx.datastore.core.android)
+    kapt("androidx.room:room-compiler:2.7.1")
+
+    implementation("androidx.activity:activity-ktx:1.7.2")
 
     implementation("androidx.compose.material:material-icons-extended")
     implementation("com.airbnb.android:lottie:3.4.0")
-    implementation(libs.androidx.core.ktx)
+    implementation("androidx.core:core-ktx:1.10.1")
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))

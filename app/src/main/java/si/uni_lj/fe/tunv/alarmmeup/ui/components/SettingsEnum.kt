@@ -1,7 +1,7 @@
 package si.uni_lj.fe.tunv.alarmmeup.ui.components
 
 enum class SettingsEnum {
-                        Profile,
+    Profile,
     Settings,
     ProfileSettings;
     companion object {

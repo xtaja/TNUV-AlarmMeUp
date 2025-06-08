@@ -12,9 +12,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,11 +26,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.CloudsDecoration
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.ProfilePicture
+import si.uni_lj.fe.tunv.alarmmeup.ui.components.ProfilePictureEnum
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.ProfileSettingsBtn
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.QrCodeView
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.QrScanToggleAndText
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.ScanView
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.SettingsEnum
+import si.uni_lj.fe.tunv.alarmmeup.ui.data.SessionRepo
 
 sealed class ProfileTabScreen {
     object Main : ProfileTabScreen()
@@ -38,13 +42,19 @@ sealed class ProfileTabScreen {
 
 @Composable
 fun ProfileScreen(
-    resourceId: Int,
-    name: String,
-    surname: String,
-    username: String,
+    repo: SessionRepo,
     resetKey: Int,
     onSettingsClick: () -> Unit
 ) {
+    val user by repo.currentUser.collectAsState(initial = null)
+
+    if (user == null) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("Loading profile…")
+        }
+        return
+    }
+
     var currentScreen by remember { mutableStateOf<ProfileTabScreen>(ProfileTabScreen.Main) }
     androidx.compose.runtime.LaunchedEffect(resetKey) {
         currentScreen = ProfileTabScreen.Main
@@ -58,7 +68,7 @@ fun ProfileScreen(
                     .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                ProfilePicture(resourceId = resourceId, size = 120.dp)
+                ProfilePicture(resourceId = ProfilePictureEnum.toResource(user!!.profilePicture), size = 120.dp)
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
@@ -68,7 +78,7 @@ fun ProfileScreen(
                     CloudsDecoration(modifier = Modifier.fillMaxSize())
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "$name $surname",
+                            text = user!!.fullName,
                             fontSize = 28.sp,
                             fontWeight = FontWeight.Normal,
                             color = Color.Black
@@ -76,7 +86,7 @@ fun ProfileScreen(
                         Spacer(modifier = Modifier.height(0.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = username,
+                                text = "@${user!!.username}",
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Normal,
                                 color = Color.Black
@@ -85,7 +95,7 @@ fun ProfileScreen(
                             Box(
                                 modifier = Modifier.clickable { currentScreen = ProfileTabScreen.QrCode }
                             ) {
-                                QrCodeView(content = username, size = 80)
+                                QrCodeView(content = user!!.username, size = 80)
                             }
                         }
                     }
@@ -113,7 +123,7 @@ fun ProfileScreen(
                         .align(Alignment.TopCenter),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    ProfilePicture(resourceId = resourceId, size = 120.dp)
+                    ProfilePicture(resourceId = ProfilePictureEnum.toResource(user!!.profilePicture), size = 120.dp)
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
@@ -123,7 +133,7 @@ fun ProfileScreen(
                         CloudsDecoration(modifier = Modifier.fillMaxSize())
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                text = "$name $surname",
+                                text = user!!.fullName,
                                 fontSize = 28.sp,
                                 fontWeight = FontWeight.Normal,
                                 color = Color.Black
@@ -131,18 +141,18 @@ fun ProfileScreen(
                             Spacer(modifier = Modifier.height(0.dp))
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 QrCodeView(
-                                    content = username,
+                                    content = user!!.username,
                                     size = 80,
                                     QRcolor = Color(0xF2F2F2F2)
                                 )
                                 Text(
-                                    text = username,
+                                    text = user!!.username,
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight.Normal,
                                     color = Color.Black
                                 )
                                 QrCodeView(
-                                    content = username,
+                                    content = user!!.username,
                                     size = 80,
                                     QRcolor = Color(0xF2F2F2F2)
                                 )
@@ -150,9 +160,9 @@ fun ProfileScreen(
                         }
                     }
                     Spacer(modifier = Modifier.height(35.dp))
-                    QrCodeView(content = username, size = 500)
+                    QrCodeView(content = user!!.username, size = 500)
                     Text(
-                        text = username,
+                        text = user!!.username,
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black

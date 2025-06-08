@@ -52,7 +52,7 @@ fun SettingsBtn(
             )
 
             Icon(
-                painter = painterResource(id = R.drawable.ic_settings),
+                painter = painterResource(id = R.drawable.ic_edit_alarm),
                 contentDescription = "Settings",
                 modifier = Modifier.size(25.dp),
                 tint = Color.Black

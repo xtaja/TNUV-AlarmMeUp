@@ -1,22 +1,16 @@
 package si.uni_lj.fe.tunv.alarmmeup.ui
 
 import android.util.Patterns
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -39,20 +33,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import si.uni_lj.fe.tunv.alarmmeup.R
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.unit.sp
-
-
-
-@Preview(showBackground = true)
-@Composable
-fun AuthScreenPreview() {
-    AuthenticationScreen(
-        iconResId = R.drawable.ic_original_logo,
-        onAuthenticated = {},
-        onGoogleClick = {}
-    )
-}
+import kotlinx.coroutines.launch
+import si.uni_lj.fe.tunv.alarmmeup.ui.components.ProfilePictureEnum
+import si.uni_lj.fe.tunv.alarmmeup.ui.data.AlarmEntity
+import si.uni_lj.fe.tunv.alarmmeup.ui.data.AppDatabase
+import si.uni_lj.fe.tunv.alarmmeup.ui.data.UserEntity
 
 @Composable
 fun AuthButton(text: String, onClick: () -> Unit) {
@@ -81,7 +69,7 @@ fun MorphingAuthBox(
     label: String,
     isActive: Boolean,
     onClick: () -> Unit,
-    onContinue: () -> Unit,
+    onContinue: (Int) -> Unit,
     showName: Boolean = false,
     showSurname: Boolean = false,
     showEmail: Boolean = false,
@@ -90,6 +78,9 @@ fun MorphingAuthBox(
     showEmailOrUsername: Boolean = false,
     height: Int,
 ) {
+
+    val ctx   = LocalContext.current
+    val scope = rememberCoroutineScope()
     val targetHeight by animateDpAsState(
         targetValue = if (isActive) height.dp else 50.dp,
         animationSpec = tween(600, easing = FastOutSlowInEasing)
@@ -104,11 +95,6 @@ fun MorphingAuthBox(
     var passwordMismatch by remember { mutableStateOf(false) }
     var invalidEmail by remember { mutableStateOf(false) }
     var emailOrUsername by remember { mutableStateOf("") }
-
-    val users = listOf(
-        mapOf("fullname" to "Amy Adams", "username" to "amyzams", "email" to "amyadams@gmail.com", "password" to "123"),
-        mapOf("fullname" to "Maria Lora", "username" to "mara", "email" to "marialora@gmail.com", "password" to "pass")
-    )
 
     val backgroundColor by animateColorAsState(
         targetValue = if (isActive) Color.LightGray else Color.LightGray,
@@ -250,7 +236,6 @@ fun MorphingAuthBox(
 
                 OutlinedButton(
                     onClick = {
-                        onContinue()
                         showError = (showEmail && email.isBlank()) ||
                                 (showEmailOrUsername && emailOrUsername.isBlank()) ||
                                 (showPassword && password.isBlank()) ||
@@ -261,20 +246,65 @@ fun MorphingAuthBox(
                         invalidEmail = showEmail && !Patterns.EMAIL_ADDRESS.matcher(email).matches()
                         passwordMismatch = showConfirmPassword && password != confirmPassword
 
-                        val matchedUser = users.find {
-                            (it["email"] == emailOrUsername || it["username"] == emailOrUsername) &&
-                                    it["password"] == password
-                        }
-
-                        if (!showError && !invalidEmail && !passwordMismatch) {
-                            if (showEmailOrUsername) {
-                                if (matchedUser != null) {
-                                    onContinue()
-                                } else {
+                        scope.launch {
+                            if (showConfirmPassword) {
+                                if (passwordMismatch || invalidEmail) {
                                     showError = true
+                                    return@launch;
                                 }
-                            } else {
-                                onContinue()
+
+                                val userDao = AppDatabase.get(ctx).userDao()
+                                val alarmDao = AppDatabase.get(ctx).alarmDao()
+
+
+                                val conflicts = userDao.checkDetailsAvailable(email, username)
+                                val isAvailable = (conflicts == 0)
+
+                                if (!isAvailable) {
+                                    showError = true
+                                    return@launch
+                                }
+
+                                val newUser = UserEntity(
+                                    0,
+                                    fullName,
+                                    username,
+                                    email,
+                                    password,
+                                    ProfilePictureEnum.Man1
+                                )
+                                val userID = userDao.insert(newUser).toInt()
+
+
+                                alarmDao.insert(AlarmEntity(
+                                    userID,
+                                    hour = 12,
+                                    minute = 0,
+                                    soundId = null,
+                                    vibrationId = null,
+                                    enabled = true
+                                ))
+
+
+                                onContinue(userID)
+                            }
+                            else {
+                                if (!showError && !invalidEmail && !passwordMismatch) {
+
+                                    val userDao = AppDatabase.get(ctx).userDao()
+
+                                    val user = if (showEmailOrUsername) {
+                                        userDao.findByCredentials(emailOrUsername, password)
+                                    } else {
+                                        userDao.findByCredentials(email, password)
+                                    }
+
+                                    if (user != null) {
+                                        onContinue(user.id)
+                                    } else {
+                                        showError = true
+                                    }
+                                }
                             }
                         }
                     }
@@ -306,8 +336,9 @@ fun MorphingAuthBox(
 @Composable
 fun AuthenticationScreen(
     iconResId: Int,
-    onAuthenticated: () -> Unit,
-    onGoogleClick: () -> Unit
+    onAuthenticated: (Int) -> Unit,
+    onGoogleClick: () -> Unit,
+    onRequireAvatarSelection: () -> Unit,
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     var activeForm by remember { mutableStateOf<String?>(null) }
@@ -389,7 +420,10 @@ fun AuthenticationScreen(
             label = "SIGN UP",
             isActive = activeForm == "SIGN UP",
             onClick = { activeForm = "SIGN UP" },
-            onContinue = onAuthenticated,
+            onContinue = { userId ->
+                onAuthenticated(userId)
+                onRequireAvatarSelection()
+            },
             showName = true,
             showSurname = true,
             showEmail = true,
