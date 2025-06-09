@@ -8,16 +8,21 @@ import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -30,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
@@ -43,7 +49,7 @@ import java.util.Calendar
 fun HomeScreen(
     repo: SessionRepo,
     isTimeEdible: Boolean,
-    onEditableChange: (Boolean) -> Unit
+    iconResId: Int
 ) {
     var ctx = LocalContext.current
     var scope = rememberCoroutineScope()
@@ -59,7 +65,9 @@ fun HomeScreen(
         val ampm = if (isAm) "AM" else "PM"
         return "$h:$m $ampm"
     }
-
+    var showAlert by remember { mutableStateOf(false) }
+    var showPurchase by remember { mutableStateOf(false) }
+    var changeButton by remember { mutableStateOf(false) }
 
     val user by repo.currentUser.collectAsState(initial = null)
 
@@ -117,41 +125,118 @@ fun HomeScreen(
                 )
                 Spacer(modifier = Modifier.height(10.dp))
 
-                if (isTimeEdible) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .height(60.dp)
-                            .width(100.dp)
-                            .background(
-                                color = Color.LightGray,
-                                shape = RoundedCornerShape(55)
-                            )
-                    ) {
-                        Button(
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .height(60.dp)
+                        .width(200.dp)
+                        .background(
+                            color = Color.LightGray,
+                            shape = RoundedCornerShape(55)
+                        )
+                ) {
+                    Button(
+                        onClick = {
+                            if (!changeButton) {
+                                showAlert = true
+                            } else {
+                                showPurchase = true
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray),
 
-                            onClick = {
-                                scope.launch {
-                                    repo.updateClock(to24Hour(tempHour, tempIsAm), tempMinute, user!!.id)
-                                }
-                                scheduleAlarm(ctx, to24Hour(tempHour, tempIsAm), tempMinute)
 
-                                wakeUpTime = formatTime(tempHour, tempMinute, tempIsAm)
-
-                                onEditableChange(false)
+                        ) {
+                        Text(
+                            text = if (!changeButton) {
+                                "Set alarm"
+                            } else {
+                                "Change for 200"
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray),
-
-
-                            ) {
-                            Text(
-                                text = "SET",
-                                color = Color.Black,
-                                fontSize = 18.sp
+                            color = Color.Black,
+                            fontSize = 18.sp,
+                        )
+                        if (changeButton) {
+                            Spacer(Modifier.width(4.dp))
+                            Icon(
+                                painter = painterResource(iconResId),
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp),
+                                tint = Color(0xFFFFA500),
                             )
                         }
                     }
                 }
+
+                if (showPurchase){
+                    AlertDialog(
+                        onDismissRequest = { showAlert = false },
+                        title = { Text("Confirm Action")},
+                        text = { Text("Are you sure you want to change the time?")},
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    showPurchase = false
+                                    scope.launch {
+                                        repo.updateClock(
+                                            to24Hour(tempHour, tempIsAm),
+                                            tempMinute,
+                                            user!!.id
+                                        )
+                                    }
+                                    scheduleAlarm(ctx, to24Hour(tempHour, tempIsAm), tempMinute)
+
+                                    wakeUpTime = formatTime(tempHour, tempMinute, tempIsAm)
+                                })
+                            {
+                                Text("Yes")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(
+                                onClick = { showPurchase = false })
+                            {
+                                Text("No")
+                            }
+                        }
+                    )
+                }
+
+                if (showAlert){
+                    AlertDialog(
+                        onDismissRequest = { showAlert = false },
+                        title = { Text("Confirm Action")},
+                        text = { Text("Are you sure you want to change the time?")},
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    showAlert = false
+                                    changeButton = true
+                                    scope.launch {
+                                        repo.updateClock(
+                                            to24Hour(tempHour, tempIsAm),
+                                            tempMinute,
+                                            user!!.id
+                                        )
+                                    }
+                                    scheduleAlarm(ctx, to24Hour(tempHour, tempIsAm), tempMinute)
+
+                                    wakeUpTime = formatTime(tempHour, tempMinute, tempIsAm)
+                                })
+                            {
+                                Text("Yes")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(
+                                onClick = { showAlert = false })
+                            {
+                                Text("No")
+                            }
+                        }
+                    )
+                }
+
             }
         }
     }

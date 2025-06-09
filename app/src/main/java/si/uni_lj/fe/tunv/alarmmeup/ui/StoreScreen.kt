@@ -8,7 +8,6 @@ import android.os.Vibrator
 import android.util.Log
 import android.view.LayoutInflater
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -27,16 +26,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -44,20 +43,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import si.uni_lj.fe.tunv.alarmmeup.R
-import si.uni_lj.fe.tunv.alarmmeup.ui.components.SectionDivider
-import si.uni_lj.fe.tunv.alarmmeup.ui.data.AlarmType
-import si.uni_lj.fe.tunv.alarmmeup.ui.data.SessionRepo
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.StoreCategory
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.StoreItemData
+import si.uni_lj.fe.tunv.alarmmeup.ui.data.AlarmType
+import si.uni_lj.fe.tunv.alarmmeup.ui.data.SessionRepo
 
 
 @Composable
@@ -481,7 +476,34 @@ val initialSampleCategories = listOf(
     )
 )
 
-
+@Composable
+fun SectionDivider(
+    title: String,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        HorizontalDivider(
+            modifier = Modifier.weight(1f),
+            thickness = 1.dp,
+            color = Color.Gray
+        )
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(horizontal = 8.dp)
+        )
+        HorizontalDivider(
+            modifier = Modifier.weight(1f),
+            thickness = 1.dp,
+            color = Color.Gray
+        )
+    }
+}
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -637,36 +659,6 @@ fun StoreScreen(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(vertical = 16.dp)
     ) {
-        item {
-            Text(
-                text = "Your preferred time is set to:",
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(top = 8.dp)
-            ) {
-                Text(
-                    text = "%02d : %02d".format(hour, minute),
-                    style = MaterialTheme.typography.headlineMedium
-                )
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            Button(
-                onClick = {
-                    showAlert = true
-                },
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text(text = "Change for 200")
-                Spacer(modifier = Modifier.width(7.dp))
-                Image(
-                    painter = painterResource(id = R.drawable.ic_suncoin),
-                    contentDescription = "SunCoin",
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-        }
 
         item { SectionDivider("SOUNDS") }
 
@@ -692,32 +684,6 @@ fun StoreScreen(
             }
         }
     }
-
-    if (showAlert){
-        AlertDialog(
-            onDismissRequest = { showAlert = false },
-            title = { Text("Confirm Action")},
-            text = { Text("Are you sure you want to change the time?")},
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showAlert = false
-                        onChangeClicked()
-                    })
-                {
-                    Text("Yes")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { showAlert = false })
-                {
-                    Text("No")
-                }
-            }
-        )
-    }
-
 
 }
 

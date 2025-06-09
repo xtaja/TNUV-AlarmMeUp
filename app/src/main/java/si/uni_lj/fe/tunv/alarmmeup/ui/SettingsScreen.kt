@@ -6,10 +6,8 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.Log
-import android.util.Patterns
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.indication
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.BorderStroke
@@ -35,8 +33,6 @@ import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
 import si.uni_lj.fe.tunv.alarmmeup.R
@@ -53,12 +49,11 @@ data class SettingCategory(
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SettingsScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     var selectedDays by remember { mutableStateOf(setOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")) }
     var volume by remember { mutableStateOf(0.6f) }
-    var selectedSound by remember { mutableStateOf("Birds") }
-    var selectedVibration by remember { mutableStateOf("Basic") }
+    var showIncompleteDaysDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier
@@ -72,34 +67,29 @@ fun SettingsScreen(
 
         VolumeSlider(volume) { volume = it }
 
-        Spacer(Modifier.height(24.dp))
-
-        AlarmSoundSelector(selectedSound) { selectedSound = it }
+        AlarmSoundSelector (selectedDays, { show -> showIncompleteDaysDialog = show })
 
         Spacer(Modifier.height(24.dp))
 
 //        AlarmVibrationSelector(selectedVibration) { selectedVibration = it }
 
-        Spacer(Modifier.height(32.dp))
-
-        OutlinedButton(
-            onClick = {},
-            colors = ButtonDefaults.outlinedButtonColors(
-                containerColor = Color.DarkGray,
-                contentColor = Color.White,
-                disabledContainerColor = Color.DarkGray,
-                disabledContentColor = Color.LightGray
-            ),
-            border = BorderStroke(1.dp, Color.Black),
-            shape = RoundedCornerShape(8.dp),
-            contentPadding = PaddingValues(horizontal = 20.dp),
-        ) {
-            Text(
-                text = "SAVE",
-                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp),
-                color = Color.LightGray,
+        if (showIncompleteDaysDialog){
+            AlertDialog(
+                onDismissRequest = { showIncompleteDaysDialog = false },
+                title = { Text("Heads up!") },
+                text = {
+                    Text(
+                        "Remember, if you don’t select all days of the week, you could risk losing your streak!"
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = { showIncompleteDaysDialog = false }) {
+                        Text("Got it")
+                    }
+                }
             )
         }
+
     }
 }
 
@@ -109,7 +99,7 @@ fun DaysSelector(
     onSelectionChanged: (Set<String>) -> Unit
 ) {
     val days = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-    var showIncompleteDaysDialog by remember { mutableStateOf(false) }
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
@@ -147,32 +137,12 @@ fun DaysSelector(
                         val new = selected.toMutableSet()
                         if (day in new) new.remove(day) else new.add(day)
                         onSelectionChanged(new)
-                        if (new.size < 7){
-                            showIncompleteDaysDialog = true
-                        }
                     },
                 contentAlignment = Alignment.Center
             ) {
                 Text(day)
             }
 
-        }
-
-        if (showIncompleteDaysDialog){
-            AlertDialog(
-                onDismissRequest = { showIncompleteDaysDialog = false },
-                title = { Text("Heads up!") },
-                text = {
-                    Text(
-                        "Remember, if you don’t select all days of the week, you could risk losing your streak!"
-                    )
-                },
-                confirmButton = {
-                    TextButton(onClick = { showIncompleteDaysDialog = false }) {
-                        Text("Got it")
-                    }
-                }
-            )
         }
     }
 }
@@ -433,10 +403,9 @@ val categories = listOf(
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AlarmSoundSelector(
-    selected: String,
-    onSelect: (String) -> Unit
+    selectedDays: Set<String>,
+    showIncompleteDaysDialog: (Boolean) -> Unit
 ) {
-    val sounds = listOf("Birds", "Guitar", "For more,\ngo to Shop")
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -571,59 +540,115 @@ fun AlarmSoundSelector(
         )
     }.filter { it.items.isNotEmpty() }
 
+    Column(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+            contentPadding = PaddingValues(vertical = 16.dp)
+        ) {
+            soundCategories.forEach { cat ->
+                item {
+                    AlarmSettings(
+                        category = cat,
+                        onTogglePlay = onTogglePlay
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+            }
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(vertical = 16.dp)
-    ) {
-        soundCategories.forEach { cat ->
             item {
-                AlarmSettings(
-                    category = cat,
-                    onTogglePlay = onTogglePlay
-                )
-                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 10.dp)
+                ) {
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(1.dp),
+                        color = Color.Gray
+                    )
+                    Text(
+                        text = "Owned vibrations",
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                        fontSize = 20.sp
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(1.dp),
+                        color = Color.Gray
+                    )
+                }
+            }
+
+            vibCategories.forEach { cat ->
+                item {
+                    AlarmSettings(
+                        category = cat,
+                        onTogglePlay = onTogglePlay
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
             }
         }
 
-        item {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 10.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            OutlinedButton(
+                onClick = {},
+                colors = ButtonDefaults.outlinedButtonColors(
+                    containerColor = Color.DarkGray,
+                    contentColor = Color.White,
+                    disabledContainerColor = Color.DarkGray,
+                    disabledContentColor = Color.LightGray
+                ),
+                border = BorderStroke(1.dp, Color.Black),
+                shape = RoundedCornerShape(8.dp),
+                contentPadding = PaddingValues(horizontal = 20.dp),
             ) {
-                HorizontalDivider(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(1.dp),
-                    color = Color.Gray
-                )
                 Text(
-                    text = "Owned vibrations",
-                    modifier = Modifier.padding(horizontal = 8.dp),
-                    fontSize = 20.sp
+                    text = "CANCEL",
+                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp),
+                    color = Color.LightGray,
                 )
-                HorizontalDivider(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(1.dp),
-                    color = Color.Gray
+            }
+
+            Spacer(modifier = Modifier.width(5.dp))
+
+            OutlinedButton(
+                onClick = {
+                    if (selectedDays.size < 7) {
+                        showIncompleteDaysDialog(true)
+                    }
+                },
+                colors = ButtonDefaults.outlinedButtonColors(
+                    containerColor = Color.DarkGray,
+                    contentColor = Color.White,
+                    disabledContainerColor = Color.Black,
+                    disabledContentColor = Color.Black
+                ),
+                border = BorderStroke(1.dp, Color.Black),
+                shape = RoundedCornerShape(8.dp),
+                contentPadding = PaddingValues(horizontal = 20.dp),
+            ) {
+                Text(
+                    text = "SAVE",
+                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp),
+                    color = Color.LightGray,
                 )
             }
         }
 
-        vibCategories.forEach { cat ->
-            item {
-                AlarmSettings(
-                    category = cat,
-                    onTogglePlay = onTogglePlay
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-        }
+        Spacer(modifier = Modifier.height(12.dp))
     }
-
 }
 
 @Composable

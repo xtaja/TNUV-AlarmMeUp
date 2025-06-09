@@ -212,7 +212,7 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit) {
                         HomeScreen(
                             repo = sessionRepo,
                             isTimeEdible = clockChangeable,
-                            onEditableChange = { b -> clockChangeable = b }
+                            R.drawable.ic_suncoin
                         )
                     }
                     LaunchedEffect(selectedScreen) {
@@ -222,7 +222,6 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit) {
                     }
                 }
                 "Store" -> StoreScreen(repo = sessionRepo, onChangeClicked = {
-                    selectedScreen = "Home"
                     clockChangeable = true
                 })
                 "Settings" -> SettingsScreen()
