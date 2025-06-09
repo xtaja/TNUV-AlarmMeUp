@@ -29,6 +29,7 @@ fun NavBarButton(
     contentDescription: String,
     onClick: () -> Unit,
     isActive: Boolean = false,
+    isAtSettings: Boolean = false,
     label: String? = null,
     iconSize: Dp = 40.dp
 ) {
@@ -51,6 +52,15 @@ fun NavBarButton(
                         .size(70.dp)
                         .background(
                             color = Color.LightGray,
+                            shape = RoundedCornerShape(50)
+                        )
+                )
+            }else if (isAtSettings) {
+                Box(
+                    modifier = Modifier
+                        .size(70.dp)
+                        .background(
+                            color = Color(0xF2F2F2F2),
                             shape = RoundedCornerShape(50)
                         )
                 )

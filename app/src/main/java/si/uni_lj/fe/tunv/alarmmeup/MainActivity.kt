@@ -170,14 +170,16 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit) {
                     iconSize = 32.dp
                 )
                 NavBarStats( //XP and SunCoins
-                    numOfXP = user?.xp ?: 2,
-                    numOfSunCoins = user?.coins ?: 2
+                    numOfXP = user?.xp ?: 0,
+                    numOfSunCoins = user?.coins ?: 0
                 )
                 NavBarButton(
                     iconResId = R.drawable.ic_profile,
                     contentDescription = "Profile",
                     onClick = { selectedScreen = "Profile"; profileTabClickCount++ },
                     isActive = selectedScreen == "Profile",
+                    isAtSettings = selectedScreen == "Settings" || selectedScreen == "ProfileSettings",
+
                 )
             }
         }

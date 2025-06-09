@@ -15,9 +15,9 @@ fun CloudsDecoration(
         val width = size.width
         val height = size.height
         val radiusWidth =width * 0.17f
-        val cloudColor= Color(0xF2F2F2F2)
+        val cloudColor= Color(0xFFF2F2F2)
 
-        // Example positions and radii for 6 circles
+
         drawCircle(
             color = cloudColor,
             radius = radiusWidth*0.85f,
@@ -26,32 +26,32 @@ fun CloudsDecoration(
         drawCircle(
             color = cloudColor,
             radius = radiusWidth*1.1f,
-            center = Offset(width * 0.50f, height * 0.30f)
+            center = Offset(width * 0.50f, height * 0.33f)
         )
         drawCircle(
             color = cloudColor,
             radius = radiusWidth*0.9f,
-            center = Offset(width *0.70f, height * 0.37f)
+            center = Offset(width *0.70f, height * 0.38f)
         )
         drawCircle(
             color = cloudColor,
             radius = radiusWidth*0.7f,
-            center = Offset(width * 0.20f, height * 0.50f)
+            center = Offset(width * 0.20f, height * 0.51f)
         )
         drawCircle(
             color = cloudColor,
             radius = radiusWidth ,
-            center = Offset(width * 0.35f, height * 0.65f)
+            center = Offset(width * 0.35f, height * 0.66f)
         )
         drawCircle(
             color = cloudColor,
             radius = radiusWidth,
-            center = Offset(width * 0.58f, height * 0.71f)
+            center = Offset(width * 0.58f, height * 0.72f)
         )
         drawCircle(
             color = cloudColor,
             radius = radiusWidth*0.9f,
-            center = Offset(width * 0.75f, height * 0.55f)
+            center = Offset(width * 0.75f, height * 0.56f)
         )
     }
 }

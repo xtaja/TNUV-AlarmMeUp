@@ -17,7 +17,9 @@ import si.uni_lj.fe.tunv.alarmmeup.R
 
 @Composable
 fun ProfileSettingsBtn(
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
+    modifier: Modifier = Modifier
+
 ) {
     val outerColor = Color.White
     val innerColor = Color(0xF2F2F2F2)
@@ -25,7 +27,7 @@ fun ProfileSettingsBtn(
     IconButton(
         onClick = { onSettingsClick() },
         modifier = Modifier
-            .offset(x = 0.dp, y = -30.dp)
+            .offset(x = 90.dp, y =0.dp)
             .size(60.dp)
     ) {
         Box(
@@ -49,8 +51,8 @@ fun ProfileSettingsBtn(
             )
 
             Icon(
-                painter = painterResource(id = R.drawable.ic_settings),
-                contentDescription = "Settings",
+                painter = painterResource(id = R.drawable.ic_edit),
+                contentDescription = "ProfileSettings",
                 modifier = Modifier.size(25.dp),
                 tint = Color.Black
             )

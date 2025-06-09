@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import si.uni_lj.fe.tunv.alarmmeup.R
+import si.uni_lj.fe.tunv.alarmmeup.ui.components.SectionDivider
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.AlarmType
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.SessionRepo
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.StoreCategory
@@ -480,34 +481,7 @@ val initialSampleCategories = listOf(
     )
 )
 
-@Composable
-fun SectionDivider(
-    title: String,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-    ) {
-        HorizontalDivider(
-            modifier = Modifier.weight(1f),
-            thickness = 1.dp,
-            color = Color.Gray
-        )
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(horizontal = 8.dp)
-        )
-        HorizontalDivider(
-            modifier = Modifier.weight(1f),
-            thickness = 1.dp,
-            color = Color.Gray
-        )
-    }
-}
+
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
