@@ -182,7 +182,7 @@ fun WordleGame(
                     .fillMaxSize()
             ) {
                 Spacer(modifier = Modifier.height(100.dp))
-                Text("Wordle", fontSize = 32.sp)
+                Text("Wordle", fontSize = 45.sp)
                 Spacer(modifier = Modifier.height(50.dp))
                 // Board
                 for (row in 0 until maxGuesses) {

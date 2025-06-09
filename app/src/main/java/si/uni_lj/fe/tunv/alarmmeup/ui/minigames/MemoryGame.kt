@@ -124,7 +124,7 @@ fun MemoryGame(
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Spacer(modifier = Modifier.height(100.dp))
-                Text("Memory", fontSize = 32.sp)
+                Text("Memory", fontSize = 45.sp)
                 Spacer(modifier = Modifier.height(100.dp))
                 Text("Find all pairs!", fontSize = 20.sp)
                 Spacer(modifier = Modifier.height(50.dp))
