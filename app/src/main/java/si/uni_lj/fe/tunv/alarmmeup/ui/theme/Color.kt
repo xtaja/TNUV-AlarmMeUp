@@ -2,10 +2,13 @@ package si.uni_lj.fe.tunv.alarmmeup.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+val Orange19 = Color(0xFFFF9800)
+val Yellow19 = Color(0xFFFFEB3B )
+val Red19 = Color(0xFFF44336)
+val Green19 = Color(0xFF8BC34A)
+val Blue19 = Color(0xFF03A9F4)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+val LightOrange = Color(0xFFFFC107)
+val SoftPeach = Color(0xFFFFD180)
+val DeepOrange = Color(0xFFF57C00)
+val BurntOrange = Color(0xFFE65100)

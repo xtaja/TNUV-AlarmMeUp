@@ -1,9 +1,6 @@
 package si.uni_lj.fe.tunv.alarmmeup.ui.components
 
-
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -37,10 +35,7 @@ fun MinigameCard(
     Box(
         modifier = modifier
             .height(140.dp)
-            .border(
-                BorderStroke(1.dp, Color.Black),
-                shape = RoundedCornerShape(16.dp)
-            )
+            .shadow(8.dp, RoundedCornerShape(16.dp))
             .clip(RoundedCornerShape(16.dp))
     ) {
         Button(
@@ -48,7 +43,7 @@ fun MinigameCard(
             modifier = Modifier.fillMaxSize(),
             colors = ButtonDefaults.buttonColors(containerColor = Color.White),
             shape = RoundedCornerShape(16.dp),
-            contentPadding = PaddingValues(0.dp)
+            contentPadding = PaddingValues(16.dp)
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
