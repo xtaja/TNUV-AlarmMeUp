@@ -37,10 +37,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import kotlinx.coroutines.launch
+import si.uni_lj.fe.tunv.alarmmeup.ui.components.ChallengeEnum
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.ProfilePictureEnum
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.AlarmEntity
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.AppDatabase
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.UserEntity
+import si.uni_lj.fe.tunv.alarmmeup.ui.data.UserSoundEntity
+import si.uni_lj.fe.tunv.alarmmeup.ui.data.UserVibrationEntity
 
 @Composable
 fun AuthButton(text: String, onClick: () -> Unit) {
@@ -255,6 +258,8 @@ fun MorphingAuthBox(
 
                                 val userDao = AppDatabase.get(ctx).userDao()
                                 val alarmDao = AppDatabase.get(ctx).alarmDao()
+                                val userVibrationDao = AppDatabase.get(ctx).userVibrationDao()
+                                val userSoundDao = AppDatabase.get(ctx).userSoundDao()
 
 
                                 val conflicts = userDao.checkDetailsAvailable(email, username)
@@ -276,12 +281,26 @@ fun MorphingAuthBox(
                                 val userID = userDao.insert(newUser).toInt()
 
 
+                                userVibrationDao.insert(UserVibrationEntity(
+                                        userID,
+                                        29
+                                    )
+                                )
+
+                                userSoundDao.insert( UserSoundEntity(
+                                        userID,
+                                        2
+                                    )
+                                )
+
                                 alarmDao.insert(AlarmEntity(
                                     userID,
                                     hour = 12,
                                     minute = 0,
-                                    soundId = null,
-                                    vibrationId = null,
+                                    soundId = 2,
+                                    vibrationId = 29,
+                                    daysMask = 0,
+                                    challenge = ChallengeEnum.Math,
                                     enabled = true
                                 ))
 

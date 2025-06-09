@@ -8,8 +8,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.Flow
+import si.uni_lj.fe.tunv.alarmmeup.ui.components.ChallengeEnum
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.ProfilePictureEnum
+import si.uni_lj.fe.tunv.alarmmeup.ui.components.SoundCategoryEnum
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.SoundEnum
+import si.uni_lj.fe.tunv.alarmmeup.ui.components.VibrationCategoryEnum
+import java.util.logging.Level
 
 @Entity(
     tableName = "alarms",
@@ -38,7 +42,60 @@ data class AlarmEntity(
     val minute: Int,
     val soundId: Int?,
     val vibrationId: Int?,
+    val volume: Float = 1f,
+    val daysMask: Int,
+    val challenge: ChallengeEnum,
     val enabled: Boolean = true
+)
+
+@Entity(
+    tableName = "user_sounds",
+    primaryKeys = ["userId", "soundId"],
+    foreignKeys = [
+        ForeignKey(
+            entity = UserEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["userId"],
+            onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = SoundEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["soundId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [ Index("userId"), Index("soundId") ]
+)
+data class UserSoundEntity(
+    val userId: Int,
+    val soundId: Int,
+    val unlockedAt: Long = System.currentTimeMillis()
+)
+
+@Entity(
+    tableName = "user_vibrations",
+    primaryKeys = ["userId", "vibrationId"],
+    foreignKeys = [
+        ForeignKey(
+            entity = UserEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["userId"],
+            onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = VibrationEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["vibrationId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [ Index("userId"), Index("vibrationId") ]
+)
+data class UserVibrationEntity(
+    val userId: Int,
+    val vibrationId: Int,
+    val unlockedAt: Long = System.currentTimeMillis()
 )
 
 @Entity(
@@ -48,6 +105,7 @@ data class AlarmEntity(
 data class SoundEntity(
     @PrimaryKey val id: Int,
     val soundIdentifier: SoundEnum,
+    val category: SoundCategoryEnum,
     val name: String
 )
 
@@ -55,6 +113,7 @@ data class SoundEntity(
 data class VibrationEntity(
     @PrimaryKey val id: Int,
     val name: String,
+    val category: VibrationCategoryEnum,
     val patternJson: String,
     val amplitudeJson: String
 )
@@ -66,7 +125,10 @@ data class UserEntity(
     val username: String,
     val email: String,
     val password: String,
-    val profilePicture: ProfilePictureEnum
+    val profilePicture: ProfilePictureEnum,
+    val coins: Int = 0,
+    val xp: Int = 0,
+    val createdAt: Long = System.currentTimeMillis()
 )
 
 class EnumConverters {
@@ -95,6 +157,49 @@ interface AlarmDao {
     @Query("SELECT * FROM alarms WHERE id = :id")
     fun selectById(id: Int): Flow<AlarmEntity?>
 }
+
+@Dao
+interface UserSoundDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertAll(list: List<UserSoundEntity>)
+    @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insert(entry: UserSoundEntity)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun unlockSound(entry: UserSoundEntity)
+
+    @Delete
+    suspend fun removeSound(entry: UserSoundEntity)
+
+    @Query("""
+    SELECT s.* 
+      FROM sounds AS s 
+      INNER JOIN user_sounds AS us 
+        ON s.id = us.soundId 
+     WHERE us.userId = :userId
+    """)
+    fun getUnlockedSounds(userId: Int): Flow<List<SoundEntity>>
+}
+
+@Dao
+interface UserVibrationDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertAll(list: List<UserVibrationEntity>)
+    @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insert(entry: UserVibrationEntity)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun unlockVibration(entry: UserVibrationEntity)
+
+    @Delete
+    suspend fun removeVibration(entry: UserVibrationEntity)
+
+    @Query("""
+    SELECT v.* 
+      FROM vibrations AS v 
+      INNER JOIN user_vibrations AS uv 
+        ON v.id = uv.vibrationId 
+     WHERE uv.userId = :userId
+    """)
+    fun getUnlockedVibrations(userId: Int): Flow<List<VibrationEntity>>
+}
+
 
 @Dao
 interface SoundDao {
@@ -141,8 +246,8 @@ interface UserDao {
 }
 
 @Database(
-    entities = [AlarmEntity::class, SoundEntity::class, VibrationEntity::class, UserEntity::class],
-    version = 100,
+    entities = [AlarmEntity::class, SoundEntity::class, VibrationEntity::class, UserEntity::class, UserSoundEntity::class, UserVibrationEntity::class],
+    version = 102,
     exportSchema = false
 )
 @TypeConverters(EnumConverters::class)
@@ -152,6 +257,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun soundDao(): SoundDao
     abstract fun vibrationDao(): VibrationDao
     abstract fun userDao(): UserDao
+    abstract fun userSoundDao(): UserSoundDao
+    abstract fun userVibrationDao(): UserVibrationDao
 
     companion object {
         @Volatile private var INSTANCE: AppDatabase? = null
@@ -176,92 +283,103 @@ abstract class AppDatabase : RoomDatabase() {
                     }
 
                     private fun seedEverything(ctx: Context) {
-                        // run seeding off the UI thread
                         CoroutineScope(Dispatchers.IO).launch {
                             val soundSeeds = listOf(
-                                SoundEntity(1,  SoundEnum.Siren1,     "Siren 1"),
-                                SoundEntity(2,  SoundEnum.Digital1,   "Digital 1"),
-                                SoundEntity(3,  SoundEnum.Digital2,   "Digital 2"),
-                                SoundEntity(4,  SoundEnum.EightBit,   "8-bit"),
-                                SoundEntity(5,  SoundEnum.OldPhone,   "Old phone"),
-                                SoundEntity(6,  SoundEnum.Digital3,   "Digital 3"),
-                                SoundEntity(7,  SoundEnum.Digital4,   "Digital 4"),
-                                SoundEntity(8,  SoundEnum.SoftWaves,  "Soft waves"),
-                                SoundEntity(9,  SoundEnum.Tropical,   "Tropical"),
-                                SoundEntity(10, SoundEnum.Doomsday,   "Doomsday"),
-                                SoundEntity(11, SoundEnum.Siren2,     "Siren 2"),
+                                SoundEntity(1,  SoundEnum.Siren1, SoundCategoryEnum.Featured,   "Siren 1"),
+                                SoundEntity(2,  SoundEnum.Digital1, SoundCategoryEnum.Featured,  "Digital 1"),
+                                SoundEntity(3,  SoundEnum.Digital2, SoundCategoryEnum.Featured,  "Digital 2"),
+                                SoundEntity(4,  SoundEnum.EightBit, SoundCategoryEnum.Featured,  "8-bit"),
+                                SoundEntity(5,  SoundEnum.OldPhone, SoundCategoryEnum.Featured,  "Old phone"),
+                                SoundEntity(6,  SoundEnum.Digital3, SoundCategoryEnum.Featured,  "Digital 3"),
+                                SoundEntity(7,  SoundEnum.Digital4,  SoundCategoryEnum.Featured, "Digital 4"),
+                                SoundEntity(8,  SoundEnum.SoftWaves, SoundCategoryEnum.Featured, "Soft waves"),
+                                SoundEntity(9,  SoundEnum.Tropical, SoundCategoryEnum.Featured,  "Tropical"),
+                                SoundEntity(10, SoundEnum.Doomsday, SoundCategoryEnum.Featured,  "Doomsday"),
+                                SoundEntity(11, SoundEnum.Siren2,  SoundCategoryEnum.Featured,   "Siren 2"),
 
-                                SoundEntity(12, SoundEnum.Drops,      "Drops"),
-                                SoundEntity(13, SoundEnum.Beep,       "Beep"),
-                                SoundEntity(14, SoundEnum.Golden,     "Golden"),
-                                SoundEntity(15, SoundEnum.Sweet,      "Sweet"),
-                                SoundEntity(16, SoundEnum.Jingles,    "Jingles"),
-                                SoundEntity(17, SoundEnum.Melodic,    "Melodic"),
-                                SoundEntity(18, SoundEnum.Lofi,       "Lo-fi"),
-                                SoundEntity(19, SoundEnum.Voyage,     "Voyage"),
-                                SoundEntity(20, SoundEnum.Memphic,    "Memphis"),
-                                SoundEntity(21, SoundEnum.Anime,      "Anime"),
-                                SoundEntity(22, SoundEnum.Police,     "Police")
+                                SoundEntity(12, SoundEnum.Drops,  SoundCategoryEnum.NewAlarms,    "Drops"),
+                                SoundEntity(13, SoundEnum.Beep,   SoundCategoryEnum.NewAlarms,    "Beep"),
+                                SoundEntity(14, SoundEnum.Golden,  SoundCategoryEnum.NewAlarms,   "Golden"),
+                                SoundEntity(15, SoundEnum.Sweet,   SoundCategoryEnum.NewAlarms,   "Sweet"),
+                                SoundEntity(16, SoundEnum.Jingles, SoundCategoryEnum.NewAlarms,   "Jingles"),
+                                SoundEntity(17, SoundEnum.Melodic, SoundCategoryEnum.NewAlarms,   "Melodic"),
+                                SoundEntity(18, SoundEnum.Lofi,   SoundCategoryEnum.NewAlarms,    "Lo-fi"),
+                                SoundEntity(19, SoundEnum.Voyage, SoundCategoryEnum.NewAlarms,    "Voyage"),
+                                SoundEntity(20, SoundEnum.Memphic, SoundCategoryEnum.NewAlarms,   "Memphis"),
+                                SoundEntity(21, SoundEnum.Anime,   SoundCategoryEnum.NewAlarms,   "Anime"),
+                                SoundEntity(22, SoundEnum.Police,  SoundCategoryEnum.NewAlarms,   "Police")
                             )
 
                             val vibrationSeeds = listOf(
                                 VibrationEntity(
                                     id = 23, name = "Wave Wash",
+                                    category = VibrationCategoryEnum.Featured,
                                     patternJson   = "[0,150,75,150,75,300,75,150,75]",
                                     amplitudeJson = "[0,255,0,255,0,200,0,255,0]"
                                 ),
                                 VibrationEntity(
                                     id = 24, name = "Police",
+                                    category = VibrationCategoryEnum.Featured,
                                     patternJson   = "[0,150,75,150,75,300,75,150,75]",
                                     amplitudeJson = "[0,255,0,255,0,200,0,255,0]"
                                 ),
                                 VibrationEntity(
                                     id = 25, name = "ZigZag",
+                                    category = VibrationCategoryEnum.Featured,
                                     patternJson   = "[0,80,40,120,40,160,40]",
                                     amplitudeJson = "[0,200,0,220,0,255,0]"
                                 ),
                                 VibrationEntity(
                                     id = 26, name = "Heartbeat",
+                                    category = VibrationCategoryEnum.Featured,
                                     patternJson   = "[0,200,100,200,500]",
                                     amplitudeJson = "[0,255,0,255,0]"
                                 ),
                                 VibrationEntity(
                                     id = 27, name = "Chill Wave",
+                                    category = VibrationCategoryEnum.Featured,
                                     patternJson   = "[0,700,300]",
                                     amplitudeJson = "[0,100,0]"
                                 ),
                                 VibrationEntity(
                                     id = 28, name = "Thunder",
+                                    category = VibrationCategoryEnum.Featured,
                                     patternJson   = "[0,500,100,500,100,500,100]",
                                     amplitudeJson = "[0,255,0,255,0,255,0]"
                                 ),
                                 VibrationEntity(
                                     id = 29, name = "Ripple",
+                                    category = VibrationCategoryEnum.Popular,
                                     patternJson   = "[0,600,300,400,200]",
                                     amplitudeJson = "[0,120,0,100,0]"
                                 ),
                                 VibrationEntity(
                                     id = 30, name = "Quest",
+                                    category = VibrationCategoryEnum.Popular,
                                     patternJson   = "[0,100,50,120,50,140,50,160,50]",
                                     amplitudeJson = "[0,255,0,255,0,255,0,255,0]"
                                 ),
                                 VibrationEntity(
                                     id = 31, name = "8-Bit Zap",
+                                    category = VibrationCategoryEnum.Popular,
                                     patternJson   = "[0,500,500,500,500,500,500]",
                                     amplitudeJson = "[0,220,0,240,0,255,0]"
                                 ),
                                 VibrationEntity(
                                     id = 32, name = "Starlink",
+                                    category = VibrationCategoryEnum.Popular,
                                     patternJson   = "[0,150,75,75,75,150,75]",
                                     amplitudeJson = "[0,255,0,220,0,255,0]"
                                 ),
                                 VibrationEntity(
                                     id = 33, name = "Campfire",
+                                    category = VibrationCategoryEnum.Popular,
                                     patternJson   = "[0,60,30,120,30,90,30,60,30]",
                                     amplitudeJson = "[0,255,0,200,0,180,0,200,0]"
                                 ),
                                 VibrationEntity(
                                     id = 34, name = "Metro",
+                                    category = VibrationCategoryEnum.Popular,
                                     patternJson   = "[0,300,100,150,100,300,100]",
                                     amplitudeJson = "[0,220,0,200,0,230,0]"
                                 )
@@ -274,6 +392,8 @@ abstract class AppDatabase : RoomDatabase() {
                                     minute = 0,
                                     soundId = 1,
                                     vibrationId = 23,
+                                    daysMask = 0,
+                                    challenge = ChallengeEnum.Math,
                                     enabled = true
                                 ),
                                 AlarmEntity(
@@ -282,6 +402,8 @@ abstract class AppDatabase : RoomDatabase() {
                                     minute = 0,
                                     soundId = 1,
                                     vibrationId = 23,
+                                    daysMask = 0,
+                                    challenge = ChallengeEnum.Math,
                                     enabled = true
                                 ),
                                 AlarmEntity(
@@ -290,42 +412,67 @@ abstract class AppDatabase : RoomDatabase() {
                                     minute = 0,
                                     soundId = 1,
                                     vibrationId = 23,
+                                    daysMask = 0,
+                                    challenge = ChallengeEnum.Math,
                                     enabled = true
                                 )
 
                             )
 
-                            val defaultUsers = listOf(
-                                UserEntity(
+                            get(ctx).apply {
+
+                                val amyId   = userDao().insert(UserEntity(
                                     0,
                                     "Amy Adams",
                                     "amyzams",
                                     "amyadams@gmail.com",
                                     "123",
                                     ProfilePictureEnum.Man1
-                                ),
-                                UserEntity(
+                                ))
+                                val mariaId = userDao().insert(UserEntity(
                                     0,
                                     "Maria Lora",
                                     "mara",
                                     "marialora@gmail.com",
                                     "pass",
                                     ProfilePictureEnum.Man1
-                                ),
-                                UserEntity(
+                                ))
+                                val testId  = userDao().insert(UserEntity(
                                     0,
                                     "Test",
                                     "test",
                                     "t",
                                     "t",
                                     ProfilePictureEnum.Man1
+                                ))
+
+                                val defaultInventorySounds = listOf(
+                                    UserSoundEntity(userId = amyId.toInt(), soundId = 1),
+                                    UserSoundEntity(userId = amyId.toInt(), soundId = 2),
+
+                                    UserSoundEntity(userId = mariaId.toInt(), soundId = 4),
+                                    UserSoundEntity(userId = mariaId.toInt(), soundId = 5),
+
+                                    UserSoundEntity(userId = testId.toInt(), soundId = 10),
+                                    UserSoundEntity(userId = testId.toInt(), soundId = 12)
                                 )
-                            )
-                            get(ctx).apply {
-                                userDao().insertAll(defaultUsers)
+
+                                val defaultInventoryVibrations = listOf(
+                                    UserVibrationEntity(userId = amyId.toInt(), vibrationId = 23),
+                                    UserVibrationEntity(userId = amyId.toInt(), vibrationId = 24),
+
+                                    UserVibrationEntity(userId = mariaId.toInt(), vibrationId = 25),
+                                    UserVibrationEntity(userId = mariaId.toInt(), vibrationId = 26),
+
+                                    UserVibrationEntity(userId = testId.toInt(), vibrationId = 27),
+                                    UserVibrationEntity(userId = testId.toInt(), vibrationId = 28)
+                                )
+
                                 soundDao().insertAll(soundSeeds)
                                 vibrationDao().insertAll(vibrationSeeds)
                                 alarmDao().insertAll(defaultAlarmsEntities)
+                                userVibrationDao().insertAll(defaultInventoryVibrations)
+                                userSoundDao().insertAll(defaultInventorySounds)
                             }
                         }
                     }
