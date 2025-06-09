@@ -15,17 +15,19 @@ import si.uni_lj.fe.tunv.alarmmeup.R
 @Composable
 fun ExitButton(onExit: () -> Unit) {
     Button(
-        modifier = Modifier.size(48.dp,48.dp),
+        modifier = Modifier.size(80.dp,80.dp),
         onClick = onExit,
         colors = ButtonDefaults.buttonColors(
             containerColor = Color.Transparent,
-            contentColor = Color.Black
+            contentColor = Color.LightGray
         )
     ){
         Icon(
-            painter = painterResource(id = R.drawable.close),
+            painter = painterResource(id = R.drawable.ic_close),
             contentDescription = "Exit",
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(40.dp) ,
+            tint = Color.Black
+
         )
 
     }
