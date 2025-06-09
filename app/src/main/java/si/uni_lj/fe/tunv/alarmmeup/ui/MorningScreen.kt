@@ -1,5 +1,4 @@
 package si.uni_lj.fe.tunv.alarmmeup.ui
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,19 +7,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import si.uni_lj.fe.tunv.alarmmeup.R
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.MinigameCard
+import si.uni_lj.fe.tunv.alarmmeup.ui.components.SnoozeButton
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -86,20 +82,8 @@ fun MorningScreen(
         Spacer(modifier = Modifier.height(50.dp))
         Text("...or snooze and loose your streak...", fontSize = 18.sp)
         Spacer(modifier = Modifier.height(12.dp))
-        Button(
-            onClick = onSnoozeClick,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.LightGray,
-                contentColor = Color.Black
-            )) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_snooze),
-                contentDescription = "Snooze",
-                modifier = Modifier
-                    .padding(end = 8.dp)
-                    .align(Alignment.CenterVertically)
-            )
-            Text("SNOOZE", fontSize = 22.sp)
-        }
+        SnoozeButton(
+            onClick = onSnoozeClick
+        )
     }
 }

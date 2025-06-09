@@ -8,7 +8,6 @@ import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -244,8 +243,19 @@ fun HomeScreen(
 }
 fun scheduleAlarm(context: Context, hour: Int, minute: Int) {
     val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+        if (!alarmManager.canScheduleExactAlarms()) {
+            // Prompt user to grant permission or show a message
+            // You can direct them to Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
+            return
+        }
+    }
+
     val intent = Intent(context, AlarmReceiver::class.java)
-    val pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+    val pendingIntent = PendingIntent.getBroadcast(
+        context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
 
     val calendar = Calendar.getInstance().apply {
         set(Calendar.HOUR_OF_DAY, hour)
@@ -257,19 +267,13 @@ fun scheduleAlarm(context: Context, hour: Int, minute: Int) {
         }
     }
 
-    val canSchedule = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-        alarmManager.canScheduleExactAlarms()
-    } else {
-        true
+    try {
+        val alarmClockInfo = AlarmManager.AlarmClockInfo(calendar.timeInMillis, pendingIntent)
+        alarmManager.setAlarmClock(alarmClockInfo, pendingIntent)
+    } catch (e: SecurityException) {
+        // Handle the exception (e.g., show a message to the user)
     }
-
-    if (canSchedule) {
-        try {
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
-        } catch (e: SecurityException) {
-            e.printStackTrace()
-        }
-    } }
+}
 fun to24Hour(hour: Int, isAm: Boolean): Int {
     return when {
         isAm && hour == 12 -> 0

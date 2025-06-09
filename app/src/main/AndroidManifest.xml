@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
+        android:name=".AlarmMeUpApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -24,6 +25,11 @@
             </intent-filter>
         </activity>
         <receiver android:name=".AlarmReceiver" />
+        <activity
+            android:name=".WakeUpActivity"
+            android:exported="true"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"/>
     </application>
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
