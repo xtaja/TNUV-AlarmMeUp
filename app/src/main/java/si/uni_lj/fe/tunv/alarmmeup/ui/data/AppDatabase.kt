@@ -128,6 +128,7 @@ data class UserEntity(
     val profilePicture: ProfilePictureEnum,
     val coins: Int = 0,
     val xp: Int = 0,
+    val lastGameCompletedDate: String? = null,
     val createdAt: Long = System.currentTimeMillis()
 )
 
@@ -247,7 +248,7 @@ interface UserDao {
 
 @Database(
     entities = [AlarmEntity::class, SoundEntity::class, VibrationEntity::class, UserEntity::class, UserSoundEntity::class, UserVibrationEntity::class],
-    version = 102,
+    version = 103,
     exportSchema = false
 )
 @TypeConverters(EnumConverters::class)

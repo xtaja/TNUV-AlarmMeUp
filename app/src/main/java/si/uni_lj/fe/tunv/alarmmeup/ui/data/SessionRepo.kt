@@ -1,16 +1,24 @@
 package si.uni_lj.fe.tunv.alarmmeup.ui.data
 
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.preferencesDataStore
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.*
-import si.uni_lj.fe.tunv.alarmmeup.ui.alarmData
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.ProfilePictureEnum
-import kotlin.math.min
 
 val Context.userPrefs by preferencesDataStore("user_prefs")
 object Keys { val CURRENT_ID = intPreferencesKey("current_uid") }
@@ -20,6 +28,7 @@ class SessionRepo(
     private val ds: DataStore<Preferences>,
     private val dao: UserDao,
     private val daoAlarms: AlarmDao
+
 ) {
     @OptIn(ExperimentalCoroutinesApi::class)
     val currentUser: Flow<UserEntity?> =
@@ -41,6 +50,8 @@ class SessionRepo(
         return true
     }
 
+    var user by mutableStateOf<UserEntity?>(null)
+
     suspend fun updateProfilePicture(id: Int, picture: ProfilePictureEnum) : Boolean {
         dao.updateProfilePictureEnum(id, picture)
         return true
@@ -53,5 +64,31 @@ class SessionRepo(
 
     fun getClock(id: Int) : Flow<AlarmEntity?> {
         return daoAlarms.selectById(id)
+    }
+
+    suspend fun addXPAndCoins(xp: Int, coins: Int) {
+        user?.let {
+            val updatedUser = it.copy(
+                xp = (it.xp ?: 0) + xp,
+                coins = (it.coins ?: 0) + coins
+            )
+            user = updatedUser
+            dao.update(updatedUser)
+            println("Added $xp XP and $coins coins. New total: ${updatedUser.xp} XP, ${updatedUser.coins} coins.")
+        }
+    }
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun wasGameCompletedToday(): Boolean {
+        val today = java.time.LocalDate.now().toString()
+        return user?.lastGameCompletedDate == today
+    }
+    @RequiresApi(Build.VERSION_CODES.O)
+    suspend fun setGameCompletedToday() {
+        val today = java.time.LocalDate.now().toString()
+        user?.let {
+            val updatedUser = it.copy(lastGameCompletedDate = today)
+            user = updatedUser
+            dao.update(updatedUser)
+        }
     }
 }

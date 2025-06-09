@@ -20,7 +20,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import si.uni_lj.fe.tunv.alarmmeup.R
-import si.uni_lj.fe.tunv.alarmmeup.ui.components.MiniGameCard
+import si.uni_lj.fe.tunv.alarmmeup.ui.components.MinigameCard
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -44,47 +44,47 @@ fun MorningScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Time to wake up!", fontSize = 22.sp)
-        Spacer(modifier = Modifier.height(25.dp))
+        Text("Time to wake up!", fontSize = 18.sp)
+        Spacer(modifier = Modifier.height(15.dp))
         Text(currentTime, fontSize = 70.sp)
         Spacer(modifier = Modifier.height(45.dp))
         Text("Choose today's challenge:", fontSize = 25.sp)
-        Spacer(modifier = Modifier.height(30.dp))
+        Spacer(modifier = Modifier.height(40.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            MiniGameCard(
+            MinigameCard(
                 iconRes = R.drawable.ic_math,
                 name = "Math",
                 xp = 50,
                 onClick = onMathClick,
                 modifier = Modifier.weight(1f)
             )
-            MiniGameCard(
+            MinigameCard(
                 iconRes = R.drawable.ic_typing,
                 name = "Typing",
-                xp = 40,
+                xp = 50,
                 onClick = onTypingClick,
                 modifier = Modifier.weight(1f)
             )
-            MiniGameCard(
+            MinigameCard(
                 iconRes = R.drawable.ic_memory,
                 name = "Memory",
-                xp = 30,
+                xp = 50,
                 onClick = onMemoryClick,
                 modifier = Modifier.weight(1f)
             )
-            MiniGameCard(
+            MinigameCard(
                 iconRes = R.drawable.ic_wordle,
                 name = "Wordle",
-                xp = 60,
+                xp = 50,
                 onClick = onWordleClick,
                 modifier = Modifier.weight(1f)
             )
         }
         Spacer(modifier = Modifier.height(50.dp))
-        Text("...or snooze and loose your streak...", fontSize = 20.sp)
+        Text("...or snooze and loose your streak...", fontSize = 18.sp)
         Spacer(modifier = Modifier.height(12.dp))
         Button(
             onClick = onSnoozeClick,

@@ -27,8 +27,8 @@ import si.uni_lj.fe.tunv.alarmmeup.R
 
 @Composable
 fun NavBarStats(
-    numOfXP: Int = 120,
-    numOfSunCoins: Int = 520
+    numOfXP: Int = 0,
+    numOfSunCoins: Int = 0
 ) {
 
     Box(

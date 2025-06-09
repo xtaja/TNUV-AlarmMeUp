@@ -16,7 +16,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,7 +30,6 @@ import si.uni_lj.fe.tunv.alarmmeup.ui.components.ProfileSettingsBtn
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.QrCodeView
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.QrScanToggleAndText
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.ScanView
-import si.uni_lj.fe.tunv.alarmmeup.ui.components.SettingsEnum
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.SessionRepo
 
 sealed class ProfileTabScreen {
@@ -62,7 +60,6 @@ fun ProfileScreen(
 
     when (currentScreen) {
         ProfileTabScreen.Main -> {
-            // Main profile screen (as before, but QR code is clickable)
             Column(
                 modifier = Modifier
                     .fillMaxSize(),
@@ -113,7 +110,6 @@ fun ProfileScreen(
             }
         }
         ProfileTabScreen.QrCode -> {
-            // Enlarged QR code screen with username and slider
             Box(
                 modifier = Modifier.fillMaxSize()
             ) {

@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun MiniGameCard(
+fun MinigameCard(
     iconRes: Int,
     name: String,
     xp: Int,
@@ -62,7 +62,7 @@ fun MiniGameCard(
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(name, fontWeight = FontWeight.Normal, fontSize = 12.sp, color = Color.Black)
                 Spacer(modifier = Modifier.height(4.dp))
-                Text("$xp XP", fontSize = 14.sp, color = Color(0xFFFBBC05))
+                Text("+ $xp XP", fontSize = 14.sp, color = Color(0xFFFBBC05))
             }
         }
     }

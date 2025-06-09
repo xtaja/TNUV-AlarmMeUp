@@ -68,7 +68,7 @@ fun WinScreen(
             containerColor = Color.LightGray,
             contentColor = Color.Black
         )) {
-            Text("COLLECT", fontSize = 22.sp)
+            Text("CONTINUE", fontSize = 22.sp)
         }
     }
 }

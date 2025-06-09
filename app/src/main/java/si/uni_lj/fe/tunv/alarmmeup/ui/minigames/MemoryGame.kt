@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -18,19 +19,30 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import si.uni_lj.fe.tunv.alarmmeup.ui.WinScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.ExitButton
+import si.uni_lj.fe.tunv.alarmmeup.ui.data.SessionRepo
 
 @Composable
-fun MemoryGame(onExit: () -> Unit) {
+fun MemoryGame(
+    onExit: () -> Unit,
+    sessionRepo: SessionRepo
+) {
+    var numOfXP=50
+    var numOfSunCoins=10
     var isFinished by remember { mutableStateOf(false) }
-
+    LaunchedEffect(isFinished) {
+        if (isFinished) {
+            sessionRepo.addXPAndCoins(numOfXP, numOfSunCoins)
+            sessionRepo.setGameCompletedToday()
+        }
+    }
     if (isFinished) {
         WinScreen(
             currentStreak = 5,
-            numOfXP = 100,
-            numOfSunCoins = 10,
+            numOfXP = numOfXP,
+            numOfSunCoins = numOfSunCoins,
             onCollect = onExit
         )
-    } else {
+    }else {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.TopEnd
