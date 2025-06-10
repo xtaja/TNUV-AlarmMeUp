@@ -16,6 +16,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import si.uni_lj.fe.tunv.alarmmeup.R
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.GrayColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.SecondaryColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.TertiaryColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,7 +40,7 @@ fun SearchBar(
             singleLine = true,
             shape = RoundedCornerShape(16.dp),
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                containerColor = Color(0xFFF2F2F2),
+                containerColor = TertiaryColor,
                 focusedBorderColor = Color.Transparent,
                 unfocusedBorderColor = Color.Transparent
             ),
@@ -52,7 +55,8 @@ fun SearchBar(
                     IconButton(onClick = { onValueChange("") }) {
                         Icon(
                             imageVector = androidx.compose.material.icons.Icons.Default.Clear,
-                            contentDescription = "Clear text"
+                            contentDescription = "Clear text",
+                            tint = GrayColor
                         )
                     }
                 }

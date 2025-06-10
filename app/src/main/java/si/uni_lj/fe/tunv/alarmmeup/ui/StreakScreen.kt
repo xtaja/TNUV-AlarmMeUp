@@ -49,6 +49,10 @@ import com.kizitonwose.calendar.core.DayPosition
 import kotlinx.coroutines.launch
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.Day
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.DayStatus
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.AccentColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.BlackColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.GrayColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.WhiteColor
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.Month
@@ -123,8 +127,8 @@ fun CreateRanges(
     val rangeList: MutableList<DateRangeHighlight> = mutableListOf()
     val calendarStartDate = LocalDate.now().minusMonths(12)
     val calendarEndDate = LocalDate.now().plusMonths(12)
-    val defaultFillerColor = Color.LightGray
-    val defaultIconColor = Color.Black
+    val defaultFillerColor = GrayColor
+    val defaultIconColor = BlackColor
 
     val firstAlarmDate = days.first().date!!
     if (firstAlarmDate.isAfter(calendarStartDate)) {
@@ -134,10 +138,10 @@ fun CreateRanges(
                 DateRangeHighlight(
                     start = calendarStartDate,
                     end = endOfInitialFiller,
-                    color = Color.White,
-                    borderColor = Color.White,
+                    color = WhiteColor,
+                    borderColor = WhiteColor,
                     icon = closeIconId,
-                    iconColor = defaultIconColor
+                    iconColor = AccentColor
                 )
             )
         }
@@ -156,8 +160,8 @@ fun CreateRanges(
                 DateRangeHighlight(
                     start = currentRangeStartDate,
                     end = lastProcessedDate,
-                    color = if (currentRangeStatus == DayStatus.COMPLETED) Color(0xFFFFA500) else defaultFillerColor,
-                    borderColor = if (currentRangeStatus == DayStatus.COMPLETED) Color(0xFFFFA500) else defaultFillerColor,
+                    color = if (currentRangeStatus == DayStatus.COMPLETED) AccentColor else defaultFillerColor,
+                    borderColor = if (currentRangeStatus == DayStatus.COMPLETED) AccentColor else defaultFillerColor,
                     icon = if (currentRangeStatus == DayStatus.COMPLETED) checkIconId else snoozeIconId,
                     iconColor = defaultIconColor
                 )
@@ -168,8 +172,8 @@ fun CreateRanges(
                     DateRangeHighlight(
                         start = lastProcessedDate.plusDays(1),
                         end = endOfGapFiller,
-                        color = Color.White,
-                        borderColor = Color.White,
+                        color = WhiteColor,
+                        borderColor = WhiteColor,
                         icon = closeIconId,
                         iconColor = defaultIconColor
                     )
@@ -182,8 +186,8 @@ fun CreateRanges(
                 DateRangeHighlight(
                     start = currentRangeStartDate,
                     end = lastProcessedDate,
-                    color = if (currentRangeStatus == DayStatus.COMPLETED) Color(0xFFFFA500) else defaultFillerColor,
-                    borderColor = if (currentRangeStatus == DayStatus.COMPLETED) Color(0xFFFFA500) else defaultFillerColor,
+                    color = if (currentRangeStatus == DayStatus.COMPLETED) AccentColor else defaultFillerColor,
+                    borderColor = if (currentRangeStatus == DayStatus.COMPLETED) AccentColor else defaultFillerColor,
                     icon = if (currentRangeStatus == DayStatus.COMPLETED) checkIconId else snoozeIconId,
                     iconColor = defaultIconColor
                 )
@@ -198,8 +202,8 @@ fun CreateRanges(
         DateRangeHighlight(
             start = currentRangeStartDate,
             end = lastProcessedDate,
-            color = if (currentRangeStatus == DayStatus.COMPLETED) Color(0xFFFFA500) else defaultFillerColor,
-            borderColor = if (currentRangeStatus == DayStatus.COMPLETED) Color(0xFFFFA500) else defaultFillerColor,
+            color = if (currentRangeStatus == DayStatus.COMPLETED) AccentColor else defaultFillerColor,
+            borderColor = if (currentRangeStatus == DayStatus.COMPLETED) AccentColor else defaultFillerColor,
             icon = if (currentRangeStatus == DayStatus.COMPLETED) checkIconId else snoozeIconId,
             iconColor = defaultIconColor
         )
@@ -213,8 +217,8 @@ fun CreateRanges(
                 DateRangeHighlight(
                     start = startOfFinalFiller,
                     end = calendarEndDate,
-                    color = Color.White,
-                    borderColor = Color.White,
+                    color = WhiteColor,
+                    borderColor = WhiteColor,
                     icon = closeIconId,
                     iconColor = defaultIconColor
                 )
@@ -273,7 +277,7 @@ fun StreakScreen(
                     painter = painterResource(id = fireIconId),
                     contentDescription = "Current Streak",
                     modifier = Modifier.size(STREAK_ICON_SIZE), // Increased size
-                    tint = Color(0xFFFFA500)
+                    tint = AccentColor
                 )
                 Spacer(modifier = Modifier.size(STREAK_SPACER_WIDTH)) // Increased spacer
             }

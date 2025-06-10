@@ -10,10 +10,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import si.uni_lj.fe.tunv.alarmmeup.R
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.BlackColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.SecondaryColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.WhiteColor
 
 @Composable
 fun ProfileSettingsBtn(
@@ -21,8 +23,8 @@ fun ProfileSettingsBtn(
     modifier: Modifier = Modifier
 
 ) {
-    val outerColor = Color.White
-    val innerColor = Color(0xF2F2F2F2)
+    val outerColor = WhiteColor
+    val innerColor = SecondaryColor
 
     IconButton(
         onClick = { onSettingsClick() },
@@ -54,7 +56,7 @@ fun ProfileSettingsBtn(
                 painter = painterResource(id = R.drawable.ic_edit),
                 contentDescription = "ProfileSettings",
                 modifier = Modifier.size(25.dp),
-                tint = Color.Black
+                tint = BlackColor
             )
         }
     }

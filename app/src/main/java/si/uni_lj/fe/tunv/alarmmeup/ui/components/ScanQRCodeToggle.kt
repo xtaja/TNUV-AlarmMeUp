@@ -17,10 +17,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.BlackColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.MainColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.SecondaryColor
 
 @Composable
 fun ScanQRCodeToggle(
@@ -38,7 +40,7 @@ fun ScanQRCodeToggle(
             .width(toggleWidth)
             .height(toggleHeight)
             .clip(RoundedCornerShape(18.dp))
-            .background(Color.LightGray)
+            .background(MainColor)
             .clickable { onToggle(!isScan) }
     ) {
         Box(
@@ -47,7 +49,7 @@ fun ScanQRCodeToggle(
                 .width(thumbWidth)
                 .height(toggleHeight)
                 .clip(RoundedCornerShape(18.dp))
-                .background(Color(0xF2F2F2F2))
+                .background(SecondaryColor)
         )
         Row(
             modifier = Modifier.fillMaxSize(),
@@ -60,7 +62,7 @@ fun ScanQRCodeToggle(
             ) {
                 Text(
                     text = "My code",
-                    color = if (!isScan) Color.Black else Color.Black,
+                    color = if (!isScan) BlackColor else BlackColor,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
                 )
@@ -71,7 +73,7 @@ fun ScanQRCodeToggle(
             ) {
                 Text(
                     text = "Scan",
-                    color = if (isScan) Color.Black else Color.Black,
+                    color = if (!isScan) BlackColor else BlackColor,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
                 )

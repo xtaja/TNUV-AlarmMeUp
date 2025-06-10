@@ -16,11 +16,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.BlackColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.MainColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.SecondaryColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.WhiteColor
 
 @Composable
 fun NavBarButton(
@@ -36,13 +39,15 @@ fun NavBarButton(
     IconButton(
         onClick = onClick,
         modifier = modifier.then(Modifier.size(90.dp))
+
     ) {
+        val mainColor = MainColor
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .size(90.dp)
                 .background(
-                    color = Color.White,
+                    color = WhiteColor,
                     shape = RoundedCornerShape(50)
                 )
         ) {
@@ -51,7 +56,7 @@ fun NavBarButton(
                     modifier = Modifier
                         .size(70.dp)
                         .background(
-                            color = Color.LightGray,
+                            color = mainColor,
                             shape = RoundedCornerShape(50)
                         )
                 )
@@ -60,7 +65,7 @@ fun NavBarButton(
                     modifier = Modifier
                         .size(70.dp)
                         .background(
-                            color = Color(0xF2F2F2F2),
+                            color = SecondaryColor,
                             shape = RoundedCornerShape(50)
                         )
                 )
@@ -73,7 +78,7 @@ fun NavBarButton(
                     painter = painterResource(id = iconResId),
                     contentDescription = contentDescription,
                     modifier = Modifier.size(iconSize),
-                    tint = Color.Unspecified
+                    tint = BlackColor
                 )
                 if (label != null) {
                     Spacer(modifier = Modifier.width(0.dp))
@@ -81,7 +86,7 @@ fun NavBarButton(
                         label,
                         style = MaterialTheme.typography.bodyMedium,
                         fontSize = 22.sp,
-                        color = Color.Black)
+                        color = BlackColor)
                 }
             }
         }

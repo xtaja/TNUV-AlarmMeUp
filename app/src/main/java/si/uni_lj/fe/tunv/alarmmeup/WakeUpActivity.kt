@@ -63,10 +63,20 @@ class WakeUpActivity : ComponentActivity() {
 
         setContent {
             WakeUpScreen(
-                onAwakeClick = { stopAlarmAndFinish() },
+                onAwakeClick = {
+                    setShowMorningScreenFlag()
+                    stopAlarmAndFinish()
+                },
                 onSnoozeClick = { stopAlarmAndFinish() }
             )
         }
+    }
+
+    private fun setShowMorningScreenFlag() {
+        getSharedPreferences("alarmmeup_prefs", Context.MODE_PRIVATE)
+            .edit()
+            .putBoolean("showMorningScreen", true)
+            .apply()
     }
 
     private fun stopAlarmAndFinish() {

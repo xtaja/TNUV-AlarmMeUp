@@ -46,6 +46,11 @@ import si.uni_lj.fe.tunv.alarmmeup.ui.data.AppDatabase
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.UserEntity
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.UserSoundEntity
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.UserVibrationEntity
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.BlackColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.GrayColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.Red19
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.SecondaryColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.WhiteColor
 
 @Composable
 fun AuthButton(text: String, onClick: () -> Unit) {
@@ -56,15 +61,15 @@ fun AuthButton(text: String, onClick: () -> Unit) {
             .fillMaxWidth()
             .padding(vertical = screenWidth * 0.01f)
             .height(screenWidth * 0.12f),
-        colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray),
-        border = BorderStroke(1.dp, Color.Black),
+        colors = ButtonDefaults.buttonColors(containerColor = SecondaryColor),
+        border = BorderStroke(1.dp, BlackColor),
         shape = RoundedCornerShape(8.dp),
     ) {
         Text(
             text,
             style = MaterialTheme.typography.bodyLarge.copy(
                 fontSize = 25.sp,
-                color = Color.Black)
+                color = BlackColor)
         )
     }
 }
@@ -102,7 +107,7 @@ fun MorphingAuthBox(
     var emailOrUsername by remember { mutableStateOf("") }
 
     val backgroundColor by animateColorAsState(
-        targetValue = if (isActive) Color.LightGray else Color.LightGray,
+        targetValue = if (isActive) SecondaryColor else SecondaryColor,
         animationSpec = tween(600)
     )
 
@@ -111,7 +116,7 @@ fun MorphingAuthBox(
             .fillMaxWidth()
             .height(targetHeight)
             .clip(RoundedCornerShape(8.dp))
-            .border(BorderStroke(1.dp, Color.Black), RoundedCornerShape(8.dp))
+            .border(BorderStroke(1.dp, BlackColor), RoundedCornerShape(8.dp))
             .background(backgroundColor)
             .then(if (!isActive) Modifier.clickable { onClick() } else Modifier)
     ) {
@@ -125,7 +130,7 @@ fun MorphingAuthBox(
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodyLarge.copy(fontSize = 25.sp),
-                color = Color.Black
+                color = BlackColor
             )
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -174,7 +179,7 @@ fun MorphingAuthBox(
                         if (invalidEmail) {
                             Text(
                                 text = "Please enter a valid email address",
-                                color = Color.Red,
+                                color = Red19,
                                 fontSize = 14.sp,
                                 modifier = Modifier.padding(top = 4.dp)
                             )
@@ -194,7 +199,7 @@ fun MorphingAuthBox(
                         if (showError && emailOrUsername.isNotBlank()) {
                             Text(
                                 text = "Invalid credentials. Please try again.",
-                                color = Color.Red,
+                                color = Red19,
                                 fontSize = 14.sp,
                                 modifier = Modifier.padding(top = 4.dp)
                             )
@@ -229,7 +234,7 @@ fun MorphingAuthBox(
                         if (passwordMismatch) {
                             Text(
                                 text = "Passwords do not match",
-                                color = Color.Red,
+                                color = Red19,
                                 fontSize = 14.sp,
                                 modifier = Modifier.padding(top = 4.dp)
                             )
@@ -331,19 +336,19 @@ fun MorphingAuthBox(
                     }
                     ,
                     colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = Color.DarkGray,
-                        contentColor = Color.White,
-                        disabledContainerColor = Color.DarkGray,
-                        disabledContentColor = Color.LightGray
+                        containerColor = GrayColor,
+                        contentColor = WhiteColor,
+                        disabledContainerColor = GrayColor,
+                        disabledContentColor = SecondaryColor
                     ),
-                    border = BorderStroke(1.dp, Color.Black),
+                    border = BorderStroke(1.dp, BlackColor),
                     shape = RoundedCornerShape(8.dp),
                     contentPadding = PaddingValues(horizontal = 10.dp),
                 ) {
                     Text(
                         text = "CONTINUE",
                         style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp),
-                        color = Color.LightGray,
+                        color = SecondaryColor,
                     )
                 }
             }
@@ -477,7 +482,7 @@ fun AuthenticationScreen(
                 modifier = Modifier
                     .weight(1f)
                     .height(1.dp),
-                color = Color.Gray
+                color = GrayColor
             )
 
             Text(
@@ -490,7 +495,7 @@ fun AuthenticationScreen(
                 modifier = Modifier
                     .weight(1f)
                     .height(1.dp),
-                color = Color.Gray
+                color = GrayColor
             )
         }
 

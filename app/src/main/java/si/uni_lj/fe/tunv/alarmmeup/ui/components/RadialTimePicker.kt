@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -35,9 +34,15 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.AccentColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.BlackColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.GrayColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.MainColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.SecondaryColor
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -54,7 +59,7 @@ fun RadialTimePicker(
     isSelectingHour: Boolean,
     onSelectionChange: (Boolean) -> Unit,
     onTimeChange: (Int, Int, Boolean) -> Unit,
-    modifier: Modifier = Modifier.height(450.dp),
+    modifier: Modifier = Modifier.height(400.dp),
 ) {
     var hourInput by remember { mutableStateOf(TextFieldValue(selectedHour.toString().padStart(2, '0'))) }
     var minuteInput by remember { mutableStateOf(TextFieldValue(selectedMinute.toString().padStart(2, '0'))) }
@@ -129,20 +134,20 @@ fun RadialTimePicker(
                             .alignByBaseline(),
                         colors =TextFieldDefaults.colors(
                             unfocusedContainerColor = Color.Transparent,
-                            focusedContainerColor = Color.LightGray,
+                            focusedContainerColor = SecondaryColor,
                             unfocusedIndicatorColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Black,
+                            focusedIndicatorColor = BlackColor,
                             disabledIndicatorColor = Color.Transparent
                         ),
                         textStyle = TextStyle(
                             fontSize = 50.sp,
-                            color= Color.Black
+                            color= BlackColor
                         )
                     )
                     Text(
                         text = ":",
                         fontSize = 50.sp,
-                        color = Color.Black,
+                        color = BlackColor,
                         modifier = Modifier
                             .alignByBaseline()
                     )
@@ -178,20 +183,20 @@ fun RadialTimePicker(
                             .alignByBaseline(),
                         colors =TextFieldDefaults.colors(
                             unfocusedContainerColor = Color.Transparent,
-                            focusedContainerColor = Color.LightGray,
+                            focusedContainerColor = SecondaryColor,
                             unfocusedIndicatorColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Black,
+                            focusedIndicatorColor = BlackColor,
                             disabledIndicatorColor = Color.Transparent
                         ),
                         textStyle = TextStyle(
                             fontSize = 50.sp,
-                            color= Color.Black
+                            color= BlackColor
                         )
                     )
                 }
             }
             Column(
-                verticalArrangement = Arrangement.Center,
+                verticalArrangement = Arrangement.spacedBy(0.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 TextButton(
@@ -202,7 +207,9 @@ fun RadialTimePicker(
                 ) {
                     Text(
                         text = "AM",
-                        color = if (isAm) Color.Black else Color.Gray
+                        color = if (isAm) AccentColor else GrayColor,
+                        fontWeight = if (isAm) FontWeight.Bold else FontWeight.Normal,
+                        fontSize = 18.sp
                     )
                 }
                 TextButton(
@@ -213,20 +220,22 @@ fun RadialTimePicker(
                 ) {
                     Text(
                         text = "PM",
-                        color = if (!isAm) Color.Black else Color.Gray
+                        color = if (!isAm) AccentColor else GrayColor,
+                        fontWeight = if (!isAm) FontWeight.Bold else FontWeight.Normal,
+                        fontSize = 18.sp
                     )
                 }
             }
         }
 
-        Spacer(Modifier.height(10.dp))
+        //Spacer(Modifier.height(10.dp))
         Row(
             horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(0.8f)
         ) {
             Box(
                 modifier = Modifier
-                    .size(350.dp)
+                    .size(400.dp)
                     .pointerInput(Unit) {
                         detectTapGestures { offset ->
                             val boxSize = min(this.size.width, this.size.height).toFloat();                        val center = Offset(boxSize / 2, boxSize / 2)
@@ -260,20 +269,21 @@ fun RadialTimePicker(
                     val minuteRadius = boxSize / 2.5f
                     val minuteNumberRadius = hourRadius - 100
 
-                    drawCircle(Color.LightGray, center = center, radius = minuteRadius)
+                    drawCircle(SecondaryColor, center = center, radius = minuteRadius)
 
                     // Draw hour hand and its end circle
                     val hourAngle = Math.toRadians((selectedHour * 30 - 90).toDouble())
                     val hourX = center.x + cos(hourAngle) * (hourRadius - 0)
                     val hourY = center.y + sin(hourAngle) * (hourRadius - 0)
+                    val handColor = MainColor
                     drawLine(
-                        Color.Gray,
+                        handColor,
                         start = center,
                         end = Offset(hourX.toFloat(), hourY.toFloat()),
                         strokeWidth = 8f
                     )
                     drawCircle(
-                        color = Color.Gray,
+                        color = handColor,
                         radius = 45f,
                         center = Offset(hourX.toFloat(), hourY.toFloat())
                     )
@@ -283,13 +293,13 @@ fun RadialTimePicker(
                     val minuteX = center.x + cos(minuteAngle) * (minuteRadius - 158)
                     val minuteY = center.y + sin(minuteAngle) * (minuteRadius - 158)
                     drawLine(
-                        Color.Gray,
+                        handColor,
                         start = center,
                         end = Offset(minuteX.toFloat(), minuteY.toFloat()),
                         strokeWidth = 8f
                     )
                     drawCircle(
-                        color = Color.Gray,
+                        color = handColor,
                         radius = 30f,
                         center = Offset(minuteX.toFloat(), minuteY.toFloat())
                     )
@@ -307,7 +317,7 @@ fun RadialTimePicker(
                         }
                         drawContext.canvas.nativeCanvas.apply {
                             val paint = android.graphics.Paint().apply {
-                                color = android.graphics.Color.WHITE
+                                color = BlackColor.toArgb()
                                 textSize = 60f
                                 textAlign = android.graphics.Paint.Align.CENTER
                                 typeface = android.graphics.Typeface.DEFAULT_BOLD
@@ -333,7 +343,7 @@ fun RadialTimePicker(
                                 x.toFloat(),
                                 y.toFloat() + 22,
                                 android.graphics.Paint().apply {
-                                    color = Color.White.toArgb()
+                                    color = BlackColor.toArgb()
                                     textSize = 45f
                                     textAlign = android.graphics.Paint.Align.CENTER
                                 }

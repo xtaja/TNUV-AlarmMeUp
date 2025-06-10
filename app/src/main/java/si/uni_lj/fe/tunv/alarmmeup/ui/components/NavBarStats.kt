@@ -17,26 +17,27 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import si.uni_lj.fe.tunv.alarmmeup.R
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.BlackColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.WhiteColor
 
 @Composable
 fun NavBarStats(
     numOfXP: Int = 0,
     numOfSunCoins: Int = 0
 ) {
-
+    val textColor = BlackColor
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .size(100.dp)
             .background(
-                color = Color.White,
+                color = WhiteColor,
                 shape = RoundedCornerShape(50)
             )
     ) {
@@ -46,7 +47,7 @@ fun NavBarStats(
                 .graphicsLayer(rotationZ = -45f)
                 .offset(20.dp, 22.dp)
                 .background(
-                    color = Color.White,
+                    color = WhiteColor,
                     shape = RoundedCornerShape(25)
                 )
         )
@@ -56,7 +57,7 @@ fun NavBarStats(
                 .graphicsLayer(rotationZ = 45f)
                 .offset(-20.dp, 21.dp)
                 .background(
-                    color = Color.White,
+                    color = WhiteColor,
                     shape = RoundedCornerShape(25)
                 )
         )
@@ -73,14 +74,14 @@ fun NavBarStats(
                     text = "XP",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.Black
+                    color = textColor
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = numOfXP.toString(),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Normal,
-                    color = Color.Black
+                    color = textColor
                 )
             }
             Spacer(modifier = Modifier.height(2.dp))
@@ -93,14 +94,14 @@ fun NavBarStats(
                     painter = painterResource(id = R.drawable.ic_suncoin),
                     contentDescription = "suncoin",
                     modifier = Modifier.size(28.dp),
-                    tint = Color.Unspecified
+                    tint = textColor
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = numOfSunCoins.toString(),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Normal,
-                    color = Color.Black
+                    color = textColor
                 )
             }
         }

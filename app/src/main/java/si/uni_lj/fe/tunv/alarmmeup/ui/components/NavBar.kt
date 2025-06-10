@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.MainColor
 
 
 @Composable
@@ -20,11 +21,12 @@ fun NavBar(
     backgroundAlignment: Alignment = Alignment.TopStart,
     content: @Composable RowScope.() -> Unit
 ) {
+    val mainColor = MainColor
     Box(
         modifier = modifier
             .fillMaxWidth()
             .height(146.dp)
-            .background(Color.White)
+            .background(Color.Transparent)
     ) {
         Box(
             modifier = Modifier
@@ -32,7 +34,7 @@ fun NavBar(
                 .height(73.dp)
                 .align(backgroundAlignment)
                 .background(
-                    color = Color.LightGray,
+                    color = mainColor,
                 )
         )
         Row(

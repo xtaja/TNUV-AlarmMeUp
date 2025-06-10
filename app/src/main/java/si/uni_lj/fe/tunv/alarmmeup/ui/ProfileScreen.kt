@@ -42,6 +42,7 @@ import si.uni_lj.fe.tunv.alarmmeup.ui.components.ScanView
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.SearchBar
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.SectionDivider
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.SessionRepo
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.WhiteColor
 
 sealed class ProfileTabScreen {
     object Main : ProfileTabScreen()
@@ -177,7 +178,7 @@ fun ProfileScreen(
                             .fillMaxHeight()
                             .background(
                                 brush = Brush.horizontalGradient(
-                                    colors = listOf(Color.White, Color.Transparent)
+                                    colors = listOf(WhiteColor, Color.Transparent)
                                 )
                             )
                     )
@@ -189,7 +190,7 @@ fun ProfileScreen(
                             .fillMaxHeight()
                             .background(
                                 brush = Brush.horizontalGradient(
-                                    colors = listOf(Color.Transparent, Color.White)
+                                    colors = listOf(Color.Transparent, WhiteColor)
                                 )
                             )
                     )

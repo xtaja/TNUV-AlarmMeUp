@@ -4,10 +4,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.BlackColor
 import si.uni_lj.fe.tunv.alarmmeup.ui.utils.generateQrCodeBitmapWithCorners
 
 @Composable
-fun QrCodeView(content: String, size: Int = 512, QRcolor: Color = Color.Black) {
+fun QrCodeView(content: String, size: Int = 512, QRcolor: Color = BlackColor) {
     val qrBitmap = generateQrCodeBitmapWithCorners(content,
         size = size,
         color = QRcolor.toArgb(),

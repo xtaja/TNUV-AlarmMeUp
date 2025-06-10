@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.GrayColor
 
 @Composable
 fun SectionDivider(
@@ -39,7 +40,7 @@ fun SectionDivider(
         HorizontalDivider(
             modifier = Modifier.weight(1f),
             thickness = 1.dp,
-            color = Color.Gray
+            color = GrayColor
         )
     }
 }

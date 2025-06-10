@@ -14,6 +14,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import si.uni_lj.fe.tunv.alarmmeup.R
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.MainColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.SecondaryColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.WhiteColor
 
 
 @Composable
@@ -22,8 +25,8 @@ fun SettingsBtn(
     onSettingsClick: () -> Unit
 ) {
     val isActive = currentScreen == SettingsEnum.Settings
-    val outerColor = if (isActive) Color.White else Color.White
-    val innerColor = if (isActive) Color.LightGray else Color(0xF2F2F2F2)
+    val outerColor = if (isActive) WhiteColor else WhiteColor
+    val innerColor = if (isActive) MainColor else SecondaryColor
 
     IconButton(
         onClick = { onSettingsClick() },

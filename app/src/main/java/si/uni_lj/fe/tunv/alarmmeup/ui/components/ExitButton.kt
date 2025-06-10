@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import si.uni_lj.fe.tunv.alarmmeup.R
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.GrayColor
 
 @Composable
 fun ExitButton(onExit: () -> Unit) {
@@ -19,14 +20,14 @@ fun ExitButton(onExit: () -> Unit) {
         onClick = onExit,
         colors = ButtonDefaults.buttonColors(
             containerColor = Color.Transparent,
-            contentColor = Color.LightGray
+            contentColor = GrayColor
         )
     ){
         Icon(
             painter = painterResource(id = R.drawable.ic_close),
             contentDescription = "Exit",
             modifier = Modifier.size(40.dp) ,
-            tint = Color.Black
+            tint = GrayColor
 
         )
 

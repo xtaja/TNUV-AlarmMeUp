@@ -47,6 +47,10 @@ import si.uni_lj.fe.tunv.alarmmeup.ui.data.SoundEntity
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.StoreCategory
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.StoreItemData
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.VibrationEntity
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.BlackColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.GrayColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.SecondaryColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.WhiteColor
 
 data class SettingCategory(
     val id: Int,
@@ -144,19 +148,19 @@ fun SettingsScreen(
                     OutlinedButton(
                         onClick = {onCancel()},
                         colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = Color.DarkGray,
-                            contentColor = Color.White,
-                            disabledContainerColor = Color.DarkGray,
-                            disabledContentColor = Color.LightGray
+                            containerColor = GrayColor,
+                            contentColor = WhiteColor,
+                            disabledContainerColor = GrayColor,
+                            disabledContentColor = SecondaryColor
                         ),
-                        border = BorderStroke(1.dp, Color.Black),
+                        border = BorderStroke(1.dp, BlackColor),
                         shape = RoundedCornerShape(8.dp),
                         contentPadding = PaddingValues(horizontal = 20.dp),
                     ) {
                         Text(
                             text = "CANCEL",
                             style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp),
-                            color = Color.LightGray,
+                            color = SecondaryColor,
                         )
                     }
 
@@ -184,19 +188,19 @@ fun SettingsScreen(
                             }
                         },
                         colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = Color.DarkGray,
-                            contentColor = Color.White,
-                            disabledContainerColor = Color.Black,
-                            disabledContentColor = Color.Black
+                            containerColor = GrayColor,
+                            contentColor = WhiteColor,
+                            disabledContainerColor = BlackColor,
+                            disabledContentColor = BlackColor
                         ),
-                        border = BorderStroke(1.dp, Color.Black),
+                        border = BorderStroke(1.dp, BlackColor),
                         shape = RoundedCornerShape(8.dp),
                         contentPadding = PaddingValues(horizontal = 20.dp),
                     ) {
                         Text(
                             text = "SAVE",
                             style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp),
-                            color = Color.LightGray,
+                            color = SecondaryColor,
                         )
                     }
                 }
@@ -253,7 +257,7 @@ fun DaysSelector(
             modifier = Modifier
                 .weight(1f)
                 .height(1.dp),
-            color = Color.Gray
+            color = GrayColor
         )
         Text(
             text = "Days",
@@ -264,13 +268,13 @@ fun DaysSelector(
             modifier = Modifier
                 .weight(1f)
                 .height(1.dp),
-            color = Color.Gray
+            color = GrayColor
         )
     }
 
     Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
         days.forEach { day ->
-            val selectedColor = if (selected.contains(day)) Color.Gray else Color.White
+            val selectedColor = if (selected.contains(day)) GrayColor else WhiteColor
             Box(
                 modifier = Modifier
                     .size(40.dp)
@@ -305,7 +309,7 @@ fun VolumeSlider(
             modifier = Modifier
                 .weight(1f)
                 .height(1.dp),
-            color = Color.Gray
+            color = GrayColor
         )
         Text(
             text = "Volume",
@@ -316,7 +320,7 @@ fun VolumeSlider(
             modifier = Modifier
                 .weight(1f)
                 .height(1.dp),
-            color = Color.Gray
+            color = GrayColor
         )
     }
     Row(
@@ -334,9 +338,9 @@ fun VolumeSlider(
             onValueChange = onVolumeChanged,
             modifier = Modifier.weight(1f),
             colors = SliderDefaults.colors(
-                thumbColor = Color.Black,
-                activeTrackColor = Color.Black,
-                inactiveTrackColor = Color.LightGray
+                thumbColor = BlackColor,
+                activeTrackColor = BlackColor,
+                inactiveTrackColor = SecondaryColor
             )
         )
     }
@@ -654,7 +658,7 @@ fun AlarmSoundSelector(
                 modifier = Modifier
                     .weight(1f)
                     .height(1.dp),
-                color = Color.Gray
+                color = GrayColor
             )
             Text(
                 text = "Owned Sounds",
@@ -665,7 +669,7 @@ fun AlarmSoundSelector(
                 modifier = Modifier
                     .weight(1f)
                     .height(1.dp),
-                color = Color.Gray
+                color = GrayColor
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -696,7 +700,7 @@ fun AlarmSoundSelector(
                 modifier = Modifier
                     .weight(1f)
                     .height(1.dp),
-                color = Color.Gray
+                color = GrayColor
             )
             Text(
                 text = "Owned Vibrations",
@@ -707,7 +711,7 @@ fun AlarmSoundSelector(
                 modifier = Modifier
                     .weight(1f)
                     .height(1.dp),
-                color = Color.Gray
+                color = GrayColor
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -760,7 +764,7 @@ fun SoundCard(
                 .clickable(onClick = onSelect),
             shape = RoundedCornerShape(12.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            colors = CardDefaults.cardColors(SecondaryColor)
         ) {
             Column {
                 Row(
@@ -790,7 +794,7 @@ fun SoundCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp)
-                            .background(Color.White),
+                            .background(WhiteColor),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
                     ) {
@@ -825,7 +829,7 @@ fun VibrationCard(
                 .clickable(onClick = onSelect),
             shape = RoundedCornerShape(12.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            colors = CardDefaults.cardColors(SecondaryColor)
         ) {
             Column {
                 Row(
@@ -855,7 +859,7 @@ fun VibrationCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp)
-                            .background(Color.White),
+                            .background(WhiteColor),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
                     ) {
@@ -884,7 +888,7 @@ fun VibrationCard(
 //            modifier = Modifier
 //                .weight(1f)
 //                .height(1.dp),
-//            color = Color.Gray
+//            color = GrayColor
 //        )
 //        Text(
 //            text = "Alarm vibration",
@@ -895,7 +899,7 @@ fun VibrationCard(
 //            modifier = Modifier
 //                .weight(1f)
 //                .height(1.dp),
-//            color = Color.Gray
+//            color = GrayColor
 //        )
 //    }
 //    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -904,11 +908,11 @@ fun VibrationCard(
 //            OutlinedButton(
 //                onClick = { if (!isDisabled) onSelect(item) },
 //                enabled = !isDisabled,
-//                border = if (selected == item) BorderStroke(2.dp, Color.Black) else null
+//                border = if (selected == item) BorderStroke(2.dp, BlackColor) else null
 //            ) {
 //                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-//                    Text("▶", color=Color.Black)
-//                    Text(item, style = MaterialTheme.typography.labelSmall, color = Color.Black)
+//                    Text("▶", color=BlackColor)
+//                    Text(item, style = MaterialTheme.typography.labelSmall, color = BlackColor)
 //                }
 //            }
 //        }

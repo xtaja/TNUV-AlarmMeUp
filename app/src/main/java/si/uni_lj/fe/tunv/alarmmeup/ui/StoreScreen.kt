@@ -53,6 +53,10 @@ import si.uni_lj.fe.tunv.alarmmeup.ui.data.StoreCategory
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.StoreItemData
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.AlarmType
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.SessionRepo
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.AccentColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.GrayColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.TertiaryColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.WhiteColor
 
 
 @Composable
@@ -69,7 +73,7 @@ fun SettingsScreenWithLottieOverlay(showLottie: Boolean) {
                 },
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.White.copy(alpha = 0.8f))
+                    .background(WhiteColor.copy(alpha = 0.8f))
             )
         }
     }
@@ -489,7 +493,7 @@ fun SectionDivider(
         HorizontalDivider(
             modifier = Modifier.weight(1f),
             thickness = 1.dp,
-            color = Color.Gray
+            color = GrayColor
         )
         Text(
             text = title,
@@ -500,7 +504,7 @@ fun SectionDivider(
         HorizontalDivider(
             modifier = Modifier.weight(1f),
             thickness = 1.dp,
-            color = Color.Gray
+            color = GrayColor
         )
     }
 }
@@ -719,7 +723,7 @@ fun StoreItemCard(
             .width(140.dp),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(containerColor = TertiaryColor)
     ) {
         Box(
             modifier = Modifier
@@ -764,7 +768,7 @@ fun StoreItemCard(
                         modifier = Modifier
                             .width(16.dp)
                             .height(16.dp),
-                        tint = Color(0xFFFFA500)
+                        tint = AccentColor
                     )
                 }
                 if (item.playing) {
@@ -772,7 +776,7 @@ fun StoreItemCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp)
-                            .background(Color.White),
+                            .background(WhiteColor),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
                     ) {

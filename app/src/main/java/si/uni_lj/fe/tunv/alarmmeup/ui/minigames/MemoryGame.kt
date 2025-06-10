@@ -24,14 +24,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import si.uni_lj.fe.tunv.alarmmeup.ui.WinScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.ExitButton
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.SessionRepo
-import si.uni_lj.fe.tunv.alarmmeup.ui.theme.Orange19
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.MainColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.WhiteColor
 
 data class MemoryCard(val id: Int, val symbol: String, var isRevealed: Boolean = false, var isMatched: Boolean = false)
 
@@ -152,9 +152,9 @@ fun MemoryGrid(cards: List<MemoryCard>, onCardClick: (Int) -> Unit) {
             Row {
                 row.forEach { card ->
                     val cardColor = when {
-                        card.isMatched -> Color.White
-                        card.isRevealed -> Color.White
-                        else -> Orange19
+                        card.isMatched -> WhiteColor
+                        card.isRevealed -> WhiteColor
+                        else -> MainColor
                     }
                     Box(
                         modifier = Modifier
@@ -171,7 +171,7 @@ fun MemoryGrid(cards: List<MemoryCard>, onCardClick: (Int) -> Unit) {
                         Text(
                             text = if (card.isRevealed || card.isMatched) card.symbol else "?",
                             fontSize = 28.sp,
-                            color = Color.White
+                            color = WhiteColor
 
                         )
                     }

@@ -19,11 +19,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.BlackColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.GrayColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.WhiteColor
 
 @Composable
 fun FriendCard(
@@ -42,7 +44,7 @@ fun FriendCard(
         Button(
             onClick = onClick,
             modifier = Modifier.fillMaxSize(),
-            colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+            colors = ButtonDefaults.buttonColors(containerColor = WhiteColor),
             shape = RoundedCornerShape(16.dp),
             contentPadding = PaddingValues(16.dp)
         ) {
@@ -58,9 +60,9 @@ fun FriendCard(
                         .clip(RoundedCornerShape(24.dp))
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(fullName, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Color.Black)
+                Text(fullName, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = BlackColor)
                 Spacer(modifier = Modifier.height(4.dp))
-                Text("@$username", fontSize = 12.sp, color = Color.Gray)
+                Text("@$username", fontSize = 12.sp, color = GrayColor)
             }
         }
     }

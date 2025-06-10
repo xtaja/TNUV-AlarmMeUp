@@ -40,8 +40,11 @@ import si.uni_lj.fe.tunv.alarmmeup.R
 import si.uni_lj.fe.tunv.alarmmeup.ui.WinScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.ExitButton
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.SessionRepo
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.BlackColor
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.Green19
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.MainColor
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.Orange19
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.WhiteColor
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.Yellow19
 
 private val KEYBOARD_ROWS = listOf(
@@ -201,7 +204,7 @@ fun WordleGame(
                                 LetterState.CORRECT -> Green19
                                 LetterState.PRESENT -> Yellow19
                                 LetterState.ABSENT -> Color.LightGray
-                                else -> Color.White
+                                else -> WhiteColor
                             }
                             Surface(
                                 modifier = Modifier
@@ -271,7 +274,7 @@ fun WordleGame(
                                             key.toString(),
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 18.sp,
-                                            color = if (state == LetterState.UNSET) Color.Black else Color.White
+                                            color = if (state == LetterState.UNSET) BlackColor else WhiteColor
                                         )
                                     }
                                 }
@@ -283,7 +286,7 @@ fun WordleGame(
                                         .padding(1.dp)
                                         .size(54.dp, 36.dp)
                                         .shadow(4.dp, RoundedCornerShape(6.dp)),
-                                    color = Orange19,
+                                    color = MainColor,
                                     shape = RoundedCornerShape(6.dp)
                                 ) {
                                     Box(
@@ -305,7 +308,7 @@ fun WordleGame(
                                             shape = RoundedCornerShape(6.dp),
                                             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent, disabledContainerColor = Color.Transparent)
                                         ) {
-                                            Text("⌫", fontWeight = FontWeight.Bold, fontSize = 18.sp,color = Color.White)
+                                            Text("⌫", fontWeight = FontWeight.Bold, fontSize = 18.sp,color = WhiteColor)
                                         }
                                     }
                                 }
@@ -315,7 +318,7 @@ fun WordleGame(
                                         .padding(1.dp)
                                         .size(54.dp, 36.dp)
                                         .shadow(4.dp, RoundedCornerShape(6.dp)),
-                                    color = Orange19,
+                                    color = MainColor,
                                     shape = RoundedCornerShape(6.dp)
                                 ) {
                                     Box(
@@ -356,7 +359,7 @@ fun WordleGame(
                                             shape = RoundedCornerShape(6.dp),
                                             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent, disabledContainerColor =Color.Transparent )
                                         ) {
-                                            Text("ENTER", fontWeight = FontWeight.Bold, fontSize = 14.sp,color = Color.White)
+                                            Text("ENTER", fontWeight = FontWeight.Bold, fontSize = 14.sp,color = WhiteColor)
                                         }
                                     }
                                 }

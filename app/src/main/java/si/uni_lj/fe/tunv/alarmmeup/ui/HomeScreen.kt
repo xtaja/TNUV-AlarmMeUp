@@ -5,14 +5,13 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -34,15 +33,23 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import si.uni_lj.fe.tunv.alarmmeup.AlarmReceiver
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.RadialTimePicker
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.SessionRepo
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.AccentColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.BlackColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.WhiteColor
 import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -105,8 +112,22 @@ fun HomeScreen(
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.verticalScroll(scrollState)
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
             ) {
+                Text(
+                    text = buildAnnotatedString {
+                        append("Alarm is set to: ")
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append(wakeUpTime)
+                        }
+                    },
+                    color = BlackColor,
+                    fontSize = 25.sp,
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
                 RadialTimePicker(
                     selectedHour        = tempHour,
                     selectedMinute      = tempMinute,
@@ -121,54 +142,37 @@ fun HomeScreen(
                         isSelectingHour = selectingHour
                     },
                 )
-
-                Text(
-                    text = "The current wakeup time is set to: $wakeUpTime",
-                    color = Color.Black,
-                    fontSize = 18.sp,
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .height(60.dp)
-                        .width(200.dp)
-                        .background(
-                            color = Color.LightGray,
-                            shape = RoundedCornerShape(55)
-                        )
-                ) {
-                    Button(
-                        onClick = {
-                            if (!changeButton) {
-                                showAlert = true
-                            } else {
-                                showPurchase = true
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray),
-
-
-                        ) {
-                        Text(
-                            text = if (!changeButton) {
-                                "Set alarm"
-                            } else {
-                                "Change for 200"
-                            },
-                            color = Color.Black,
-                            fontSize = 18.sp,
-                        )
-                        if (changeButton) {
-                            Spacer(Modifier.width(4.dp))
-                            Icon(
-                                painter = painterResource(iconResId),
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp),
-                                tint = Color(0xFFFFA500),
-                            )
+                Spacer(modifier = Modifier.height(20.dp))
+                Button(
+                    onClick = {
+                        if (!changeButton) {
+                            showAlert = true
+                        } else {
+                            showPurchase = true
                         }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = WhiteColor,
+                        contentColor = BlackColor
+                    ),
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.shadow(10.dp, RoundedCornerShape(16.dp))
+                ) {
+                    Text(
+                        text = if (!changeButton) "SET" else "RESET for 20",
+                        fontSize = 22.sp,
+                        color = BlackColor
+                    )
+                    if (changeButton) {
+                        Icon(
+                            painter = painterResource(iconResId),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(30.dp)
+                                .align(Alignment.CenterVertically)
+                                .padding(end = 8.dp),
+                            tint = AccentColor
+                        )
                     }
                 }
 

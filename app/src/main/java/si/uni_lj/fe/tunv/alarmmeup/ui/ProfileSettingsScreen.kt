@@ -41,6 +41,7 @@ import si.uni_lj.fe.tunv.alarmmeup.ChooseAvatar
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.ProfilePictureEnum
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.AppDatabase
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.SessionRepo
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.WhiteColor
 import java.util.logging.Logger
 
 @Composable
@@ -84,7 +85,7 @@ fun EditableProfilePicture(
         Icon(
             imageVector = Icons.Default.Edit,
             contentDescription = "Edit picture",
-            tint = Color.White,
+            tint = WhiteColor,
             modifier = Modifier.size(size / 3)
         )
     }

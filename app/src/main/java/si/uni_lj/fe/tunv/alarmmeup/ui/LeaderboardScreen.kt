@@ -2,26 +2,46 @@ package si.uni_lj.fe.tunv.alarmmeup.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LocalFireDepartment
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import si.uni_lj.fe.tunv.alarmmeup.R
-import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.zIndex
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
+import si.uni_lj.fe.tunv.alarmmeup.R
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.AccentColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.SecondaryColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.TertiaryColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.WhiteColor
 
 data class Leader(
     val name: String,
@@ -61,7 +81,7 @@ fun AvatarCluster(leaders: List<Leader>) {
                 Box(
                     modifier = Modifier
                         .size(100.dp)
-                        .background(Color.White, shape = CircleShape)
+                        .background(WhiteColor, shape = CircleShape)
                 )
                 Image(
                     painter = painterResource(it.avatarRes),
@@ -83,7 +103,7 @@ fun AvatarCluster(leaders: List<Leader>) {
                 Box(
                     modifier = Modifier
                         .size(70.dp)
-                        .background(Color.White, shape = CircleShape)
+                        .background(WhiteColor, shape = CircleShape)
                 )
                 Image(
                     painter = painterResource(it.avatarRes),
@@ -105,7 +125,7 @@ fun AvatarCluster(leaders: List<Leader>) {
                 Box(
                     modifier = Modifier
                         .size(70.dp)
-                        .background(Color.White, shape = CircleShape)
+                        .background(WhiteColor, shape = CircleShape)
                 )
                 Image(
                     painter = painterResource(it.avatarRes),
@@ -133,19 +153,28 @@ fun BoxScope.FlameXpBubble(
         modifier = Modifier
             .align(Alignment.BottomCenter)
             .offset(y = padding)
-            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
+            .background(color = TertiaryColor, RoundedCornerShape(12.dp))
             .padding(padding)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_streak),
                 contentDescription = "Flames",
-                modifier = Modifier.size(iconSize)
+                modifier = Modifier.size(iconSize),
+                tint = AccentColor
             )
             Spacer(Modifier.width(2.dp))
             Text(text = "$flames", fontSize = fontSize)
         }
-        Text(text = "XP $xp", fontSize = fontSize)
+        Text(
+            text = buildAnnotatedString {
+                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                    append("XP ")
+                }
+                append("$xp")
+            },
+            fontSize = fontSize
+        )
     }
 }
 
@@ -164,14 +193,14 @@ fun LeaderboardList(leaders: List<Leader>) {
                         .fillMaxWidth()
                         .padding(start = 50.dp)
                         .padding(vertical = 2.dp)
-                        .background(Color.LightGray, RoundedCornerShape(12.dp))
+                        .background(SecondaryColor, RoundedCornerShape(12.dp))
                 ) {
                     Box(
                         modifier = Modifier
                             .size(67.dp)
                             .zIndex(1f)
                             .offset(x = (-35).dp)
-                            .background(Color.White, CircleShape),
+                            .background(WhiteColor, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Image(
@@ -206,12 +235,21 @@ fun LeaderboardList(leaders: List<Leader>) {
                         horizontalAlignment = Alignment.End,
                         modifier = Modifier.offset(x = (-25).dp),
                     ) {
-                        Text(text = "XP ${leader.xp}", fontSize = 14.sp)
+                        Text(
+                            text = buildAnnotatedString {
+                                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                    append("XP ")
+                                }
+                                append("${leader.xp}")
+                            },
+                            fontSize = 14.sp
+                        )
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_streak),
                                 contentDescription = "Flames",
-                                modifier = Modifier.size(14.dp)
+                                modifier = Modifier.size(14.dp),
+                                tint = AccentColor
                             )
                             Spacer(Modifier.width(4.dp))
                             Text(text = "${leader.flames}", fontSize = 12.sp)

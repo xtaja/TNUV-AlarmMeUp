@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.TertiaryColor
 
 @Composable
 fun CloudsDecoration(
@@ -15,7 +15,7 @@ fun CloudsDecoration(
         val width = size.width
         val height = size.height
         val radiusWidth =width * 0.17f
-        val cloudColor= Color(0xFFF2F2F2)
+        val cloudColor= TertiaryColor
 
 
         drawCircle(

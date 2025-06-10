@@ -2,7 +2,9 @@ package si.uni_lj.fe.tunv.alarmmeup
 
 import android.Manifest
 import android.accounts.AccountManager
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -22,7 +24,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -40,6 +44,7 @@ import androidx.core.content.ContextCompat
 import kotlinx.coroutines.launch
 import si.uni_lj.fe.tunv.alarmmeup.ui.AuthenticationScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.HomeScreen
+import si.uni_lj.fe.tunv.alarmmeup.ui.Leader
 import si.uni_lj.fe.tunv.alarmmeup.ui.LeaderboardScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.LoadingScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.MorningScreen
@@ -48,6 +53,7 @@ import si.uni_lj.fe.tunv.alarmmeup.ui.ProfileSettingsScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.SettingsScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.StoreScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.StreakScreen
+import si.uni_lj.fe.tunv.alarmmeup.ui.WakeUpScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.NavBar
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.NavBarButton
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.NavBarStats
@@ -63,8 +69,8 @@ import si.uni_lj.fe.tunv.alarmmeup.ui.minigames.TypingGame
 import si.uni_lj.fe.tunv.alarmmeup.ui.minigames.WordleGame
 import si.uni_lj.fe.tunv.alarmmeup.ui.snoozeAlarm
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.AlarmMeUpTheme
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.WhiteColor
 import java.util.Calendar
-import si.uni_lj.fe.tunv.alarmmeup.ui.Leader
 import kotlin.math.abs
 
 class MainActivity : ComponentActivity() {
@@ -138,6 +144,7 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit) {
 
     var profilePicture by remember {mutableStateOf(R.drawable.man1)}
     val ctx        = LocalContext.current
+    var showMorningScreen by remember { mutableStateOf(false) }
     val mainScope  = rememberCoroutineScope()
     val sessionRepo = remember {
         SessionRepo(
@@ -171,8 +178,43 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit) {
 
     var avatarVersion by remember { mutableIntStateOf(0) }
 
+
+    // Read and clear the flag from SharedPreferences
+    LaunchedEffect(Unit) {
+        val prefs = ctx.getSharedPreferences("alarmmeup_prefs", android.content.Context.MODE_PRIVATE)
+        if (prefs.getBoolean("showMorningScreen", false)) {
+            showMorningScreen = true
+            prefs.edit().putBoolean("showMorningScreen", false).apply()
+        }
+    }
+
+    // Always check the flag on every recomposition (in addition to listener)
+    SideEffect {
+        val prefs = ctx.getSharedPreferences("alarmmeup_prefs", android.content.Context.MODE_PRIVATE)
+        if (prefs.getBoolean("showMorningScreen", false)) {
+            showMorningScreen = true
+            prefs.edit().putBoolean("showMorningScreen", false).apply()
+        }
+    }
+    
+    DisposableEffect(Unit) {
+        val prefs = ctx.getSharedPreferences("alarmmeup_prefs", Context.MODE_PRIVATE)
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == "showMorningScreen" && prefs.getBoolean("showMorningScreen", false)) {
+                showMorningScreen = true
+                prefs.edit().putBoolean("showMorningScreen", false).apply()
+            }
+        }
+        prefs.registerOnSharedPreferenceChangeListener(listener)
+        onDispose {
+            prefs.unregisterOnSharedPreferenceChangeListener(listener)
+        }
+    }
+
+
     Column(
         modifier = modifier.fillMaxSize()
+        .background(WhiteColor),
     ) {
         // Top Navigation Bar
         if (selectedScreen !in listOf("Auth", "Loading") && selectedScreen !in minigameScreens) {
@@ -205,11 +247,11 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit) {
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .background(Color.White),
+                .background(WhiteColor),
             contentAlignment = Alignment.Center
         ) {
             when (selectedScreen) {
-                "StreakCalendar" -> StreakScreen(R.drawable.snooze, R.drawable.fire, R.drawable.check, R.drawable.close)
+                "StreakCalendar" -> StreakScreen(R.drawable.snooze, R.drawable.ic_streak, R.drawable.check, R.drawable.close)
                 "Profile" -> ProfileScreen(
                     repo = sessionRepo,
                     resetKey = profileTabClickCount,
@@ -217,7 +259,7 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit) {
                 "Leaderboard" -> LeaderboardScreen(
                     leaders = dummyLeaders)
                 "Home" -> {
-                    if (!forceHomeScreen && isWithinWakeupWindow() && !gameCompletedToday) {
+                    if (showMorningScreen /*&& !gameCompletedToday*/) {
                         MorningScreen(
                             onMathClick = { selectedScreen = "MathGame" },
                             onTypingClick = { selectedScreen = "TypingGame" },
@@ -312,10 +354,38 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit) {
                     onProfilesClick = { selectedScreen = "ChooseAvatar" },
                     goToAuthorizationScreen = { selectedScreen = "Auth" }
                 )
-                "MathGame" -> MathGame(onExit = { forceHomeScreen = true; selectedScreen = "Home"}, sessionRepo = sessionRepo)
-                "TypingGame" -> TypingGame(onExit = { forceHomeScreen = true; selectedScreen = "Home"}, sessionRepo = sessionRepo)
-                "MemoryGame" -> MemoryGame(onExit = { forceHomeScreen = true; selectedScreen = "Home" }, sessionRepo = sessionRepo)
-                "WordleGame" -> WordleGame(onExit = { forceHomeScreen = true; selectedScreen = "Home" }, sessionRepo = sessionRepo)
+                "MathGame" -> MathGame(
+                    onExit = {
+                        forceHomeScreen = true
+                        showMorningScreen = false
+                        selectedScreen = "Home"
+                    },
+                    sessionRepo = sessionRepo
+                )
+                "TypingGame" -> TypingGame(
+                    onExit = {
+                        forceHomeScreen = true
+                        showMorningScreen = false
+                        selectedScreen = "Home"
+                    },
+                    sessionRepo = sessionRepo
+                )
+                "MemoryGame" -> MemoryGame(
+                    onExit = {
+                        forceHomeScreen = true
+                        showMorningScreen = false
+                        selectedScreen = "Home"
+                    },
+                    sessionRepo = sessionRepo
+                )
+                "WordleGame" -> WordleGame(
+                    onExit = {
+                        forceHomeScreen = true
+                        showMorningScreen = false
+                        selectedScreen = "Home"
+                    },
+                    sessionRepo = sessionRepo
+                )
                 else -> Text("Unknown screen")
             }
             if (selectedScreen == "Profile" || selectedScreen == "ProfileSettings" || selectedScreen == "Settings") {
@@ -357,8 +427,4 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit) {
         }
     }
 }
-
-
-
-
 
