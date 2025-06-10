@@ -12,6 +12,7 @@ import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
@@ -34,11 +35,18 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 import si.uni_lj.fe.tunv.alarmmeup.R
+import si.uni_lj.fe.tunv.alarmmeup.ui.components.DaysEnum
+import si.uni_lj.fe.tunv.alarmmeup.ui.components.SoundEnum
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.AlarmType
+import si.uni_lj.fe.tunv.alarmmeup.ui.data.SessionRepo
+import si.uni_lj.fe.tunv.alarmmeup.ui.data.SoundEntity
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.StoreCategory
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.StoreItemData
+import si.uni_lj.fe.tunv.alarmmeup.ui.data.VibrationEntity
 
 data class SettingCategory(
     val id: Int,
@@ -49,29 +57,149 @@ data class SettingCategory(
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SettingsScreen(
+    repo: SessionRepo,
+    onCancel: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var selectedDays by remember { mutableStateOf(setOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")) }
+    var selectedDays by remember { mutableStateOf(setOf(DaysEnum.MONDAY, DaysEnum.TUESDAY, DaysEnum.WEDNESDAY,
+        DaysEnum.THURSDAY, DaysEnum.FRIDAY, DaysEnum.SATURDAY, DaysEnum.SUNDAY)) }
     var volume by remember { mutableStateOf(0.6f) }
+    var selectedSoundId : Int? by remember { mutableStateOf(0) }
+    var selectedVibrationId : Int? by remember { mutableStateOf(0) }
     var showIncompleteDaysDialog by remember { mutableStateOf(false) }
+
+
+    val scope = rememberCoroutineScope()
+
+    val user by repo.currentUser.collectAsState(initial = null)
+    if (user == null) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("Loading Images")
+        }
+        return
+    }
+
+    val alarm by repo.getClock(user!!.id).collectAsState(initial = null)
+
+    val ownedSounds by repo.getOwnedSounds().collectAsState(initial = emptyList())
+    val ownedVibrations by repo.getOwnedVibrations()
+        .collectAsState(initial = emptyList())
+
+    LaunchedEffect(alarm) {
+        alarm?.let { currentAlarm ->
+            volume = currentAlarm.volume
+            selectedSoundId = currentAlarm.soundId
+            selectedVibrationId = currentAlarm.vibrationId
+            selectedDays = DaysEnum.toSet(currentAlarm.daysMask)
+        }
+    }
 
     Column(
         modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        DaysSelector(selectedDays) { selectedDays = it }
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            contentPadding = PaddingValues(bottom = 16.dp)
+        ) {
+            item {
+                DaysSelector(selectedDays) { selectedDays = it }
 
-        Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(24.dp))
+            }
 
-        VolumeSlider(volume) { volume = it }
+            item {
+                VolumeSlider(volume) { volume = it }
+                Spacer(Modifier.height(24.dp))
+            }
 
-        AlarmSoundSelector (selectedDays, { show -> showIncompleteDaysDialog = show })
+            item {
+                AlarmSoundSelector(
+                    ownedSounds = ownedSounds,
+                    ownedVibrations = ownedVibrations,
+                    selectedSoundId = selectedSoundId,
+                    onSoundSelected = { soundId -> selectedSoundId = soundId },
+                    selectedVibrationId = selectedVibrationId,
+                    onVibrationSelected = { vibrationId ->
+                        selectedVibrationId = vibrationId
+                    }
+                )
 
-        Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(24.dp))
+            }
 
 //        AlarmVibrationSelector(selectedVibration) { selectedVibration = it }
+
+        }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedButton(
+                        onClick = {onCancel()},
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = Color.DarkGray,
+                            contentColor = Color.White,
+                            disabledContainerColor = Color.DarkGray,
+                            disabledContentColor = Color.LightGray
+                        ),
+                        border = BorderStroke(1.dp, Color.Black),
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(horizontal = 20.dp),
+                    ) {
+                        Text(
+                            text = "CANCEL",
+                            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp),
+                            color = Color.LightGray,
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(5.dp))
+
+                    OutlinedButton(
+                        onClick = {
+                            if (selectedDays.size < 7) {
+                                showIncompleteDaysDialog = true
+                            } else {
+                                scope.launch {
+                                    val originalAlarm = alarm ?: return@launch
+
+                                    val newDaysMask = DaysEnum.fromSet(selectedDays)
+
+                                    val updatedAlarm = originalAlarm.copy(
+                                        volume = volume,
+                                        daysMask = newDaysMask,
+                                        soundId = selectedSoundId,
+                                        vibrationId = selectedVibrationId
+                                    )
+
+                                    repo.setAlarmSettings(updatedAlarm)
+                                }
+                            }
+                        },
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = Color.DarkGray,
+                            contentColor = Color.White,
+                            disabledContainerColor = Color.Black,
+                            disabledContentColor = Color.Black
+                        ),
+                        border = BorderStroke(1.dp, Color.Black),
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(horizontal = 20.dp),
+                    ) {
+                        Text(
+                            text = "SAVE",
+                            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp),
+                            color = Color.LightGray,
+                        )
+                    }
+                }
 
         if (showIncompleteDaysDialog){
             AlertDialog(
@@ -83,7 +211,23 @@ fun SettingsScreen(
                     )
                 },
                 confirmButton = {
-                    TextButton(onClick = { showIncompleteDaysDialog = false }) {
+                    TextButton(onClick = {
+                        showIncompleteDaysDialog = false
+                        scope.launch {
+                            val originalAlarm = alarm ?: return@launch
+
+                            val newDaysMask = DaysEnum.fromSet(selectedDays)
+
+                            val updatedAlarm = originalAlarm.copy(
+                                volume = volume,
+                                daysMask = newDaysMask,
+                                soundId = selectedSoundId,
+                                vibrationId = selectedVibrationId
+                            )
+
+                            repo.setAlarmSettings(updatedAlarm)
+                        }
+                    }) {
                         Text("Got it")
                     }
                 }
@@ -95,10 +239,11 @@ fun SettingsScreen(
 
 @Composable
 fun DaysSelector(
-    selected: Set<String>,
-    onSelectionChanged: (Set<String>) -> Unit
+    selected: Set<DaysEnum>,
+    onSelectionChanged: (Set<DaysEnum>) -> Unit
 ) {
-    val days = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+    val days = listOf(DaysEnum.MONDAY, DaysEnum.TUESDAY, DaysEnum.WEDNESDAY,
+        DaysEnum.THURSDAY, DaysEnum.FRIDAY, DaysEnum.SATURDAY, DaysEnum.SUNDAY)
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -140,7 +285,7 @@ fun DaysSelector(
                     },
                 contentAlignment = Alignment.Center
             ) {
-                Text(day)
+                Text(DaysEnum.toString(day))
             }
 
         }
@@ -403,270 +548,325 @@ val categories = listOf(
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AlarmSoundSelector(
-    selectedDays: Set<String>,
-    showIncompleteDaysDialog: (Boolean) -> Unit
+    ownedSounds: List<SoundEntity>,
+    ownedVibrations: List<VibrationEntity>,
+    selectedSoundId: Int?,
+    onSoundSelected: (Int) -> Unit,
+    selectedVibrationId: Int?,
+    onVibrationSelected: (Int) -> Unit
 ) {
 
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        HorizontalDivider(
-            modifier = Modifier
-                .weight(1f)
-                .height(1.dp),
-            color = Color.Gray
-        )
-        Text(
-            text = "Owned alarm sounds",
-            modifier = Modifier.padding(horizontal = 8.dp),
-            fontSize = 20.sp
-        )
-        HorizontalDivider(
-            modifier = Modifier
-                .weight(1f)
-                .height(1.dp),
-            color = Color.Gray
-        )
-    }
-//    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-//        items(sounds) { sound ->
-//            val isSelected = selected == sound
-//            OutlinedButton(
-//                onClick = { if (sound != "Shop") onSelect(sound) },
-//                border = if (isSelected) BorderStroke(2.dp, Color.Black) else null
-//            ) {
-//                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-//                    Text("▶", color=Color.Black)
-//                    Text(sound, style = MaterialTheme.typography.labelSmall, color = Color.Black)
-//                }
-//            }
-//        }
-//    }
+    var playingItemId by remember { mutableStateOf<Int?>(null) }
+    var playingItemType by remember { mutableStateOf<AlarmType?>(null) }
 
-    var categories by remember { mutableStateOf(categories) }
-    var mediaPlayer by remember { mutableStateOf<MediaPlayer?>(null) }
     val context = LocalContext.current
-    val globalVibrator = remember {
-        context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+    var mediaPlayer by remember { mutableStateOf<MediaPlayer?>(null) }
+    val vibrator =
+        remember { context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator }
+
+    val actualVibrationToPlay: VibrationEntity? = remember(playingItemId, playingItemType) {
+        if (playingItemType == AlarmType.VIBRATION) {
+            ownedVibrations.find { it.id == playingItemId }
+        } else {
+            null
+        }
     }
 
-    val actualItemToVibrate: StoreItemData? = remember(categories) {
-        categories.asSequence()
-            .flatMap { it.items }
-            .find { it.playing }
-    }
-
-    DisposableEffect(actualItemToVibrate) {
-        if (actualItemToVibrate != null &&
-            actualItemToVibrate.type == AlarmType.VIBRATION &&
-            actualItemToVibrate.vibrationPattern != null &&
-            actualItemToVibrate.vibrationAmplitudes != null) {
+    DisposableEffect(actualVibrationToPlay) {
+        if (actualVibrationToPlay != null) {
             try {
-                globalVibrator.vibrate(
-                    VibrationEffect.createWaveform(
-                        actualItemToVibrate.vibrationPattern,
-                        actualItemToVibrate.vibrationAmplitudes,
-                        actualItemToVibrate.vibrationRepeat
-                    )
+                val pattern = actualVibrationToPlay.patternJson
+                    .removeSurrounding("[", "]")
+                    .split(',')
+                    .map { it.trim().toLong() }
+                    .toLongArray()
+                val amplitudes = actualVibrationToPlay.amplitudeJson
+                    .removeSurrounding("[", "]")
+                    .split(',')
+                    .map { it.trim().toInt() }
+                    .toIntArray()
+                vibrator.vibrate(
+                    VibrationEffect.createWaveform(pattern, amplitudes, 0)
                 )
             } catch (e: Exception) {
-                Log.e("CentralEffect", "ERROR vibrating ${actualItemToVibrate.name}: ${e.message}", e)
+                Log.e("AlarmSoundSelector", "Error playing vibration", e)
             }
         } else {
-            globalVibrator.cancel()
+            vibrator.cancel()
         }
 
         onDispose {
-            globalVibrator.cancel()
+            vibrator.cancel()
         }
     }
 
-    val onTogglePlay = { clickedItem: StoreItemData ->
-        val targetItemIdForPlaying = if (!clickedItem.playing) clickedItem.id else null
+    DisposableEffect(Unit) {
+        onDispose {
+            mediaPlayer?.stop()
+            mediaPlayer?.release()
+            mediaPlayer = null
+        }
+    }
 
+    val onToggleSoundPlay = { sound: SoundEntity ->
         mediaPlayer?.stop()
         mediaPlayer?.release()
         mediaPlayer = null
+        vibrator.cancel()
 
-        categories = categories.map { category ->
-            category.copy(items = category.items.map { item ->
-                item.copy(playing = item.id == targetItemIdForPlaying)
-            })
-        }
+        val isNowPlaying = sound.id != playingItemId || playingItemType != AlarmType.SOUND
 
+        playingItemId = if (isNowPlaying) sound.id else null
+        playingItemType = if (isNowPlaying) AlarmType.SOUND else null
 
-        if (targetItemIdForPlaying != null) {
-            if (clickedItem.soundResourceId != null) {
-                try {
-                    mediaPlayer =
-                        MediaPlayer.create(context, clickedItem.soundResourceId)
-                    mediaPlayer?.isLooping = true
-                    mediaPlayer?.setOnErrorListener { mp, what, extra ->
-                        mp.release()
-                        if (mediaPlayer == mp) mediaPlayer = null
-                        categories = categories.map { cat ->
-                            cat.copy(items = cat.items.map { i ->
-                                if (i.id == clickedItem.id) i.copy(playing = false)
-                                else i
-                            })
-                        }
-                        true
-                    }
-                    mediaPlayer?.start()
-                } catch (e: Exception) {
-                    mediaPlayer?.release()
-                    mediaPlayer = null
-                    categories = categories.map { cat ->
-                        cat.copy(items = cat.items.map { i ->
-                            if (i.id == clickedItem.id) i.copy(playing = false)
-                            else i
-                        })
-                    }
+        if (isNowPlaying) {
+            try {
+                val resourceId = SoundEnum.toResource(sound.soundIdentifier)
+                mediaPlayer = MediaPlayer.create(context, resourceId).apply {
+                    isLooping = true
+                    start()
                 }
+            } catch (e: Exception) {
+                Log.e("AlarmSoundSelector", "Error playing sound", e)
+                playingItemId = null
             }
         }
     }
 
-    val soundCategories = categories.map { cat ->
-        cat.copy(
-            items = cat.items.filter { it.type == AlarmType.SOUND }
-        )
-    }.filter { it.items.isNotEmpty() }
+    val onToggleVibrationPlay = { vibration: VibrationEntity ->
+        mediaPlayer?.stop()
+        mediaPlayer?.release()
+        mediaPlayer = null
+        vibrator.cancel()
 
-    val vibCategories = categories.map { cat ->
-        cat.copy(
-            items = cat.items.filter { it.type == AlarmType.VIBRATION }
-        )
-    }.filter { it.items.isNotEmpty() }
+        val isNowPlaying = vibration.id != playingItemId || playingItemType != AlarmType.VIBRATION
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth(),
-            contentPadding = PaddingValues(vertical = 16.dp)
-        ) {
-            soundCategories.forEach { cat ->
-                item {
-                    AlarmSettings(
-                        category = cat,
-                        onTogglePlay = onTogglePlay
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-            }
+        playingItemId = if (isNowPlaying) vibration.id else null
+        playingItemType = if (isNowPlaying) AlarmType.VIBRATION else null
+    }
 
-            item {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 10.dp)
-                ) {
-                    HorizontalDivider(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(1.dp),
-                        color = Color.Gray
-                    )
-                    Text(
-                        text = "Owned vibrations",
-                        modifier = Modifier.padding(horizontal = 8.dp),
-                        fontSize = 20.sp
-                    )
-                    HorizontalDivider(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(1.dp),
-                        color = Color.Gray
-                    )
-                }
-            }
-
-            vibCategories.forEach { cat ->
-                item {
-                    AlarmSettings(
-                        category = cat,
-                        onTogglePlay = onTogglePlay
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-            }
-        }
-
+    Column(modifier = Modifier.fillMaxWidth()) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            OutlinedButton(
-                onClick = {},
-                colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = Color.DarkGray,
-                    contentColor = Color.White,
-                    disabledContainerColor = Color.DarkGray,
-                    disabledContentColor = Color.LightGray
-                ),
-                border = BorderStroke(1.dp, Color.Black),
-                shape = RoundedCornerShape(8.dp),
-                contentPadding = PaddingValues(horizontal = 20.dp),
-            ) {
-                Text(
-                    text = "CANCEL",
-                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp),
-                    color = Color.LightGray,
-                )
-            }
-
-            Spacer(modifier = Modifier.width(5.dp))
-
-            OutlinedButton(
-                onClick = {
-                    if (selectedDays.size < 7) {
-                        showIncompleteDaysDialog(true)
-                    }
-                },
-                colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = Color.DarkGray,
-                    contentColor = Color.White,
-                    disabledContainerColor = Color.Black,
-                    disabledContentColor = Color.Black
-                ),
-                border = BorderStroke(1.dp, Color.Black),
-                shape = RoundedCornerShape(8.dp),
-                contentPadding = PaddingValues(horizontal = 20.dp),
-            ) {
-                Text(
-                    text = "SAVE",
-                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp),
-                    color = Color.LightGray,
-                )
-            }
+            HorizontalDivider(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(1.dp),
+                color = Color.Gray
+            )
+            Text(
+                text = "Owned Sounds",
+                modifier = Modifier.padding(horizontal = 8.dp),
+                fontSize = 20.sp
+            )
+            HorizontalDivider(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(1.dp),
+                color = Color.Gray
+            )
         }
-
-        Spacer(modifier = Modifier.height(12.dp))
-    }
-}
-
-@Composable
-fun AlarmSettings(
-    category: StoreCategory,
-    onTogglePlay: (StoreItemData) -> Unit,
-) {
-    Column {
+        Spacer(modifier = Modifier.height(16.dp))
         LazyRow(
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(category.items, key = { it.id }) { storeItem ->
-                StoreItemCard(item = storeItem, onTogglePlay = onTogglePlay)
+            items(ownedSounds, key = { "sound-${it.id}" }) { sound ->
+                val isSelected = sound.id == selectedSoundId
+                val isPlaying =
+                    sound.id == playingItemId && playingItemType == AlarmType.SOUND
+                SoundCard(
+                    sound = sound,
+                    isSelected = isSelected,
+                    isPlaying = isPlaying,
+                    onSelect = { onSoundSelected(sound.id) },
+                    onTogglePlay = { onToggleSoundPlay(sound) }
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            HorizontalDivider(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(1.dp),
+                color = Color.Gray
+            )
+            Text(
+                text = "Owned Vibrations",
+                modifier = Modifier.padding(horizontal = 8.dp),
+                fontSize = 20.sp
+            )
+            HorizontalDivider(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(1.dp),
+                color = Color.Gray
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(ownedVibrations, key = { "vibration-${it.id}" }) { vibration ->
+                val isSelected = vibration.id == selectedVibrationId
+                val isPlaying =
+                    vibration.id == playingItemId && playingItemType == AlarmType.VIBRATION
+                VibrationCard(
+                    vibration = vibration,
+                    isSelected = isSelected,
+                    isPlaying = isPlaying,
+                    onSelect = { onVibrationSelected(vibration.id) },
+                    onTogglePlay = {
+                        onToggleVibrationPlay(
+                            vibration
+                        )
+                    }
+                )
             }
         }
     }
 }
+
+
+
+@Composable
+fun SoundCard(
+    sound: SoundEntity,
+    isSelected: Boolean,
+    isPlaying: Boolean,
+    onSelect: () -> Unit,
+    onTogglePlay: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .border(
+                width = if (isSelected) 2.dp else 0.dp,
+                color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                shape = RoundedCornerShape(12.dp)
+            )
+            .padding(2.dp)
+    ) {
+        Card(
+            modifier = Modifier
+                .width(140.dp)
+                .clickable(onClick = onSelect),
+            shape = RoundedCornerShape(12.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
+            Column {
+                Row(
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .clickable(onClick = onTogglePlay),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(
+                            if (isPlaying) R.drawable.ic_pause
+                            else R.drawable.ic_play
+                        ),
+                        contentDescription = if (isPlaying) "Pause" else "Play",
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = sound.name,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontSize = 13.sp
+                    )
+                }
+                if (isPlaying) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp)
+                            .background(Color.White),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        SettingsScreenWithLottieOverlay(true)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun VibrationCard(
+    vibration: VibrationEntity,
+    isSelected: Boolean,
+    isPlaying: Boolean,
+    onSelect: () -> Unit,
+    onTogglePlay: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .border(
+                width = if (isSelected) 2.dp else 0.dp,
+                color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                shape = RoundedCornerShape(12.dp)
+            )
+            .padding(2.dp)
+    ) {
+        Card(
+            modifier = Modifier
+                .width(140.dp)
+                .clickable(onClick = onSelect),
+            shape = RoundedCornerShape(12.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
+            Column {
+                Row(
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .clickable(onClick = onTogglePlay),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(
+                            if (isPlaying) R.drawable.ic_pause
+                            else R.drawable.ic_play
+                        ),
+                        contentDescription = if (isPlaying) "Pause" else "Play",
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = vibration.name,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontSize = 13.sp
+                    )
+                }
+                if (isPlaying) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp)
+                            .background(Color.White),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        SettingsScreenWithLottieOverlay(true)
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 
 //@Composable

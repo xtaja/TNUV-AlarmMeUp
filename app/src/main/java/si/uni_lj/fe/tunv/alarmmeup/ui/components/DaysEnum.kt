@@ -15,5 +15,15 @@ enum class DaysEnum(val bit: Int) {
 
         fun toSet(mask: Int): Set<DaysEnum> =
             DaysEnum.entries.filter { mask and it.bit != 0 }.toSet()
+
+        fun toString(day: DaysEnum): String = when (day) {
+            MONDAY -> "Mon"
+            TUESDAY -> "Tue"
+            WEDNESDAY -> "Wed"
+            THURSDAY -> "Thu"
+            FRIDAY -> "Fri"
+            SATURDAY -> "Sat"
+            SUNDAY -> "Sun"
+        }
     }
 }

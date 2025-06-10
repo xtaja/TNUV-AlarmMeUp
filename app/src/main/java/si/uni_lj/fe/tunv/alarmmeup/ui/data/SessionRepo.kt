@@ -27,8 +27,9 @@ object Keys { val CURRENT_ID = intPreferencesKey("current_uid") }
 class SessionRepo(
     private val ds: DataStore<Preferences>,
     private val dao: UserDao,
-    private val daoAlarms: AlarmDao
-
+    private val daoAlarms: AlarmDao,
+    private val userSoundDao: UserSoundDao,
+    private val userVibrationDao: UserVibrationDao
 ) {
     @OptIn(ExperimentalCoroutinesApi::class)
     val currentUser: Flow<UserEntity?> =
@@ -37,6 +38,28 @@ class SessionRepo(
             .flatMapLatest { id ->
                 if (id == null) flowOf(null) else dao.byIdFlow(id)
             }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun getOwnedSounds(): Flow<List<SoundEntity>> {
+        return currentUser.flatMapLatest { user ->
+            if (user == null) {
+                flowOf(emptyList())
+            } else {
+                userSoundDao.getUnlockedSounds(user.id)
+            }
+        }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun getOwnedVibrations(): Flow<List<VibrationEntity>> {
+        return currentUser.flatMapLatest { user ->
+            if (user == null) {
+                flowOf(emptyList())
+            } else {
+                userVibrationDao.getUnlockedVibrations(user.id)
+            }
+        }
+    }
 
     suspend fun login(id: Int) = ds.edit { it[Keys.CURRENT_ID] = id }
     suspend fun logout()       = ds.edit { it.remove(Keys.CURRENT_ID) }
@@ -64,6 +87,10 @@ class SessionRepo(
 
     fun getClock(id: Int) : Flow<AlarmEntity?> {
         return daoAlarms.selectById(id)
+    }
+
+    suspend fun setAlarmSettings(ent: AlarmEntity) {
+        daoAlarms.update(ent)
     }
 
     suspend fun addXPAndCoins(xp: Int, coins: Int) {

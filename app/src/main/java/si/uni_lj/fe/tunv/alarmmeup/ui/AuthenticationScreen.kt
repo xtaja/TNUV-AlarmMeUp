@@ -10,7 +10,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -362,11 +364,13 @@ fun AuthenticationScreen(
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     var activeForm by remember { mutableStateOf<String?>(null) }
     var showButton by remember { mutableStateOf(true) }
+    val scrollState = rememberScrollState()
 
     Column (
         modifier = Modifier
             .fillMaxSize()
-            .padding(screenWidth * 0.12f),
+            .padding(screenWidth * 0.12f)
+            .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     )

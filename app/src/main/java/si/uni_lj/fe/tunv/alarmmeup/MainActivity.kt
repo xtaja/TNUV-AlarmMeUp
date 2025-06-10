@@ -64,6 +64,8 @@ import si.uni_lj.fe.tunv.alarmmeup.ui.minigames.WordleGame
 import si.uni_lj.fe.tunv.alarmmeup.ui.snoozeAlarm
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.AlarmMeUpTheme
 import java.util.Calendar
+import si.uni_lj.fe.tunv.alarmmeup.ui.Leader
+import kotlin.math.abs
 
 class MainActivity : ComponentActivity() {
 
@@ -116,6 +118,16 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+private val dummyLeaders = listOf(
+    Leader("Alice Anders",  "@alicea", R.drawable.woman2, xp = 1500, flames = 45, rank = 4),
+    Leader("Bob Brown",     "@bobb",   R.drawable.man2, xp = 1380, flames = 38, rank = 5),
+    Leader("Cara Chen",     "@cara_c", R.drawable.woman4, xp = 1275, flames = 31, rank = 6),
+    Leader("David Drew",    "@daved",  R.drawable.man5, xp = 1160, flames = 27, rank = 7),
+    Leader("Eva Eastwood",  "@evae",   R.drawable.woman8, xp = 1045, flames = 22, rank = 8),
+    Leader("Frank Foster",  "@frankf", R.drawable.man8, xp =  980, flames = 18, rank = 9),
+    Leader("Gina Gonzales", "@ginag",  R.drawable.woman10, xp =  880, flames = 14, rank = 10),
+)
+
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -130,7 +142,9 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit) {
     val sessionRepo = remember {
         SessionRepo(
             ctx.userPrefs, AppDatabase.get(ctx).userDao(),
-            daoAlarms = AppDatabase.get(ctx).alarmDao()
+            daoAlarms = AppDatabase.get(ctx).alarmDao(),
+            userSoundDao = AppDatabase.get(ctx).userSoundDao(),
+            userVibrationDao = AppDatabase.get(ctx).userVibrationDao()
         )
     }
 
@@ -150,7 +164,7 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit) {
         val wakeupTotalMinutes = alarm.hour * 60 + alarm.minute
         val calendar = Calendar.getInstance()
         val currentTotalMinutes = calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
-        return kotlin.math.abs(currentTotalMinutes - wakeupTotalMinutes) <= 15
+        return abs(currentTotalMinutes - wakeupTotalMinutes) <= 15
     }
 
     var clockChangeable by remember { mutableStateOf(false) }
@@ -200,7 +214,8 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit) {
                     repo = sessionRepo,
                     resetKey = profileTabClickCount,
                     onSettingsClick = { selectedScreen = "ProfileSettings" })
-                "Leaderboard" -> LeaderboardScreen()
+                "Leaderboard" -> LeaderboardScreen(
+                    leaders = dummyLeaders)
                 "Home" -> {
                     if (!forceHomeScreen && isWithinWakeupWindow() && !gameCompletedToday) {
                         MorningScreen(
@@ -226,7 +241,10 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit) {
                 "Store" -> StoreScreen(repo = sessionRepo, onChangeClicked = {
                     clockChangeable = true
                 })
-                "Settings" -> SettingsScreen()
+                "Settings" -> SettingsScreen(
+                    repo = sessionRepo,
+                    onCancel = { selectedScreen = "Profile" }
+                    )
                 "Auth" -> AuthenticationScreen(
                     iconResId = R.drawable.ic_original_logo,
                     onAuthenticated = { it ->
