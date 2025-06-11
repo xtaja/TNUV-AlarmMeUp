@@ -28,7 +28,8 @@ import si.uni_lj.fe.tunv.alarmmeup.ui.theme.WhiteColor
 @Composable
 fun WakeUpScreen(
     onAwakeClick: () -> Unit,
-    onSnoozeClick: () -> Unit
+    onSnoozeClick: () -> Unit,
+    snoozed: Boolean = false
 ) {
     Column(
         modifier = Modifier
@@ -63,7 +64,8 @@ fun WakeUpScreen(
         Spacer(modifier = Modifier.height(16.dp))
         SnoozeButton(
             onClick = onSnoozeClick,
-            modifier = Modifier.fillMaxWidth(0.5f)
+            modifier = Modifier.fillMaxWidth(0.5f),
+            snoozed = snoozed
         )
     }
 }

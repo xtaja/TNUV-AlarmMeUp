@@ -54,27 +54,27 @@ import si.uni_lj.fe.tunv.alarmmeup.ui.ProfileSettingsScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.SettingsScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.StoreScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.StreakScreen
+import si.uni_lj.fe.tunv.alarmmeup.ui.components.ChallengeEnum
+import si.uni_lj.fe.tunv.alarmmeup.ui.components.DayStatus
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.NavBar
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.NavBarButton
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.NavBarStats
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.ProfilePictureEnum
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.SettingsBtn
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.SettingsEnum
+import si.uni_lj.fe.tunv.alarmmeup.ui.components.snoozeAlarm
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.AppDatabase
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.SessionRepo
+import si.uni_lj.fe.tunv.alarmmeup.ui.data.UserStreakData
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.userPrefs
 import si.uni_lj.fe.tunv.alarmmeup.ui.minigames.MathGame
 import si.uni_lj.fe.tunv.alarmmeup.ui.minigames.MemoryGame
 import si.uni_lj.fe.tunv.alarmmeup.ui.minigames.TypingGame
 import si.uni_lj.fe.tunv.alarmmeup.ui.minigames.WordleGame
-import si.uni_lj.fe.tunv.alarmmeup.ui.snoozeAlarm
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.AlarmMeUpTheme
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.WhiteColor
-import java.util.Calendar
-import si.uni_lj.fe.tunv.alarmmeup.ui.components.ChallengeEnum
-import si.uni_lj.fe.tunv.alarmmeup.ui.components.DayStatus
-import si.uni_lj.fe.tunv.alarmmeup.ui.data.UserStreakData
 import java.time.LocalDateTime
+import java.util.Calendar
 import kotlin.math.abs
 
 class MainActivity : ComponentActivity() {
@@ -155,6 +155,7 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit, initial
     var profilePicture by remember {mutableStateOf(R.drawable.man1)}
     val ctx        = LocalContext.current
     var showMorningScreen by remember { mutableStateOf(initialShowMorningScreen) }
+    var snoozed by remember { mutableStateOf(false) }
     val mainScope  = rememberCoroutineScope()
     val sessionRepo = remember {
         SessionRepo(
@@ -201,6 +202,7 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit, initial
         if (prefs.getBoolean("showMorningScreen", false)) {
             showMorningScreen = true
             prefs.edit().putBoolean("showMorningScreen", false).apply()
+            snoozed = false // Reset snooze state when alarm rings again
         }
     }
 
@@ -210,6 +212,7 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit, initial
         if (prefs.getBoolean("showMorningScreen", false)) {
             showMorningScreen = true
             prefs.edit().putBoolean("showMorningScreen", false).apply()
+            snoozed = false // Reset snooze state when alarm rings again
         }
     }
 
@@ -219,6 +222,7 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit, initial
             if (key == "showMorningScreen" && prefs.getBoolean("showMorningScreen", false)) {
                 showMorningScreen = true
                 prefs.edit().putBoolean("showMorningScreen", false).apply()
+                snoozed = false // Reset snooze state when alarm rings again
             }
         }
         prefs.registerOnSharedPreferenceChangeListener(listener)
@@ -314,7 +318,11 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit, initial
                             onTypingClick = { selectedScreen = "TypingGame" },
                             onMemoryClick = { selectedScreen = "MemoryGame" },
                             onWordleClick = { selectedScreen = "WordleGame" },
-                            onSnoozeClick = { snoozeAlarm(ctx) }
+                            onSnoozeClick = {
+                                snoozeAlarm(ctx)
+                                snoozed = true
+                            },
+                            snoozed = snoozed
                         )
                     } else {
                         HomeScreen(
@@ -454,4 +462,5 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit, initial
         }
     }
 }
+
 

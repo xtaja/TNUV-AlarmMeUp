@@ -155,7 +155,7 @@ fun HomeScreen(
                         contentColor = BlackColor
                     ),
                     shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier.shadow(10.dp, RoundedCornerShape(16.dp))
+                    modifier = Modifier.shadow(6.dp, RoundedCornerShape(16.dp))
                 ) {
                     Text(
                         text = if (!changeButton) "SET" else "RESET for 20",
@@ -288,13 +288,4 @@ fun to24Hour(hour: Int, isAm: Boolean): Int {
         !isAm && hour != 12 -> hour + 12
         else -> hour
     }
-}
-
-fun snoozeAlarm(context: Context) {
-    val calendar = Calendar.getInstance().apply {
-        add(Calendar.MINUTE, 5)
-    }
-    val hour = calendar.get(Calendar.HOUR_OF_DAY)
-    val minute = calendar.get(Calendar.MINUTE)
-    scheduleAlarm(context, hour, minute)
 }

@@ -27,7 +27,8 @@ fun MorningScreen(
     onTypingClick: () -> Unit,
     onMemoryClick: () -> Unit,
     onWordleClick: () -> Unit,
-    onSnoozeClick: () -> Unit
+    onSnoozeClick: () -> Unit,
+    snoozed: Boolean = false
 ) {
     val currentTime = remember {
         SimpleDateFormat("hh:mm", Locale.getDefault()).format(Date())
@@ -40,7 +41,7 @@ fun MorningScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Time to wake up!", fontSize = 18.sp)
+        Text("Time to wake up!", fontSize = 20.sp)
         Spacer(modifier = Modifier.height(15.dp))
         Text(currentTime, fontSize = 70.sp)
         Spacer(modifier = Modifier.height(45.dp))
@@ -80,10 +81,28 @@ fun MorningScreen(
             )
         }
         Spacer(modifier = Modifier.height(50.dp))
-        Text("...or snooze and loose your streak...", fontSize = 18.sp)
-        Spacer(modifier = Modifier.height(12.dp))
-        SnoozeButton(
-            onClick = onSnoozeClick
-        )
+
+        if(!snoozed){
+            Text(
+                text = "...or snooze and loose your streak...",
+                fontSize = 20.sp,
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            SnoozeButton(
+                onClick = onSnoozeClick,
+                snoozed = snoozed
+            )
+        }else{
+            Text(
+                text ="...you snoozed..." ,
+                fontSize = 20.sp,
+            )
+            Spacer(modifier = Modifier.height(14.dp))
+            Text(
+                text ="See you in a few minutes!" ,
+                fontSize = 22.sp,
+            )
+
+        }
     }
 }
