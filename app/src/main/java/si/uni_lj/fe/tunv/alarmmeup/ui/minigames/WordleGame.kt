@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -140,7 +141,7 @@ fun WordleGame(
     if (isFinished) {
         if (isWin) {
             WinScreen(
-                currentStreak = 5,
+                repo = sessionRepo,
                 numOfXP = numOfXP,
                 numOfSunCoins = numOfSunCoins,
                 onCollect = onExit,
@@ -152,29 +153,26 @@ fun WordleGame(
         if (showExitDialog) {
             AlertDialog(
                 onDismissRequest = { showExitDialog = false },
-                title = { Text("Exit Game?") },
-                text = { Text("If you exit now, you will lose all your progress in this minigame.") },
+                title = { stringResource(R.string.exit_game_question) },
+                text = { stringResource(R.string.exit_game_text) },
                 confirmButton = {
-                    TextButton(onClick = { showExitDialog = false; onExit(ChallengeEnum.Wordle, true, false)}) {
-                        Text("Exit")
-                    }
+                    TextButton(onClick = { showExitDialog = false; onExit(ChallengeEnum.Wordle, true, false)})
+                    { stringResource(R.string.exit) }
                 },
                 dismissButton = {
-                    TextButton(onClick = { showExitDialog = false }) {
-                        Text("Cancel")
-                    }
+                    TextButton(onClick = { showExitDialog = false })
+                    { stringResource(R.string.cancel) }
                 }
             )
         }
         if (showInvalidWord) {
             AlertDialog(
                 onDismissRequest = { showInvalidWord = false },
-                title = { Text("Invalid Word") },
-                text = { Text("Please enter a valid 5-letter word.") },
+                title = { stringResource(R.string.invalid_word) },
+                text = { stringResource(R.string.five_letter_word) },
                 confirmButton = {
-                    TextButton(onClick = { showInvalidWord = false }) {
-                        Text("OK")
-                    }
+                    TextButton(onClick = { showInvalidWord = false })
+                    { stringResource(R.string.OK) }
                 },
                 dismissButton = {}
             )
@@ -195,7 +193,7 @@ fun WordleGame(
                     .fillMaxSize()
             ) {
                 Spacer(modifier = Modifier.height(100.dp))
-                Text("Wordle", fontSize = 45.sp)
+                Text(stringResource(R.string.wordle), fontSize = 45.sp)
                 Spacer(modifier = Modifier.height(50.dp))
                 // Board
                 for (row in 0 until maxGuesses) {
@@ -277,7 +275,7 @@ fun WordleGame(
                                         LetterState.CORRECT -> Green19
                                         LetterState.PRESENT -> Yellow19
                                         LetterState.ABSENT -> GrayColor
-                                        
+
                                         else -> WhiteColor
                                     }
                                     Surface(

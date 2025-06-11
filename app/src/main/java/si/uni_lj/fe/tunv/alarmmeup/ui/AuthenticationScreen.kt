@@ -36,7 +36,9 @@ import androidx.compose.ui.unit.sp
 import si.uni_lj.fe.tunv.alarmmeup.R
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import kotlinx.coroutines.launch
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.ChallengeEnum
@@ -145,8 +147,8 @@ fun MorphingAuthBox(
                         OutlinedTextField(
                             value = fullName,
                             onValueChange = { fullName = it },
-                            label = { Text("Name and Surname") },
-                            placeholder = { Text("Enter your full name") },
+                            label = { Text(stringResource(R.string.full_name_label)) },
+                            placeholder = { Text(stringResource(R.string.full_name_placeholder)) },
                             singleLine = true,
                             isError = showError && fullName.isBlank(),
                             modifier = Modifier.fillMaxWidth()
@@ -157,8 +159,8 @@ fun MorphingAuthBox(
                         OutlinedTextField(
                             value = username,
                             onValueChange = { username = it },
-                            label = { Text("Username") },
-                            placeholder = { Text("Enter your username") },
+                            label = { Text(stringResource(R.string.Username)) },
+                            placeholder = { Text(stringResource(R.string.username_placeholder)) },
                             singleLine = true,
                             isError = showError && username.isBlank(),
                             modifier = Modifier.fillMaxWidth()
@@ -169,8 +171,8 @@ fun MorphingAuthBox(
                         OutlinedTextField(
                             value = email,
                             onValueChange = { email = it },
-                            label = { Text("Email") },
-                            placeholder = { Text("Enter your email") },
+                            label = { Text(stringResource(R.string.email_label)) },
+                            placeholder = { Text(stringResource(R.string.email_placeholder)) },
                             singleLine = true,
                             isError = showError && (email.isBlank() || invalidEmail),
                             modifier = Modifier.fillMaxWidth()
@@ -178,11 +180,13 @@ fun MorphingAuthBox(
 
                         if (invalidEmail) {
                             Text(
-                                text = "Please enter a valid email address",
+                                text = stringResource(R.string.valid_email),
                                 color = Red19,
                                 fontSize = 14.sp,
                                 modifier = Modifier.padding(top = 4.dp)
                             )
+                        } else {
+                            Spacer(Modifier.height(29.dp))
                         }
                     }
 
@@ -190,15 +194,15 @@ fun MorphingAuthBox(
                         OutlinedTextField(
                             value = emailOrUsername,
                             onValueChange = { emailOrUsername = it },
-                            label = { Text("Email or Username") },
-                            placeholder = { Text("Enter your email or username") },
+                            label = { Text(stringResource(R.string.emailOrUsername_placeholder)) },
+                            placeholder = { Text(stringResource(R.string.emailOrUsername_email)) },
                             singleLine = true,
                             isError = showError && (emailOrUsername.isBlank()),
                             modifier = Modifier.fillMaxWidth()
                         )
                         if (showError && emailOrUsername.isNotBlank()) {
                             Text(
-                                text = "Invalid credentials. Please try again.",
+                                text = stringResource(R.string.invalid_credentials),
                                 color = Red19,
                                 fontSize = 14.sp,
                                 modifier = Modifier.padding(top = 4.dp)
@@ -210,8 +214,8 @@ fun MorphingAuthBox(
                         OutlinedTextField(
                             value = password,
                             onValueChange = { password = it },
-                            label = { Text("Password") },
-                            placeholder = { Text("Enter your password") },
+                            label = { Text(stringResource(R.string.password_label)) },
+                            placeholder = { Text(stringResource(R.string.password_placeholder)) },
                             singleLine = true,
                             isError = showError && password.isBlank(),
                             modifier = Modifier.fillMaxWidth(),
@@ -223,8 +227,8 @@ fun MorphingAuthBox(
                         OutlinedTextField(
                             value = confirmPassword,
                             onValueChange = { confirmPassword = it },
-                            label = { Text("Confirm Password") },
-                            placeholder = { Text("Re-enter your password") },
+                            label = { Text(stringResource(R.string.confirm_password_label)) },
+                            placeholder = { Text(stringResource(R.string.confirm_password_placeholder)) },
                             singleLine = true,
                             isError = showError && (confirmPassword.isBlank() || passwordMismatch),
                             modifier = Modifier.fillMaxWidth(),
@@ -233,7 +237,7 @@ fun MorphingAuthBox(
 
                         if (passwordMismatch) {
                             Text(
-                                text = "Passwords do not match",
+                                text = stringResource(R.string.do_not_match),
                                 color = Red19,
                                 fontSize = 14.sp,
                                 modifier = Modifier.padding(top = 4.dp)
@@ -346,7 +350,7 @@ fun MorphingAuthBox(
                     contentPadding = PaddingValues(horizontal = 10.dp),
                 ) {
                     Text(
-                        text = "CONTINUE",
+                        text = stringResource(R.string.continue_key),
                         style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp),
                         color = SecondaryColor,
                     )
@@ -395,13 +399,13 @@ fun AuthenticationScreen(
                 )
 
                 Text(
-                    text = "Welcome to",
+                    text = stringResource(R.string.welcome),
                     style = MaterialTheme.typography.headlineMedium,
                     modifier = Modifier.padding(top = screenWidth * 0.05f)
                 )
 
                 Text(
-                    text = "AlarmMeUp!",
+                    text = stringResource(R.string.app_name),
                     style = MaterialTheme.typography.headlineMedium,
                     fontSize = 40.sp,
                     modifier = Modifier.padding(top = screenWidth * 0.01f, bottom = screenWidth * 0.05f)
@@ -426,7 +430,7 @@ fun AuthenticationScreen(
                             .padding(end = screenWidth * 0.03f)
                     )
                     Text(
-                        text = "AlarmMeUp!",
+                        text = stringResource(R.string.app_name),
                         style = MaterialTheme.typography.headlineMedium,
                         fontSize = (screenWidth.value * 0.07f).sp,
                     )
@@ -434,18 +438,9 @@ fun AuthenticationScreen(
             }
         }
 
-//        MorphingAuthBox(
-//            label = "SIGN UP",
-//            isActive = activeForm == "SIGN UP",
-//            onClick = {
-//                activeForm = "SIGN UP"
-//                showButton = false
-//            },
-//            onContinue = onAuthenticated
-//        )
 
         MorphingAuthBox(
-            label = "SIGN UP",
+            label = stringResource(R.string.signup),
             isActive = activeForm == "SIGN UP",
             onClick = { activeForm = "SIGN UP" },
             onContinue = { userId ->
@@ -457,19 +452,19 @@ fun AuthenticationScreen(
             showEmail = true,
             showPassword = true,
             showConfirmPassword = true,
-            height = 465
+            height = 500
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         MorphingAuthBox(
-            label = "SIGN IN",
+            label = stringResource(R.string.signin),
             isActive = activeForm == "SIGN IN",
             onClick = { activeForm = "SIGN IN" },
             onContinue = onAuthenticated,
             showEmailOrUsername = true,
             showPassword = true,
-            height = 255
+            height = 300
         )
 
         Row(
@@ -486,7 +481,7 @@ fun AuthenticationScreen(
             )
 
             Text(
-                text = "or sign up with",
+                text = stringResource(R.string.or_signup),
                 modifier = Modifier.padding(horizontal = 10.dp),
                 style = MaterialTheme.typography.bodyMedium
             )
@@ -499,56 +494,8 @@ fun AuthenticationScreen(
             )
         }
 
-        AuthButton("GMAIL", onClick = onGoogleClick)
+        AuthButton(stringResource(R.string.gmail), onClick = onGoogleClick)
 
     }
-
-
-
 }
-
-//@Composable
-//fun AuthScreen(
-//    iconResId: Int,
-//) {
-//    var activeForm by remember { mutableStateOf<String?>(null) }
-//
-//    Column(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .padding(32.dp),
-//        horizontalAlignment = Alignment.CenterHorizontally,
-//        verticalArrangement = Arrangement.Center
-//    ) {
-//        Icon (
-//            painter = painterResource(id = iconResId),
-//            contentDescription = "Logo",
-//            modifier = Modifier.size(100.dp)
-//        )
-//        Text("AlarmMeUp!", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(vertical = 16.dp))
-//
-//        if (activeForm == "SIGN UP") {
-//            PlaceholderForm("SIGN UP")
-//        }
-//        AuthButton("SIGN UP") { activeForm = "SIGN UP" }
-//
-//        if (activeForm == "SIGN IN") {
-//            PlaceholderForm("SIGN IN")
-//        }
-//        AuthButton("SIGN IN") { activeForm = "SIGN IN" }
-//
-//        Text("or sign up with", modifier = Modifier.padding(vertical = 16.dp))
-//
-//        if (activeForm == "GMAIL") {
-//            PlaceholderForm("GMAIL")
-//        }
-//        AuthButton("GMAIL") { activeForm = "GMAIL" }
-//
-//        if (activeForm != null) {
-//            Button(onClick = { /* continue */ }, modifier = Modifier.padding(top = 16.dp)) {
-//                Text("CONTINUE")
-//            }
-//        }
-//    }
-//}
 

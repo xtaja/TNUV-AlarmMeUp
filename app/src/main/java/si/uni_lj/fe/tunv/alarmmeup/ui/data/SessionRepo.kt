@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.single
+import si.uni_lj.fe.tunv.alarmmeup.ui.Leader
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.DayStatus
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.ProfilePictureEnum
 import java.time.LocalDate
@@ -69,7 +70,7 @@ class SessionRepo(
     }
 
     suspend fun login(id: Int) = ds.edit { it[Keys.CURRENT_ID] = id }
-    suspend fun logout()       = ds.edit { it.remove(Keys.CURRENT_ID) }
+    suspend fun logout()       = ds.edit { it.remove(Keys.CURRENT_ID)}
     suspend fun saveProfile(updated: UserEntity) =
         dao.update(updated)
 
@@ -145,6 +146,30 @@ class SessionRepo(
     suspend fun updateStreak(id: Int) {
         val userFlow = dao.byIdFlow(id)
         userFlow.first()?.let { dao.updateStreak(id, it.streak) }
+    }
+
+    suspend fun changeUserCanChangeButton(id: Int) {
+        dao.setUserChangeClockForFree(id);
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun getLeaderboard(): Flow<List<Leader>> {
+        val topTenUsersFlow = dao.getTopTenUsers()
+
+        return topTenUsersFlow.map { topUsers ->
+            topUsers.mapIndexed { index, user ->
+                val liveStreak = calculateCurrentStreak(user.id)
+
+                Leader(
+                    user.fullName,
+                    user.username,
+                    ProfilePictureEnum.toResource(user.profilePicture),
+                    user.xp,
+                    liveStreak,
+                    index + 1
+                )
+            }
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

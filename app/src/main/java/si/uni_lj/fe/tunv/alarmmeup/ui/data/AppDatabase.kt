@@ -159,6 +159,7 @@ data class UserEntity(
     val coins: Int = 0,
     val xp: Int = 0,
     val lastGameCompletedDate: String? = null,
+    val canChangeClockForFree: Boolean = true,
     val streak: Int = 0,
     val createdAt: Long = System.currentTimeMillis()
 )
@@ -317,16 +318,21 @@ interface UserDao {
 
     @Query("UPDATE users SET streak = :streak WHERE id = :id")
     fun updateStreak(id: Int, streak: Int)
+
+    @Query("SELECT * FROM users ORDER BY xp DESC LIMIT 10")
+    fun getTopTenUsers(): Flow<List<UserEntity>>
+
+    @Query("UPDATE users SET canChangeClockForFree = 0 WHERE id = :id")
+    suspend fun setUserChangeClockForFree(id: Int)
 }
 
 @Database(
     entities = [AlarmEntity::class, SoundEntity::class, VibrationEntity::class, UserEntity::class, UserSoundEntity::class, UserVibrationEntity::class, UserStreakData::class],
-    version = 111,
+    version = 113,
     exportSchema = false
 )
 @TypeConverters(EnumConverters::class, DateConverters::class)
 abstract class AppDatabase : RoomDatabase() {
-
     abstract fun alarmDao(): AlarmDao
     abstract fun soundDao(): SoundDao
     abstract fun vibrationDao(): VibrationDao
@@ -493,6 +499,26 @@ abstract class AppDatabase : RoomDatabase() {
                                     daysMask = 0,
                                     challenge = ChallengeEnum.Math,
                                     enabled = true
+                                ),
+                                AlarmEntity(
+                                    id = 4,
+                                    hour = 9,
+                                    minute = 0,
+                                    soundId = 1,
+                                    vibrationId = 23,
+                                    daysMask = 0,
+                                    challenge = ChallengeEnum.Math,
+                                    enabled = true
+                                ),
+                                AlarmEntity(
+                                    id = 5,
+                                    hour = 11,
+                                    minute = 0,
+                                    soundId = 1,
+                                    vibrationId = 23,
+                                    daysMask = 0,
+                                    challenge = ChallengeEnum.Math,
+                                    enabled = true
                                 )
 
                             )
@@ -505,7 +531,7 @@ abstract class AppDatabase : RoomDatabase() {
                                     "amyzams",
                                     "amyadams@gmail.com",
                                     "123",
-                                    ProfilePictureEnum.Man1
+                                    ProfilePictureEnum.Woman4
                                 ))
                                 val mariaId = userDao().insert(UserEntity(
                                     0,
@@ -513,16 +539,32 @@ abstract class AppDatabase : RoomDatabase() {
                                     "mara",
                                     "marialora@gmail.com",
                                     "pass",
-                                    ProfilePictureEnum.Man1
+                                    ProfilePictureEnum.Woman10
                                 ))
-                                val testId  = userDao().insert(UserEntity(
+                                val marcoId  = userDao().insert(UserEntity(
                                     0,
-                                    "Test",
-                                    "test",
-                                    "t",
+                                    "Marco So",
+                                    "marcs",
+                                    "marcs@gmail.com",
                                     "t",
                                     ProfilePictureEnum.Man1,
                                     streak = 3
+                                ))
+                                val kellyId  = userDao().insert(UserEntity(
+                                    0,
+                                    "Kelly Millila",
+                                    "kelzmilz",
+                                    "kelz@gmail.com",
+                                    "pass",
+                                    ProfilePictureEnum.Woman12,
+                                ))
+                                val nicoId  = userDao().insert(UserEntity(
+                                    0,
+                                    "Nico Blo",
+                                    "nics",
+                                    "nics@gmail.com",
+                                    "123",
+                                    ProfilePictureEnum.Man8,
                                 ))
 
                                 val defaultInventorySounds = listOf(
@@ -532,8 +574,14 @@ abstract class AppDatabase : RoomDatabase() {
                                     UserSoundEntity(userId = mariaId.toInt(), soundId = 4),
                                     UserSoundEntity(userId = mariaId.toInt(), soundId = 5),
 
-                                    UserSoundEntity(userId = testId.toInt(), soundId = 10),
-                                    UserSoundEntity(userId = testId.toInt(), soundId = 12)
+                                    UserSoundEntity(userId = marcoId.toInt(), soundId = 10),
+                                    UserSoundEntity(userId = marcoId.toInt(), soundId = 12),
+
+                                    UserSoundEntity(userId = kellyId.toInt(), soundId = 4),
+                                    UserSoundEntity(userId = kellyId.toInt(), soundId = 5),
+
+                                    UserSoundEntity(userId = nicoId.toInt(), soundId = 10),
+                                    UserSoundEntity(userId = nicoId.toInt(), soundId = 12)
                                 )
 
                                 val defaultInventoryVibrations = listOf(
@@ -543,31 +591,37 @@ abstract class AppDatabase : RoomDatabase() {
                                     UserVibrationEntity(userId = mariaId.toInt(), vibrationId = 25),
                                     UserVibrationEntity(userId = mariaId.toInt(), vibrationId = 26),
 
-                                    UserVibrationEntity(userId = testId.toInt(), vibrationId = 27),
-                                    UserVibrationEntity(userId = testId.toInt(), vibrationId = 28)
+                                    UserVibrationEntity(userId = marcoId.toInt(), vibrationId = 27),
+                                    UserVibrationEntity(userId = marcoId.toInt(), vibrationId = 28),
+
+                                    UserVibrationEntity(userId = kellyId.toInt(), vibrationId = 25),
+                                    UserVibrationEntity(userId = kellyId.toInt(), vibrationId = 26),
+
+                                    UserVibrationEntity(userId = nicoId.toInt(), vibrationId = 27),
+                                    UserVibrationEntity(userId = nicoId.toInt(), vibrationId = 28)
                                 )
 
                                 val defaultuserStreakData = listOf(
                                     UserStreakData(0, LocalDateTime.now(), LocalDateTime.now(), challenge = ChallengeEnum.Math, 1, 23,
-                                        DayStatus.COMPLETED, testId.toInt()),
+                                        DayStatus.COMPLETED, marcoId.toInt()),
                                     UserStreakData(0, LocalDateTime.now().minusDays(1), LocalDateTime.now().minusDays(1), challenge = ChallengeEnum.Math, 1, 23,
-                                        DayStatus.COMPLETED, testId.toInt()),
+                                        DayStatus.COMPLETED, marcoId.toInt()),
                                     UserStreakData(0, LocalDateTime.now().minusDays(2), LocalDateTime.now().minusDays(2), challenge = ChallengeEnum.Math, 1, 23,
-                                        DayStatus.COMPLETED, testId.toInt()),
+                                        DayStatus.COMPLETED, marcoId.toInt()),
                                     UserStreakData(0, LocalDateTime.now().minusDays(3), LocalDateTime.now().minusDays(3), challenge = ChallengeEnum.Math, 1, 23,
-                                        DayStatus.MISSED, testId.toInt()),
+                                        DayStatus.MISSED, marcoId.toInt()),
                                     UserStreakData(0, LocalDateTime.now().minusDays(4), LocalDateTime.now().minusDays(4), challenge = ChallengeEnum.Math, 1, 23,
-                                        DayStatus.MISSED, testId.toInt()),
+                                        DayStatus.MISSED, marcoId.toInt()),
 
                                     UserStreakData(0, LocalDateTime.now().minusDays(7), LocalDateTime.now().minusDays(7), challenge = ChallengeEnum.Math, 1, 23,
-                                        DayStatus.MISSED, testId.toInt()),
+                                        DayStatus.MISSED, marcoId.toInt()),
                                     UserStreakData(0, LocalDateTime.now().minusDays(8), LocalDateTime.now().minusDays(8), challenge = ChallengeEnum.Math, 1, 23,
-                                        DayStatus.MISSED, testId.toInt()),
+                                        DayStatus.MISSED, marcoId.toInt()),
 
                                     UserStreakData(0, LocalDateTime.now().minusDays(10), LocalDateTime.now().minusDays(10), challenge = ChallengeEnum.Math, 1, 23,
-                                        DayStatus.COMPLETED, testId.toInt()),
+                                        DayStatus.COMPLETED, marcoId.toInt()),
                                     UserStreakData(0, LocalDateTime.now().minusDays(11), LocalDateTime.now().minusDays(11), challenge = ChallengeEnum.Math, 1, 23,
-                                        DayStatus.COMPLETED, testId.toInt()),
+                                        DayStatus.COMPLETED, marcoId.toInt()),
 
                                 )
 

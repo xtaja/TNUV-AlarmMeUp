@@ -24,9 +24,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import si.uni_lj.fe.tunv.alarmmeup.R
 import si.uni_lj.fe.tunv.alarmmeup.ui.WinScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.ChallengeEnum
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.ExitButton
@@ -90,7 +92,7 @@ fun MemoryGame(
 
     if (isFinished) {
         WinScreen(
-            currentStreak = 5,
+            repo = sessionRepo,
             numOfXP = numOfXP,
             numOfSunCoins = numOfSunCoins,
             onCollect = onExit,
@@ -100,17 +102,15 @@ fun MemoryGame(
         if (showExitDialog) {
             AlertDialog(
                 onDismissRequest = { showExitDialog = false },
-                title = { Text("Exit Game?") },
-                text = { Text("If you exit now, you will lose all your progress in this minigame.") },
+                title = { stringResource(R.string.exit_game_question) },
+                text = { stringResource(R.string.exit_game_text) },
                 confirmButton = {
-                    TextButton(onClick = { showExitDialog = false; onExit(ChallengeEnum.Memory, true, false) }) {
-                        Text("Exit")
-                    }
+                    TextButton(onClick = { showExitDialog = false; onExit(ChallengeEnum.Memory, true, false) })
+                    { stringResource(R.string.exit) }
                 },
                 dismissButton = {
-                    TextButton(onClick = { showExitDialog = false }) {
-                        Text("Cancel")
-                    }
+                    TextButton(onClick = { showExitDialog = false })
+                    { stringResource(R.string.cancel) }
                 }
             )
         }
@@ -126,9 +126,9 @@ fun MemoryGame(
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Spacer(modifier = Modifier.height(100.dp))
-                Text("Memory", fontSize = 45.sp)
+                Text(stringResource(R.string.memory), fontSize = 45.sp)
                 Spacer(modifier = Modifier.height(100.dp))
-                Text("Find all pairs!", fontSize = 20.sp)
+                Text(stringResource(R.string.find_pairs), fontSize = 20.sp)
                 Spacer(modifier = Modifier.height(50.dp))
                 MemoryGrid(
                     cards = cards,

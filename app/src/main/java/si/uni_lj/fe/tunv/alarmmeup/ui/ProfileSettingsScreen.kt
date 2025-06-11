@@ -99,8 +99,18 @@ fun ProfileSettingsScreen(
     goToAuthorizationScreen: () -> Unit
 ) {
     val user by repo.currentUser.collectAsState(initial = null)
+    var hasLoadedUser by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
-    if (user == null) {
+    LaunchedEffect(user) {
+        if (user != null) {
+            hasLoadedUser = true
+        } else if (hasLoadedUser) {
+            goToAuthorizationScreen()
+        }
+    }
+
+    if (!hasLoadedUser) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("Loading profile…")
         }
@@ -125,7 +135,6 @@ fun ProfileSettingsScreen(
 
     val scrollState = rememberScrollState()
 
-    val scope  = rememberCoroutineScope()
     val ctx   = LocalContext.current
 
     Column(
@@ -316,7 +325,8 @@ fun ProfileSettingsScreen(
                     onClick = {
                         scope.launch {
                             repo.logout()
-                            goToAuthorizationScreen()}
+                            goToAuthorizationScreen()
+                            }
                         selected = true},
                     colors = ButtonDefaults.outlinedButtonColors(
                         containerColor = if (selected) Color.LightGray else Color.White,

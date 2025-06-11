@@ -11,6 +11,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.BlackColor
+import androidx.compose.ui.res.stringResource
+import si.uni_lj.fe.tunv.alarmmeup.R
+
 
 @Composable
 fun QrScanToggleAndText(
@@ -29,7 +32,7 @@ fun QrScanToggleAndText(
         )
         Spacer(modifier = Modifier.height(10.dp))
         Text(
-            text = "Scan to add friends!",
+            text = stringResource(R.string.qr_scan_friends),
             fontSize = 22.sp,
             fontWeight = FontWeight.Normal,
             color = BlackColor

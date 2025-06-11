@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -44,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import si.uni_lj.fe.tunv.alarmmeup.AlarmReceiver
+import si.uni_lj.fe.tunv.alarmmeup.R
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.RadialTimePicker
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.SessionRepo
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.AccentColor
@@ -74,13 +76,12 @@ fun HomeScreen(
     }
     var showAlert by remember { mutableStateOf(false) }
     var showPurchase by remember { mutableStateOf(false) }
-    var changeButton by remember { mutableStateOf(false) }
 
     val user by repo.currentUser.collectAsState(initial = null)
 
     if (user == null) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("Loading Images")
+            Text(stringResource(R.string.loading))
         }
         return
     }
@@ -144,7 +145,7 @@ fun HomeScreen(
                 Spacer(modifier = Modifier.height(20.dp))
                 Button(
                     onClick = {
-                        if (!changeButton) {
+                        if (user!!.canChangeClockForFree) {
                             showAlert = true
                         } else {
                             showPurchase = true
@@ -158,11 +159,11 @@ fun HomeScreen(
                     modifier = Modifier.shadow(6.dp, RoundedCornerShape(16.dp))
                 ) {
                     Text(
-                        text = if (!changeButton) "SET" else "RESET for 20",
+                        text = if (user!!.canChangeClockForFree) "SET" else "RESET for 20",
                         fontSize = 22.sp,
                         color = BlackColor
                     )
-                    if (changeButton) {
+                    if (!user!!.canChangeClockForFree) {
                         Icon(
                             painter = painterResource(iconResId),
                             contentDescription = null,
@@ -178,8 +179,8 @@ fun HomeScreen(
                 if (showPurchase){
                     AlertDialog(
                         onDismissRequest = { showAlert = false },
-                        title = { Text("Confirm Action")},
-                        text = { Text("Are you sure you want to change the time?")},
+                        title = { Text(stringResource(R.string.confirm_action)) },
+                        text = { Text(stringResource(R.string.confirm_action_text)) },
                         confirmButton = {
                             TextButton(
                                 onClick = {
@@ -190,20 +191,21 @@ fun HomeScreen(
                                             tempMinute,
                                             user!!.id
                                         )
+
                                     }
                                     scheduleAlarm(ctx, to24Hour(tempHour, tempIsAm), tempMinute)
 
                                     wakeUpTime = formatTime(tempHour, tempMinute, tempIsAm)
                                 })
                             {
-                                Text("Yes")
+                                Text(stringResource(R.string.yes))
                             }
                         },
                         dismissButton = {
                             TextButton(
                                 onClick = { showPurchase = false })
                             {
-                                Text("No")
+                                Text(stringResource(R.string.no))
                             }
                         }
                     )
@@ -218,13 +220,14 @@ fun HomeScreen(
                             TextButton(
                                 onClick = {
                                     showAlert = false
-                                    changeButton = true
                                     scope.launch {
                                         repo.updateClock(
                                             to24Hour(tempHour, tempIsAm),
                                             tempMinute,
                                             user!!.id
                                         )
+
+                                        repo.changeUserCanChangeButton(user!!.id)
                                     }
                                     scheduleAlarm(ctx, to24Hour(tempHour, tempIsAm), tempMinute)
 

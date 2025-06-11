@@ -1,6 +1,9 @@
 package si.uni_lj.fe.tunv.alarmmeup.ui
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,10 +19,16 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -29,18 +38,36 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import si.uni_lj.fe.tunv.alarmmeup.R
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.ChallengeEnum
+import si.uni_lj.fe.tunv.alarmmeup.ui.data.SessionRepo
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.AccentColor
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.BlackColor
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.WhiteColor
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun WinScreen(
-    currentStreak: Int,
+    repo: SessionRepo,
     numOfXP: Int,
     numOfSunCoins: Int,
     onCollect: (ChallengeEnum, Boolean, Boolean) -> Unit,
     gameEnum: ChallengeEnum
 ) {
+    val user by repo.currentUser.collectAsState(initial = null)
+
+    if (user == null) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(stringResource(R.string.loading))
+        }
+        return
+    }
+
+    var streak = remember { mutableStateOf<Int>(0) }
+
+    LaunchedEffect(user) {
+        val newStreak = repo.calculateCurrentStreak(userId = user!!.id) + 1
+        streak.value = newStreak
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -58,7 +85,7 @@ fun WinScreen(
                 tint = AccentColor
             )
             Spacer(modifier = Modifier.width(4.dp))
-            Text("$currentStreak", fontSize = 90.sp, fontWeight = FontWeight.Bold)
+            Text("${streak.value}", fontSize = 90.sp, fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.height(60.dp))
         Text(

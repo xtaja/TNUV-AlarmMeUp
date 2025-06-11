@@ -209,7 +209,7 @@ val initialSampleCategories = listOf(
     ),
     StoreCategory(
         id = 2,
-        name = "Popular Themes",
+        name = "Featured Vibrations",
         items = listOf(
             StoreItemData(
                 id = 23,
@@ -281,7 +281,7 @@ val initialSampleCategories = listOf(
     ),
     StoreCategory(
         id = 3,
-        name = "New Alarm Packs",
+        name = "New Alarm Sounds",
         items = listOf(
             StoreItemData(
                 id = 12,
@@ -408,7 +408,7 @@ val initialSampleCategories = listOf(
     ),
     StoreCategory(
         id = 2,
-        name = "Popular Themes",
+        name = "New releases",
         items = listOf(
             StoreItemData(
                 id = 29,

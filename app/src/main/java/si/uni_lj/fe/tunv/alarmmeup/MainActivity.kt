@@ -131,20 +131,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private val dummyLeaders = listOf(
-    Leader("Alice Anders",  "@A", R.drawable.woman15, xp = 5, flames = 2, rank = 1),
-    Leader("Bob Brown",     "@B",   R.drawable.man15, xp = 4, flames = 1, rank = 2),
-    Leader("Cara Chen",     "@C", R.drawable.woman13, xp = 1, flames = 1, rank = 3),
-    Leader("Alice Anders",  "@alicea", R.drawable.woman2, xp = 1500, flames = 45, rank = 4),
-    Leader("Bob Brown",     "@bobb",   R.drawable.man2, xp = 1380, flames = 38, rank = 5),
-    Leader("Cara Chen",     "@cara_c", R.drawable.woman4, xp = 1275, flames = 31, rank = 6),
-    Leader("David Drew",    "@daved",  R.drawable.man5, xp = 1160, flames = 27, rank = 7),
-    Leader("Eva Eastwood",  "@evae",   R.drawable.woman8, xp = 1045, flames = 22, rank = 8),
-    Leader("Frank Foster",  "@frankf", R.drawable.man8, xp =  980, flames = 18, rank = 9),
-    Leader("Gina Gonzales", "@ginag",  R.drawable.woman10, xp =  880, flames = 14, rank = 10),
-)
-
-
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit, initialShowMorningScreen: Boolean = false) {
@@ -309,8 +295,7 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit, initial
                     repo = sessionRepo,
                     resetKey = profileTabClickCount,
                     onSettingsClick = { selectedScreen = "ProfileSettings" })
-                "Leaderboard" -> LeaderboardScreen(
-                    leaders = dummyLeaders)
+                "Leaderboard" -> LeaderboardScreen(repo = sessionRepo)
                 "Home" -> {
                     if (showMorningScreen /*&& !gameCompletedToday*/) {
                         MorningScreen(

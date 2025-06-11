@@ -32,12 +32,14 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import si.uni_lj.fe.tunv.alarmmeup.R
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.AccentColor
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.BlackColor
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.GrayColor
@@ -145,7 +147,7 @@ fun RadialTimePicker(
                         )
                     )
                     Text(
-                        text = ":",
+                        text = stringResource(R.string.alarm_colon),
                         fontSize = 50.sp,
                         color = BlackColor,
                         modifier = Modifier
@@ -206,7 +208,7 @@ fun RadialTimePicker(
                         .width(60.dp)
                 ) {
                     Text(
-                        text = "AM",
+                        text = stringResource(R.string.AM),
                         color = if (isAm) AccentColor else GrayColor,
                         fontWeight = if (isAm) FontWeight.Bold else FontWeight.Normal,
                         fontSize = 18.sp
@@ -219,7 +221,7 @@ fun RadialTimePicker(
                         .width(60.dp)
                 ) {
                     Text(
-                        text = "PM",
+                        text = stringResource(R.string.PM),
                         color = if (!isAm) AccentColor else GrayColor,
                         fontWeight = if (!isAm) FontWeight.Bold else FontWeight.Normal,
                         fontSize = 18.sp

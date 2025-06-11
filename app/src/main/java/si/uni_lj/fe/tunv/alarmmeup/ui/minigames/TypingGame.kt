@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -59,7 +60,7 @@ fun TypingGame(
     }
     if (isFinished) {
         WinScreen(
-            currentStreak = 5,
+            repo = sessionRepo,
             numOfXP = numOfXP,
             numOfSunCoins = numOfSunCoins,
             onCollect = onExit,
@@ -69,17 +70,13 @@ fun TypingGame(
         if (showExitDialog) {
             AlertDialog(
                 onDismissRequest = { showExitDialog = false },
-                title = { Text("Exit Game?") },
-                text = { Text("If you exit now, you will lose all your progress in this minigame.") },
-                confirmButton = {
-                    TextButton(onClick = { showExitDialog = false; onExit(ChallengeEnum.Typing, true, false) }) {
-                        Text("Exit")
-                    }
+                title = { stringResource(R.string.exit_game_question) },
+                text = { stringResource(R.string.exit_game_text) },
+                confirmButton = { TextButton(onClick = { showExitDialog = false; onExit(ChallengeEnum.Typing, true, false) })
+                { stringResource(R.string.exit) }
                 },
-                dismissButton = {
-                    TextButton(onClick = { showExitDialog = false }) {
-                        Text("Cancel")
-                    }
+                dismissButton = { TextButton(onClick = { showExitDialog = false })
+                { stringResource(R.string.cancel)}
                 }
             )
         }
@@ -128,7 +125,7 @@ fun TypingGameUI(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(Modifier.padding(16.dp)) {
-                    Text("Type the following sentence:", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.find_sentences), style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(8.dp))
                     Text(target, style = MaterialTheme.typography.bodyMedium)
                 }
@@ -159,7 +156,7 @@ fun TypingGameUI(
                     )
                     if (userInput.text.isEmpty()) {
                         Text(
-                            "Start typing…",
+                            stringResource(R.string.start_typing),
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -170,7 +167,7 @@ fun TypingGameUI(
 
             if (userInput.text.isNotEmpty() && userInput.text != target) {
                 Text(
-                    "Keep going…",
+                    stringResource(R.string.keep_typing),
                     style = MaterialTheme.typography.bodySmall.copy(color = Color.Black)
                 )
             }

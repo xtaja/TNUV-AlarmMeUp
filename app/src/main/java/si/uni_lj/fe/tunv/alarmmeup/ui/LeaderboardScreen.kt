@@ -1,5 +1,8 @@
 package si.uni_lj.fe.tunv.alarmmeup.ui
 
+import android.os.Build
+import android.se.omapi.Session
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +24,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,6 +43,10 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
+import si.uni_lj.fe.tunv.alarmmeup.ui.components.ProfilePictureEnum
+import si.uni_lj.fe.tunv.alarmmeup.ui.data.SessionRepo
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.AccentColor
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.SecondaryColor
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.TertiaryColor
@@ -50,8 +61,14 @@ data class Leader(
     val rank: Int
 )
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun LeaderboardScreen(leaders: List<Leader>) {
+fun LeaderboardScreen(
+    repo: SessionRepo
+) {
+
+    var leaders = repo.getLeaderboard().collectAsState(initial = emptyList())
+
     LazyColumn (
         modifier = Modifier
             .fillMaxSize()
@@ -59,94 +76,97 @@ fun LeaderboardScreen(leaders: List<Leader>) {
         contentPadding = PaddingValues(vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
-        item { AvatarCluster(leaders = leaders) }
+        item { AvatarCluster(leaders = leaders.value) }
 
-        item { Spacer(modifier = Modifier.height(75.dp)) }
+        if (!leaders.value.isEmpty()) {
 
-        items(leaders.subList(3, leaders.size)) { leader ->
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
+            item { Spacer(modifier = Modifier.height(75.dp)) }
+
+            items(leaders.value.subList(3, leaders.value.size)) { leader ->
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 50.dp)
-                        .padding(vertical = 2.dp)
-                        .background(SecondaryColor, RoundedCornerShape(12.dp))
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(67.dp)
-                            .zIndex(1f)
-                            .offset(x = (-35).dp)
-                            .background(WhiteColor, CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Image(
-                            painter = painterResource(leader.avatarRes),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(50.dp)
-                                .clip(CircleShape)
-                        )
-                    }
-                    Spacer(Modifier.width(12.dp))
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 50.dp)
+                            .padding(vertical = 2.dp)
+                            .background(SecondaryColor, RoundedCornerShape(12.dp))
                     ) {
+                        Box(
+                            modifier = Modifier
+                                .size(67.dp)
+                                .zIndex(1f)
+                                .offset(x = (-35).dp)
+                                .background(WhiteColor, CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Image(
+                                painter = painterResource(leader.avatarRes),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(50.dp)
+                                    .clip(CircleShape)
+                            )
+                        }
+                        Spacer(Modifier.width(12.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Column(
+                                modifier = Modifier.offset(x = (-16).dp),
+                            ) {
+                                Text(
+                                    leader.name,
+                                    fontSize = 16.sp,
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                                Text(
+                                    leader.handle,
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
                         Column(
-                            modifier = Modifier.offset(x = (-16).dp),
+                            horizontalAlignment = Alignment.End,
+                            modifier = Modifier.offset(x = (-25).dp),
                         ) {
                             Text(
-                                leader.name,
-                                fontSize = 16.sp,
-                                style = MaterialTheme.typography.bodyLarge
+                                text = buildAnnotatedString {
+                                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                        append("XP ")
+                                    }
+                                    append("${leader.xp}")
+                                },
+                                fontSize = 14.sp
                             )
-                            Text(
-                                leader.handle,
-                                fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_streak),
+                                    contentDescription = "Flames",
+                                    modifier = Modifier.size(14.dp),
+                                    tint = AccentColor
+                                )
+                                Spacer(Modifier.width(4.dp))
+                                Text(text = "${leader.flames}", fontSize = 12.sp)
+                            }
                         }
+                        Spacer(Modifier.width(12.dp))
                     }
-                    Column(
-                        horizontalAlignment = Alignment.End,
-                        modifier = Modifier.offset(x = (-25).dp),
-                    ) {
-                        Text(
-                            text = buildAnnotatedString {
-                                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                    append("XP ")
-                                }
-                                append("${leader.xp}")
-                            },
-                            fontSize = 14.sp
-                        )
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_streak),
-                                contentDescription = "Flames",
-                                modifier = Modifier.size(14.dp),
-                                tint = AccentColor
-                            )
-                            Spacer(Modifier.width(4.dp))
-                            Text(text = "${leader.flames}", fontSize = 12.sp)
-                        }
-                    }
-                    Spacer(Modifier.width(12.dp))
-                }
 
-                Text(
-                    text = "${leader.rank}",
-                    fontSize = 20.sp,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .zIndex(2f)
-                )
+                    Text(
+                        text = "${leader.rank}",
+                        fontSize = 20.sp,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier
+                            .align(Alignment.CenterStart)
+                            .zIndex(2f)
+                    )
+                }
             }
         }
     }

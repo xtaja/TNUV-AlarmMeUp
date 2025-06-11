@@ -27,9 +27,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import si.uni_lj.fe.tunv.alarmmeup.R
 import si.uni_lj.fe.tunv.alarmmeup.ui.WinScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.ChallengeEnum
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.ExitButton
@@ -54,7 +56,7 @@ fun MathGame(
     }
     if (isFinished) {
         WinScreen(
-            currentStreak = 5,
+            repo = sessionRepo,
             numOfXP = numOfXP,
             numOfSunCoins = numOfSunCoins,
             onCollect = onExit,
@@ -64,17 +66,13 @@ fun MathGame(
         if (showExitDialog) {
             AlertDialog(
                 onDismissRequest = { showExitDialog = false },
-                title = { Text("Exit Game?") },
-                text = { Text("If you exit now, you will lose all your progress in this minigame.") },
-                confirmButton = {
-                    TextButton(onClick = { showExitDialog = false; onExit(ChallengeEnum.Math, true, false) }) {
-                        Text("Exit")
-                    }
+                title = { stringResource(R.string.exit_game_question) },
+                text = { stringResource(R.string.exit_game_text) },
+                confirmButton = { TextButton(onClick = { showExitDialog = false; onExit(ChallengeEnum.Math, true, false) })
+                { stringResource(R.string.exit) }
                 },
-                dismissButton = {
-                    TextButton(onClick = { showExitDialog = false }) {
-                        Text("Cancel")
-                    }
+                dismissButton = { TextButton(onClick = { showExitDialog = false })
+                { stringResource(R.string.cancel) }
                 }
             )
         }

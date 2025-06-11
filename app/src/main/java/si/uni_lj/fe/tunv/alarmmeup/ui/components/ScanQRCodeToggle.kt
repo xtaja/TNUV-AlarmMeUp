@@ -17,9 +17,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import si.uni_lj.fe.tunv.alarmmeup.R
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.BlackColor
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.MainColor
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.SecondaryColor
@@ -61,7 +63,7 @@ fun ScanQRCodeToggle(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "My code",
+                    text = stringResource(R.string.code),
                     color = if (!isScan) BlackColor else BlackColor,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
@@ -72,7 +74,7 @@ fun ScanQRCodeToggle(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Scan",
+                    text = stringResource(R.string.scan),
                     color = if (!isScan) BlackColor else BlackColor,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
