@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import si.uni_lj.fe.tunv.alarmmeup.ui.WinScreen
+import si.uni_lj.fe.tunv.alarmmeup.ui.components.ChallengeEnum
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.ExitButton
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.SessionRepo
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.MainColor
@@ -38,7 +39,7 @@ data class MemoryCard(val id: Int, val symbol: String, var isRevealed: Boolean =
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MemoryGame(
-    onExit: (fromWinScreen: Boolean) -> Unit,
+    onExit: (challengeEnum: ChallengeEnum, success: Boolean, fromWinScreen: Boolean) -> Unit,
     sessionRepo: SessionRepo
 ) {
     var numOfXP = 50
@@ -92,7 +93,8 @@ fun MemoryGame(
             currentStreak = 5,
             numOfXP = numOfXP,
             numOfSunCoins = numOfSunCoins,
-            onCollect = { onExit(true) }
+            onCollect = onExit,
+                gameEnum = ChallengeEnum.Memory
         )
     } else {
         if (showExitDialog) {
@@ -101,7 +103,7 @@ fun MemoryGame(
                 title = { Text("Exit Game?") },
                 text = { Text("If you exit now, you will lose all your progress in this minigame.") },
                 confirmButton = {
-                    TextButton(onClick = { showExitDialog = false; onExit(false) }) {
+                    TextButton(onClick = { showExitDialog = false; onExit(ChallengeEnum.Memory, true, false) }) {
                         Text("Exit")
                     }
                 },

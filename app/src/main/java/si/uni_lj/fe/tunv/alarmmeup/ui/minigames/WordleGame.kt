@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import si.uni_lj.fe.tunv.alarmmeup.R
 import si.uni_lj.fe.tunv.alarmmeup.ui.WinScreen
+import si.uni_lj.fe.tunv.alarmmeup.ui.components.ChallengeEnum
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.ExitButton
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.SessionRepo
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.BlackColor
@@ -59,7 +60,7 @@ data class LetterBox(val letter: Char?, val state: LetterState = LetterState.UNS
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun WordleGame(
-    onExit: (fromWinScreen: Boolean) -> Unit,
+    onExit: (challengeEnum: ChallengeEnum, success: Boolean, fromWinScreen: Boolean) -> Unit,
     sessionRepo: SessionRepo
 ) {
     val numOfXP = 50
@@ -135,7 +136,8 @@ fun WordleGame(
             currentStreak = if (isWin) 5 else 0,
             numOfXP = if (isWin) numOfXP else 0,
             numOfSunCoins = if (isWin) numOfSunCoins else 0,
-            onCollect = { onExit(true) }
+            onCollect = onExit,
+                gameEnum = ChallengeEnum.Wordle
         )
     } else {
         if (showExitDialog) {
@@ -144,7 +146,7 @@ fun WordleGame(
                 title = { Text("Exit Game?") },
                 text = { Text("If you exit now, you will lose all your progress in this minigame.") },
                 confirmButton = {
-                    TextButton(onClick = { showExitDialog = false; onExit(false) }) {
+                    TextButton(onClick = { showExitDialog = false; onExit(ChallengeEnum.Wordle, true, false)}) {
                         Text("Exit")
                     }
                 },

@@ -2,6 +2,8 @@ package si.uni_lj.fe.tunv.alarmmeup.ui.data
 
 import android.R.string
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.room.*
 import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.CoroutineScope
@@ -9,10 +11,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.Flow
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.ChallengeEnum
+import si.uni_lj.fe.tunv.alarmmeup.ui.components.DayStatus
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.ProfilePictureEnum
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.SoundCategoryEnum
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.SoundEnum
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.VibrationCategoryEnum
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.logging.Level
 
 @Entity(
@@ -47,6 +54,29 @@ data class AlarmEntity(
     val challenge: ChallengeEnum,
     val enabled: Boolean = true
 )
+
+@Entity(
+    tableName = "user_streak_data",
+    foreignKeys = [
+        ForeignKey(
+            entity = UserEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["userId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [ Index("userId") ]
+)
+data class UserStreakData(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val dateRang: LocalDateTime,
+    val dateActionFinished: LocalDateTime?,
+    val challenge: ChallengeEnum,
+    val soundId: Int,
+    val vibrationId: Int,
+    val action: DayStatus,
+    val userId: Int
+);
 
 @Entity(
     tableName = "user_sounds",
@@ -129,6 +159,7 @@ data class UserEntity(
     val coins: Int = 0,
     val xp: Int = 0,
     val lastGameCompletedDate: String? = null,
+    val streak: Int = 0,
     val createdAt: Long = System.currentTimeMillis()
 )
 
@@ -143,6 +174,31 @@ class EnumConverters {
     @TypeConverter
     fun stringToProfilePic(s: String): ProfilePictureEnum =
         ProfilePictureEnum.valueOf(s)
+
+    @TypeConverter
+    fun fromDayStatus(value: String?): DayStatus? {
+        return value?.let { DayStatus.valueOf(it) }
+    }
+
+    @TypeConverter
+    fun dayStatusToString(dayStatus: DayStatus?): String? {
+        return dayStatus?.name
+    }
+
+}
+
+class DateConverters {
+    @RequiresApi(Build.VERSION_CODES.O)
+    @TypeConverter
+    fun dateTimeToString(e: Long?): LocalDateTime? {
+        return e?.let { LocalDateTime.ofInstant(Instant.ofEpochSecond(it), ZoneOffset.UTC) }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    @TypeConverter
+    fun dateToTimestamp(date: LocalDateTime?): Long? {
+        return date?.toEpochSecond(ZoneOffset.UTC)
+    }
 }
 
 @Dao
@@ -157,6 +213,14 @@ interface AlarmDao {
     suspend fun updateClock(hour: Int, minute: Int, id: Int)
     @Query("SELECT * FROM alarms WHERE id = :id")
     fun selectById(id: Int): Flow<AlarmEntity?>
+}
+
+@Dao
+interface UserStreakDataDao{
+    @Insert suspend fun insert(entity: UserStreakData)
+    @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertAll(list: List<UserStreakData>)
+    @Query("SELECT * FROM user_streak_data WHERE userId = :userId")
+    suspend fun getAllForUser(userId: Int) : List<UserStreakData>
 }
 
 @Dao
@@ -207,6 +271,9 @@ interface SoundDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertAll(list: List<SoundEntity>)
     @Query("SELECT * FROM sounds")
     fun all(): Flow<List<SoundEntity>>
+
+    @Query("SELECT * FROM sounds WHERE id = :id")
+    fun getById(id: Int) : SoundEntity?
 }
 
 @Dao
@@ -214,6 +281,9 @@ interface VibrationDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertAll(list: List<VibrationEntity>)
     @Query("SELECT * FROM vibrations")
     fun all(): Flow<List<VibrationEntity>>
+
+    @Query("SELECT * FROM vibrations WHERE id = :id")
+    fun getById(id: Int) : VibrationEntity?
 }
 
 @Dao
@@ -244,14 +314,17 @@ interface UserDao {
 
     @Query("SELECT * FROM users WHERE id = :id")
     fun byIdFlow(id: Int): Flow<UserEntity?>
+
+    @Query("UPDATE users SET streak = :streak WHERE id = :id")
+    fun updateStreak(id: Int, streak: Int)
 }
 
 @Database(
-    entities = [AlarmEntity::class, SoundEntity::class, VibrationEntity::class, UserEntity::class, UserSoundEntity::class, UserVibrationEntity::class],
-    version = 103,
+    entities = [AlarmEntity::class, SoundEntity::class, VibrationEntity::class, UserEntity::class, UserSoundEntity::class, UserVibrationEntity::class, UserStreakData::class],
+    version = 111,
     exportSchema = false
 )
-@TypeConverters(EnumConverters::class)
+@TypeConverters(EnumConverters::class, DateConverters::class)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun alarmDao(): AlarmDao
@@ -260,6 +333,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun userSoundDao(): UserSoundDao
     abstract fun userVibrationDao(): UserVibrationDao
+    abstract fun userStreakDataDao(): UserStreakDataDao
 
     companion object {
         @Volatile private var INSTANCE: AppDatabase? = null
@@ -273,16 +347,19 @@ abstract class AppDatabase : RoomDatabase() {
             Room.databaseBuilder(ctx.applicationContext, AppDatabase::class.java, "alarmmeup.db")
                 .fallbackToDestructiveMigration()
                 .addCallback(object : Callback() {
+                    @RequiresApi(Build.VERSION_CODES.O)
                     override fun onCreate(db: SupportSQLiteDatabase) {
                         super.onCreate(db)
                         seedEverything(ctx)
                     }
 
+                    @RequiresApi(Build.VERSION_CODES.O)
                     override fun onDestructiveMigration(db: SupportSQLiteDatabase) {
                         super.onDestructiveMigration(db)
                         seedEverything(ctx)
                     }
 
+                    @RequiresApi(Build.VERSION_CODES.O)
                     private fun seedEverything(ctx: Context) {
                         CoroutineScope(Dispatchers.IO).launch {
                             val soundSeeds = listOf(
@@ -444,7 +521,8 @@ abstract class AppDatabase : RoomDatabase() {
                                     "test",
                                     "t",
                                     "t",
-                                    ProfilePictureEnum.Man1
+                                    ProfilePictureEnum.Man1,
+                                    streak = 3
                                 ))
 
                                 val defaultInventorySounds = listOf(
@@ -469,11 +547,36 @@ abstract class AppDatabase : RoomDatabase() {
                                     UserVibrationEntity(userId = testId.toInt(), vibrationId = 28)
                                 )
 
+                                val defaultuserStreakData = listOf(
+                                    UserStreakData(0, LocalDateTime.now(), LocalDateTime.now(), challenge = ChallengeEnum.Math, 1, 23,
+                                        DayStatus.COMPLETED, testId.toInt()),
+                                    UserStreakData(0, LocalDateTime.now().minusDays(1), LocalDateTime.now().minusDays(1), challenge = ChallengeEnum.Math, 1, 23,
+                                        DayStatus.COMPLETED, testId.toInt()),
+                                    UserStreakData(0, LocalDateTime.now().minusDays(2), LocalDateTime.now().minusDays(2), challenge = ChallengeEnum.Math, 1, 23,
+                                        DayStatus.COMPLETED, testId.toInt()),
+                                    UserStreakData(0, LocalDateTime.now().minusDays(3), LocalDateTime.now().minusDays(3), challenge = ChallengeEnum.Math, 1, 23,
+                                        DayStatus.MISSED, testId.toInt()),
+                                    UserStreakData(0, LocalDateTime.now().minusDays(4), LocalDateTime.now().minusDays(4), challenge = ChallengeEnum.Math, 1, 23,
+                                        DayStatus.MISSED, testId.toInt()),
+
+                                    UserStreakData(0, LocalDateTime.now().minusDays(7), LocalDateTime.now().minusDays(7), challenge = ChallengeEnum.Math, 1, 23,
+                                        DayStatus.MISSED, testId.toInt()),
+                                    UserStreakData(0, LocalDateTime.now().minusDays(8), LocalDateTime.now().minusDays(8), challenge = ChallengeEnum.Math, 1, 23,
+                                        DayStatus.MISSED, testId.toInt()),
+
+                                    UserStreakData(0, LocalDateTime.now().minusDays(10), LocalDateTime.now().minusDays(10), challenge = ChallengeEnum.Math, 1, 23,
+                                        DayStatus.COMPLETED, testId.toInt()),
+                                    UserStreakData(0, LocalDateTime.now().minusDays(11), LocalDateTime.now().minusDays(11), challenge = ChallengeEnum.Math, 1, 23,
+                                        DayStatus.COMPLETED, testId.toInt()),
+
+                                )
+
                                 soundDao().insertAll(soundSeeds)
                                 vibrationDao().insertAll(vibrationSeeds)
                                 alarmDao().insertAll(defaultAlarmsEntities)
                                 userVibrationDao().insertAll(defaultInventoryVibrations)
                                 userSoundDao().insertAll(defaultInventorySounds)
+                                userStreakDataDao().insertAll(defaultuserStreakData)
                             }
                         }
                     }

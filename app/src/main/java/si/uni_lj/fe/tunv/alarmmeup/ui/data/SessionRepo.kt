@@ -2,6 +2,7 @@ package si.uni_lj.fe.tunv.alarmmeup.ui.data
 
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,7 +19,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.single
+import si.uni_lj.fe.tunv.alarmmeup.ui.components.DayStatus
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.ProfilePictureEnum
+import java.time.LocalDate
 
 val Context.userPrefs by preferencesDataStore("user_prefs")
 object Keys { val CURRENT_ID = intPreferencesKey("current_uid") }
@@ -29,7 +33,10 @@ class SessionRepo(
     private val dao: UserDao,
     private val daoAlarms: AlarmDao,
     private val userSoundDao: UserSoundDao,
-    private val userVibrationDao: UserVibrationDao
+    private val userVibrationDao: UserVibrationDao,
+    private val userStreakDataDao: UserStreakDataDao,
+    private val soundDao: SoundDao,
+    private val vibrationDao: VibrationDao
 ) {
     @OptIn(ExperimentalCoroutinesApi::class)
     val currentUser: Flow<UserEntity?> =
@@ -89,6 +96,14 @@ class SessionRepo(
         return daoAlarms.selectById(id)
     }
 
+    fun getSound(id: Int) : SoundEntity? {
+        return soundDao.getById(id)
+    }
+
+    fun getVibration(id: Int) : VibrationEntity? {
+        return vibrationDao.getById(id)
+    }
+
     suspend fun setAlarmSettings(ent: AlarmEntity) {
         daoAlarms.update(ent)
     }
@@ -117,5 +132,55 @@ class SessionRepo(
             user = updatedUser
             dao.update(updatedUser)
         }
+    }
+
+    suspend fun insertStreakData(userStreak: UserStreakData) {
+        userStreakDataDao.insert(userStreak)
+    }
+
+    suspend fun getAllRelevantDays(userId: Int): List<UserStreakData> {
+        return userStreakDataDao.getAllForUser(userId)
+    }
+
+    suspend fun updateStreak(id: Int) {
+        val userFlow = dao.byIdFlow(id)
+        userFlow.first()?.let { dao.updateStreak(id, it.streak) }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    suspend fun calculateCurrentStreak(userId: Int): Int {
+        val allEntries = userStreakDataDao.getAllForUser(userId)
+
+        val completedDates = allEntries
+            .filter { it.action == DayStatus.COMPLETED }
+            .map { it.dateRang.toLocalDate() }
+            .sortedDescending()
+
+        if (completedDates.isEmpty()) {
+            return 0
+        }
+
+        val today = LocalDate.now()
+        val yesterday = today.minusDays(1)
+        val mostRecentDate = completedDates.first()
+
+        if (mostRecentDate.isBefore(yesterday)) {
+            return 0
+        }
+
+        var currentStreak = 1
+
+        for (i in 0 until completedDates.size - 1) {
+            val currentDay = completedDates[i]
+            val previousDayInList = completedDates[i + 1]
+
+            if (currentDay.minusDays(1) == previousDayInList) {
+                currentStreak++
+            } else {
+                break
+            }
+        }
+
+        return currentStreak
     }
 }

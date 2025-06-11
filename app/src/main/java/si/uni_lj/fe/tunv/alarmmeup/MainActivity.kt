@@ -40,7 +40,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import si.uni_lj.fe.tunv.alarmmeup.ui.AuthenticationScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.HomeScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.Leader
@@ -69,6 +71,10 @@ import si.uni_lj.fe.tunv.alarmmeup.ui.snoozeAlarm
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.AlarmMeUpTheme
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.WhiteColor
 import java.util.Calendar
+import si.uni_lj.fe.tunv.alarmmeup.ui.components.ChallengeEnum
+import si.uni_lj.fe.tunv.alarmmeup.ui.components.DayStatus
+import si.uni_lj.fe.tunv.alarmmeup.ui.data.UserStreakData
+import java.time.LocalDateTime
 import kotlin.math.abs
 
 class MainActivity : ComponentActivity() {
@@ -80,6 +86,8 @@ class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val showMorning = intent.getBooleanExtra("showMorningScreen", false)
 
         accountPickerLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
@@ -103,7 +111,8 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     MainScreen(
                         modifier = Modifier.padding(innerPadding),
-                        onGoogleClick = onGoogleClick
+                        onGoogleClick = onGoogleClick,
+                        initialShowMorningScreen = showMorning
                     )
                 }
             }
@@ -123,6 +132,9 @@ class MainActivity : ComponentActivity() {
 }
 
 private val dummyLeaders = listOf(
+    Leader("Alice Anders",  "@A", R.drawable.woman15, xp = 5, flames = 2, rank = 1),
+    Leader("Bob Brown",     "@B",   R.drawable.man15, xp = 4, flames = 1, rank = 2),
+    Leader("Cara Chen",     "@C", R.drawable.woman13, xp = 1, flames = 1, rank = 3),
     Leader("Alice Anders",  "@alicea", R.drawable.woman2, xp = 1500, flames = 45, rank = 4),
     Leader("Bob Brown",     "@bobb",   R.drawable.man2, xp = 1380, flames = 38, rank = 5),
     Leader("Cara Chen",     "@cara_c", R.drawable.woman4, xp = 1275, flames = 31, rank = 6),
@@ -135,34 +147,40 @@ private val dummyLeaders = listOf(
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit) {
+fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit, initialShowMorningScreen: Boolean = false) {
     var selectedScreen by remember { mutableStateOf("Auth") }
     val minigameScreens = listOf("MathGame", "TypingGame", "MemoryGame", "WordleGame")
     var profileTabClickCount by remember { mutableStateOf(0) }
 
     var profilePicture by remember {mutableStateOf(R.drawable.man1)}
     val ctx        = LocalContext.current
-    var showMorningScreen by remember { mutableStateOf(false) }
+    var showMorningScreen by remember { mutableStateOf(initialShowMorningScreen) }
     val mainScope  = rememberCoroutineScope()
     val sessionRepo = remember {
         SessionRepo(
             ctx.userPrefs, AppDatabase.get(ctx).userDao(),
             daoAlarms = AppDatabase.get(ctx).alarmDao(),
             userSoundDao = AppDatabase.get(ctx).userSoundDao(),
-            userVibrationDao = AppDatabase.get(ctx).userVibrationDao()
+            userVibrationDao = AppDatabase.get(ctx).userVibrationDao(),
+            userStreakDataDao = AppDatabase.get(ctx).userStreakDataDao(),
+            soundDao = AppDatabase.get(ctx).soundDao(),
+            vibrationDao = AppDatabase.get(ctx).vibrationDao()
         )
     }
 
     val user by sessionRepo.currentUser.collectAsState(initial = null)
 
+    var currentStreak = remember { mutableStateOf<Int>(0)}
+
     LaunchedEffect(user) {
-        if (user != null && sessionRepo.user != user) {
-            sessionRepo.user = user
+        if (user != null) {
+            if (sessionRepo.user != user) sessionRepo.user = user
+            currentStreak.value = sessionRepo.calculateCurrentStreak(user!!.id)
         }
     }
     val gameCompletedToday = sessionRepo.wasGameCompletedToday()
     val alarmEntity by user?.let { sessionRepo.getClock(it.id).collectAsState(initial = null) } ?: remember { mutableStateOf(null) }
-    var forceHomeScreen by remember { mutableStateOf(false) }
+    var forceHomeScreen by remember { mutableStateOf(!initialShowMorningScreen) }
     fun isWithinWakeupWindow(): Boolean {
         val alarm = alarmEntity
         if (alarm == null) return false
@@ -194,7 +212,7 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit) {
             prefs.edit().putBoolean("showMorningScreen", false).apply()
         }
     }
-    
+
     DisposableEffect(Unit) {
         val prefs = ctx.getSharedPreferences("alarmmeup_prefs", Context.MODE_PRIVATE)
         val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
@@ -222,7 +240,7 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit) {
                     contentDescription = "Streak Calendar",
                     onClick = { selectedScreen = "StreakCalendar" },
                     isActive = selectedScreen == "StreakCalendar",
-                    label = "24", //change to steak number
+                    label = currentStreak.value.toString(),
                     iconSize = 32.dp
                 )
                 NavBarStats( //XP and SunCoins
@@ -240,6 +258,39 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit) {
             }
         }
 
+        val onExit = { challenge: ChallengeEnum, success: Boolean, fromWinScreen: Boolean ->
+            mainScope.launch {
+                withContext(Dispatchers.IO) {
+                    sessionRepo.updateStreak(user!!.id)
+
+                    val streakData = UserStreakData(
+                        0,
+                        LocalDateTime.now(),
+                        LocalDateTime.now(),
+                        challenge,
+                        alarmEntity!!.soundId!!,
+                        alarmEntity!!.vibrationId!!,
+                        if (success) DayStatus.COMPLETED else DayStatus.MISSED,
+                        user!!.id
+                    )
+
+                    sessionRepo.insertStreakData(streakData)
+
+                    currentStreak.value = sessionRepo.calculateCurrentStreak(user!!.id)
+                }
+            }
+
+            if (fromWinScreen) {
+                forceHomeScreen = true
+                showMorningScreen = false
+                selectedScreen = "Home"
+            } else {
+                forceHomeScreen = false
+                showMorningScreen = true
+                selectedScreen = "Home"
+            }
+        }
+
         // Main Content
         Box(
             modifier = Modifier
@@ -249,7 +300,7 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit) {
             contentAlignment = Alignment.Center
         ) {
             when (selectedScreen) {
-                "StreakCalendar" -> StreakScreen(R.drawable.snooze, R.drawable.ic_streak, R.drawable.check, R.drawable.close)
+                "StreakCalendar" -> StreakScreen(sessionRepo, R.drawable.snooze, R.drawable.ic_streak, R.drawable.check, R.drawable.close, currentStreak.value)
                 "Profile" -> ProfileScreen(
                     repo = sessionRepo,
                     resetKey = profileTabClickCount,
@@ -285,16 +336,21 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit) {
                     repo = sessionRepo,
                     onCancel = { selectedScreen = "Profile" }
                     )
-                "Auth" -> AuthenticationScreen(
-                    iconResId = R.drawable.ic_original_logo,
-                    onAuthenticated = { it ->
-                        selectedScreen = "Loading"
-                        mainScope.launch {
-                            sessionRepo.login(it)
-                        } },
-                    onGoogleClick = onGoogleClick,
-                    onRequireAvatarSelection = { selectedScreen = "ChooseAvatar" }
-                )
+                "Auth" ->
+                    if (user != null) {
+                        selectedScreen = "Home"
+                    } else {
+                        AuthenticationScreen(
+                            iconResId = R.drawable.ic_original_logo,
+                            onAuthenticated = { it ->
+                                selectedScreen = "Loading"
+                                mainScope.launch {
+                                    sessionRepo.login(it)
+                                } },
+                            onGoogleClick = onGoogleClick,
+                            onRequireAvatarSelection = { selectedScreen = "ChooseAvatar" }
+                        )
+                    }
                 "Loading" -> LoadingScreen(R.layout.onboarding_step1,
                     onFinished = { selectedScreen = "Home" }
                 )
@@ -352,62 +408,11 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit) {
                     onProfilesClick = { selectedScreen = "ChooseAvatar" },
                     goToAuthorizationScreen = { selectedScreen = "Auth" }
                 )
-                "MathGame" -> MathGame(
-                    onExit = { fromWinScreen ->
-                        if (fromWinScreen) {
-                            forceHomeScreen = true
-                            showMorningScreen = false
-                            selectedScreen = "Home"
-                        } else {
-                            forceHomeScreen = false
-                            showMorningScreen = true
-                            selectedScreen = "Home"
-                        }
-                    },
-                    sessionRepo = sessionRepo
-                )
-                "TypingGame" -> TypingGame(
-                    onExit = { fromWinScreen ->
-                        if (fromWinScreen) {
-                            forceHomeScreen = true
-                            showMorningScreen = false
-                            selectedScreen = "Home"
-                        } else {
-                            forceHomeScreen = false
-                            showMorningScreen = true
-                            selectedScreen = "Home"
-                        }
-                    },
-                    sessionRepo = sessionRepo
-                )
-                "MemoryGame" -> MemoryGame(
-                    onExit = { fromWinScreen ->
-                        if (fromWinScreen) {
-                            forceHomeScreen = true
-                            showMorningScreen = false
-                            selectedScreen = "Home"
-                        } else {
-                            forceHomeScreen = false
-                            showMorningScreen = true
-                            selectedScreen = "Home"
-                        }
-                    },
-                    sessionRepo = sessionRepo
-                )
-                "WordleGame" -> WordleGame(
-                    onExit = { fromWinScreen ->
-                        if (fromWinScreen) {
-                            forceHomeScreen = true
-                            showMorningScreen = false
-                            selectedScreen = "Home"
-                        } else {
-                            forceHomeScreen = false
-                            showMorningScreen = true
-                            selectedScreen = "Home"
-                        }
-                    },
-                    sessionRepo = sessionRepo
-                )
+
+                "MathGame" -> MathGame(onExit = onExit, sessionRepo = sessionRepo)
+                "TypingGame" -> TypingGame(onExit = onExit, sessionRepo = sessionRepo)
+                "MemoryGame" -> MemoryGame(onExit = onExit, sessionRepo = sessionRepo)
+                "WordleGame" -> WordleGame(onExit = onExit, sessionRepo = sessionRepo)
                 else -> Text("Unknown screen")
             }
             if (selectedScreen == "Profile" || selectedScreen == "ProfileSettings" || selectedScreen == "Settings") {

@@ -29,6 +29,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -53,6 +57,8 @@ import si.uni_lj.fe.tunv.alarmmeup.ui.theme.AccentColor
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.BlackColor
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.GrayColor
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.WhiteColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.components.DaysEnum
+import si.uni_lj.fe.tunv.alarmmeup.ui.data.SessionRepo
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.Month
@@ -60,17 +66,15 @@ import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.Locale
 
-// Data class definition
 data class DateRangeHighlight(
     val start: LocalDate,
     val end: LocalDate,
     val color: Color,
     val borderColor: Color,
-    @DrawableRes val icon: Int? = null, // Use @DrawableRes for type safety
+    @DrawableRes val icon: Int? = null,
     val iconColor: Color = Color.Black
 )
 
-// --- Configurable Styling Constants ---
 private val CALENDAR_OUTER_EDGE_MARGIN: Dp = 8.dp
 private val DAY_CELL_VERTICAL_INNER_MARGIN: Dp = 2.dp
 private val DAY_CELL_HORIZONTAL_INNER_MARGIN: Dp = 4.dp
@@ -82,14 +86,13 @@ private val DAY_CELL_TEXT_SIZE: TextUnit = 14.sp
 private val RANGE_TEXT_COLOR: Color = Color.Black
 private val DEFAULT_ICON_COLOR: Color = Color.Black
 
-// --- NEW: Styling for Larger Streak Display ---
-private val STREAK_ICON_SIZE: Dp = 36.dp // Increased icon size
-private val STREAK_TEXT_SIZE: TextUnit = 22.sp // Increased text size
-private val STREAK_SPACER_WIDTH: Dp = 10.dp // Increased spacer
-private val STREAK_ROW_VERTICAL_PADDING: Dp = 12.dp // Increased row padding
+private val STREAK_ICON_SIZE: Dp = 36.dp
+private val STREAK_TEXT_SIZE: TextUnit = 22.sp
+private val STREAK_SPACER_WIDTH: Dp = 10.dp
+private val STREAK_ROW_VERTICAL_PADDING: Dp = 12.dp
 
 
-@RequiresApi(Build.VERSION_CODES.O)
+/*@RequiresApi(Build.VERSION_CODES.O)
 val alarmData: List<Day> = listOf(
     Day(date = LocalDate.of(2025, Month.MAY, 1), status = DayStatus.COMPLETED),
     Day(date = LocalDate.of(2025, Month.MAY, 2), status = DayStatus.COMPLETED),
@@ -106,7 +109,7 @@ val alarmData: List<Day> = listOf(
     Day(date = LocalDate.of(2025, Month.MAY, 30), status = DayStatus.MISSED),
     Day(date = LocalDate.of(2025, Month.MAY, 31), status = DayStatus.COMPLETED),
     Day(date = LocalDate.of(2025, Month.JUNE, 3), status = DayStatus.COMPLETED)
-)
+)*/
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -116,19 +119,41 @@ fun CreateRanges(
     @DrawableRes snoozeIconId: Int?,
     @DrawableRes closeIconId: Int?
 ): List<DateRangeHighlight> {
+
+    val calendarStartDate = LocalDate.now().minusMonths(12)
+    val calendarEndDate = LocalDate.now().plusMonths(12)
+
+    val defaultFillerColor = GrayColor
+    val defaultIconColor = BlackColor
+
     if (daysInput.isEmpty()) {
-        return emptyList()
+        return listOf(
+            DateRangeHighlight(
+                calendarStartDate,
+                calendarEndDate,
+                Color.White,
+                Color.White,
+                closeIconId,
+                defaultIconColor
+            )
+        )
     }
     val days = daysInput.filter { it.date != null }.sortedBy { it.date }
+
     if (days.isEmpty()) {
-        return emptyList()
+        return listOf(
+            DateRangeHighlight(
+                calendarStartDate,
+                calendarEndDate,
+                Color.White,
+                Color.White,
+                closeIconId,
+                defaultIconColor
+            )
+        )
     }
 
     val rangeList: MutableList<DateRangeHighlight> = mutableListOf()
-    val calendarStartDate = LocalDate.now().minusMonths(12)
-    val calendarEndDate = LocalDate.now().plusMonths(12)
-    val defaultFillerColor = GrayColor
-    val defaultIconColor = BlackColor
 
     val firstAlarmDate = days.first().date!!
     if (firstAlarmDate.isAfter(calendarStartDate)) {
@@ -233,12 +258,32 @@ fun CreateRanges(
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun StreakScreen(
+    repo: SessionRepo,
     @DrawableRes snoozeIconId: Int,
     @DrawableRes fireIconId: Int,
     @DrawableRes checkIconId: Int,
     @DrawableRes closeIconId: Int,
-    currentStreak: Int = 24
+    currentStreak: Int
 ) {
+
+    var alarmData = remember { mutableStateOf<List<Day>>(listOf()) }
+
+    val user by repo.currentUser.collectAsState(initial = null)
+
+    if (user == null) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("Loading data…")
+        }
+        return
+    }
+
+    LaunchedEffect(user) {
+        alarmData.value = repo.getAllRelevantDays(user!!.id).map { x ->
+            Day(x.dateRang.toLocalDate(), x.action)
+        }
+    }
+
+
     val currentMonth = remember { YearMonth.now() }
     val startMonth = remember { currentMonth.minusMonths(6) }
     val endMonth = remember { currentMonth.plusMonths(3) }
@@ -252,8 +297,8 @@ fun StreakScreen(
     )
     val coroutineScope = rememberCoroutineScope()
 
-    val highlightedRanges = remember(alarmData, snoozeIconId, checkIconId, closeIconId) {
-        CreateRanges(alarmData, checkIconId, snoozeIconId, closeIconId)
+    val highlightedRanges = remember(alarmData.value, snoozeIconId, checkIconId, closeIconId) {
+        CreateRanges(alarmData.value.toList(), checkIconId, snoozeIconId, closeIconId)
     }
 
     Column(
@@ -261,12 +306,11 @@ fun StreakScreen(
             .fillMaxSize()
             .padding(8.dp)
     ) {
-        // Streak Display Row - MODIFIED FOR LARGER SIZE
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    vertical = STREAK_ROW_VERTICAL_PADDING, // Increased padding
+                    vertical = STREAK_ROW_VERTICAL_PADDING,
                     horizontal = CALENDAR_OUTER_EDGE_MARGIN
                 ),
             verticalAlignment = Alignment.CenterVertically,
@@ -276,15 +320,15 @@ fun StreakScreen(
                 Icon(
                     painter = painterResource(id = fireIconId),
                     contentDescription = "Current Streak",
-                    modifier = Modifier.size(STREAK_ICON_SIZE), // Increased size
+                    modifier = Modifier.size(STREAK_ICON_SIZE),
                     tint = AccentColor
                 )
-                Spacer(modifier = Modifier.size(STREAK_SPACER_WIDTH)) // Increased spacer
+                Spacer(modifier = Modifier.size(STREAK_SPACER_WIDTH))
             }
             Text(
-                text = "$currentStreak Days",
-                style = MaterialTheme.typography.headlineSmall.copy( // Using a larger base style
-                    fontSize = STREAK_TEXT_SIZE // Explicitly set increased font size
+                text = "${currentStreak} Days",
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontSize = STREAK_TEXT_SIZE
                 ),
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface

@@ -28,6 +28,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import si.uni_lj.fe.tunv.alarmmeup.R
+import si.uni_lj.fe.tunv.alarmmeup.ui.components.ChallengeEnum
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.AccentColor
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.BlackColor
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.WhiteColor
@@ -37,7 +38,8 @@ fun WinScreen(
     currentStreak: Int,
     numOfXP: Int,
     numOfSunCoins: Int,
-    onCollect: () -> Unit
+    onCollect: (ChallengeEnum, Boolean, Boolean) -> Unit,
+    gameEnum: ChallengeEnum
 ) {
     Column(
         modifier = Modifier
@@ -90,7 +92,7 @@ fun WinScreen(
         }
         Spacer(modifier = Modifier.height(120.dp))
         Button(
-            onClick = onCollect,
+            onClick = { onCollect(gameEnum, true, true)},
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = WhiteColor,

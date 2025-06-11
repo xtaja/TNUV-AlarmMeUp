@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -20,9 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,13 +28,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import si.uni_lj.fe.tunv.alarmmeup.R
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.zIndex
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
-import si.uni_lj.fe.tunv.alarmmeup.R
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.AccentColor
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.SecondaryColor
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.TertiaryColor
@@ -54,139 +52,22 @@ data class Leader(
 
 @Composable
 fun LeaderboardScreen(leaders: List<Leader>) {
-    Column(
+    LazyColumn (
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Spacer(modifier = Modifier.height(16.dp))
-        AvatarCluster(leaders = leaders)
-        Spacer(modifier = Modifier.height(24.dp))
-        LeaderboardList(leaders)
-    }
-}
-
-@Composable
-fun AvatarCluster(leaders: List<Leader>) {
-    val center = leaders.getOrNull(0)
-    val left = leaders.getOrNull(1)
-    val right = leaders.getOrNull(2)
-
-    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-        center?.let {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.size(120.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .background(WhiteColor, shape = CircleShape)
-                )
-                Image(
-                    painter = painterResource(it.avatarRes),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(CircleShape)
-                )
-                FlameXpBubble(flames = it.flames, xp = it.xp, fontSize = 12.sp, iconSize = 16.dp, padding = 8.dp)
-            }
-        }
-        left?.let {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .size(80.dp)
-                    .offset(x = -100.dp, y = 40.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(70.dp)
-                        .background(WhiteColor, shape = CircleShape)
-                )
-                Image(
-                    painter = painterResource(it.avatarRes),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(60.dp)
-                        .clip(CircleShape)
-                )
-                FlameXpBubble(flames = it.flames, xp = it.xp, fontSize = 10.sp, iconSize = 12.dp, padding = 6.dp)
-            }
-        }
-        right?.let {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .size(80.dp)
-                    .offset(x = 100.dp, y = 40.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(70.dp)
-                        .background(WhiteColor, shape = CircleShape)
-                )
-                Image(
-                    painter = painterResource(it.avatarRes),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(60.dp)
-                        .clip(CircleShape)
-                )
-                FlameXpBubble(flames = it.flames, xp = it.xp, fontSize = 10.sp, iconSize = 12.dp, padding = 6.dp)
-            }
-        }
-    }
-}
-
-@Composable
-fun BoxScope.FlameXpBubble(
-    flames: Int,
-    xp: Int,
-    fontSize: androidx.compose.ui.unit.TextUnit,
-    iconSize: androidx.compose.ui.unit.Dp,
-    padding: androidx.compose.ui.unit.Dp
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .align(Alignment.BottomCenter)
-            .offset(y = padding)
-            .background(color = TertiaryColor, RoundedCornerShape(12.dp))
-            .padding(padding)
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_streak),
-                contentDescription = "Flames",
-                modifier = Modifier.size(iconSize),
-                tint = AccentColor
-            )
-            Spacer(Modifier.width(2.dp))
-            Text(text = "$flames", fontSize = fontSize)
-        }
-        Text(
-            text = buildAnnotatedString {
-                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                    append("XP ")
-                }
-                append("$xp")
-            },
-            fontSize = fontSize
-        )
-    }
-}
-
-@Composable
-fun LeaderboardList(leaders: List<Leader>) {
-    LazyColumn(
-        modifier = Modifier.fillMaxWidth(),
+            .padding(horizontal = 16.dp),
         contentPadding = PaddingValues(vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
-        items(leaders) { leader ->
-            Box(modifier = Modifier.fillMaxWidth()) {
+        item { AvatarCluster(leaders = leaders) }
+
+        item { Spacer(modifier = Modifier.height(75.dp)) }
+
+        items(leaders.subList(3, leaders.size)) { leader ->
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
@@ -266,6 +147,258 @@ fun LeaderboardList(leaders: List<Leader>) {
                         .align(Alignment.CenterStart)
                         .zIndex(2f)
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun CircleBubble(
+    text: String,
+    icon: Boolean = false,
+    modifier: Modifier = Modifier,
+    size: Dp = 50.dp,
+    color: Color = TertiaryColor,
+    contentAlignment: Alignment = Alignment.Center,
+    offset: Dp = 0.dp,
+    zindex: Float,
+    sizeFont: TextUnit = 15.sp
+) {
+    Box(
+        modifier = modifier
+            .size(size)
+            .background(color = color, shape = CircleShape)
+            .zIndex(zindex),
+        contentAlignment = contentAlignment,
+    ) {
+
+        if (icon) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_streak),
+                    contentDescription = "Flames",
+                    modifier = Modifier.size(15.dp)
+                )
+                Spacer(Modifier.width(2.dp))
+                Text(
+                    text = text,
+                    fontSize = sizeFont,
+                    color = Color.Black,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.offset(y = offset),
+                )
+            }
+        } else {
+            Text(
+                text = text,
+                fontSize = sizeFont,
+                color = Color.Black,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.offset(y = offset),
+            )
+        }
+    }
+}
+
+
+
+@Composable
+fun AvatarCluster(leaders: List<Leader>) {
+    val center = leaders.getOrNull(0)
+    val left = leaders.getOrNull(1)
+    val right = leaders.getOrNull(2)
+
+    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        center?.let {
+            Box(
+                modifier = Modifier
+                    .size(250.dp)
+                    .height(250.dp)
+                    .zIndex(1f),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_day_sunny_color_icon),
+                    contentDescription = "Sun background",
+                    modifier = Modifier
+                        .size(250.dp)
+                )
+
+                Box(
+                    modifier = Modifier
+                        .offset(x = (-21).dp, y = (-11).dp)
+                ){
+                    CircleBubble(
+                        text = it.handle,
+                        size = 70.dp,
+                        contentAlignment = Alignment.TopCenter,
+                        modifier = Modifier
+                            .offset(x = (-60).dp, y = (-30).dp),
+                        offset = (20).dp,
+                        zindex = (1f)
+                    )
+
+                    CircleBubble(
+                        text = "XP ${it.xp}",
+                        size = 60.dp,
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .offset(x = (-70).dp, y = (10).dp),
+                        offset = (0).dp,
+                        zindex = (2f),
+                        sizeFont = 10.sp
+                    )
+
+                    CircleBubble(
+                        text = it.flames.toString(),
+                        icon = true,
+                        size = 40.dp,
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .offset(x = (-90).dp, y = (0).dp),
+                        offset = (0).dp,
+                        zindex = (3f),
+                    )
+
+                }
+
+                Image(
+                    painter = painterResource(id = it.avatarRes),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(150.dp)
+                        .clip(CircleShape)
+                )
+
+            }
+        }
+        left?.let {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(250.dp)
+                    .height(250.dp)
+                    .offset(x = (-50).dp, y = 100.dp)
+                    .zIndex(2f),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(117.dp)
+                        .background(WhiteColor, shape = CircleShape)
+                )
+
+                Box(
+                    modifier = Modifier
+                        .offset(x = (10).dp, y = (0).dp)
+                ){
+                    CircleBubble(
+                        text = it.handle,
+                        size = 70.dp,
+                        contentAlignment = Alignment.TopCenter,
+                        modifier = Modifier
+                            .offset(x = (-60).dp, y = (-30).dp),
+                        offset = (20).dp,
+                        zindex = (1f)
+                    )
+
+                    CircleBubble(
+                        text = "XP ${it.xp}",
+                        size = 60.dp,
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .offset(x = (-70).dp, y = (10).dp),
+                        offset = (0).dp,
+                        zindex = (2f),
+                        sizeFont = 10.sp
+                    )
+
+                    CircleBubble(
+                        text = it.flames.toString(),
+                        icon = true,
+                        size = 40.dp,
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .offset(x = (-90).dp, y = (0).dp),
+                        offset = (0).dp,
+                        zindex = (3f),
+                    )
+
+                }
+
+                Image(
+                    painter = painterResource(it.avatarRes),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clip(CircleShape)
+                )
+
+
+
+            }
+        }
+        right?.let {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(250.dp)
+                    .height(250.dp)
+                    .offset(x = 50.dp, y = 110.dp)
+                    .zIndex(3f),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(97.dp)
+                        .background(WhiteColor, shape = CircleShape)
+                )
+
+                Box(
+                    modifier = Modifier
+                        .offset(x = (120).dp, y = (30).dp)
+                ){
+                    CircleBubble(
+                        text = it.handle,
+                        size = 70.dp,
+                        contentAlignment = Alignment.TopCenter,
+                        modifier = Modifier
+                            .offset(x = (-60).dp, y = (-30).dp),
+                        offset = (20).dp,
+                        zindex = (1f)
+                    )
+
+                    CircleBubble(
+                        text = "XP ${it.xp}",
+                        size = 60.dp,
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .offset(x = (-70).dp, y = (10).dp),
+                        offset = (0).dp,
+                        zindex = (2f),
+                        sizeFont = 10.sp
+                    )
+
+                    CircleBubble(
+                        text = it.flames.toString(),
+                        icon = true,
+                        size = 40.dp,
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .offset(x = (-20).dp, y = (20).dp),
+                        offset = (0).dp,
+                        zindex = (3f),
+                    )
+
+                }
+
+                Image(
+                    painter = painterResource(it.avatarRes),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(CircleShape)
+                )
+
+
             }
         }
     }
