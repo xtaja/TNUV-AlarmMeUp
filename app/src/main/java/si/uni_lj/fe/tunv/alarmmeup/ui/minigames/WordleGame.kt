@@ -42,6 +42,7 @@ import si.uni_lj.fe.tunv.alarmmeup.ui.components.ChallengeEnum
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.ExitButton
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.SessionRepo
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.BlackColor
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.GrayColor
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.Green19
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.MainColor
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.WhiteColor
@@ -73,21 +74,26 @@ fun WordleGame(
     val words = inputStream.bufferedReader().readLines()
         .map { it.trim().uppercase() }
 
-    val answer by remember { mutableStateOf(words.random()) }
+    var resetKey by remember { mutableStateOf(0) }
+    val answer by remember(resetKey) { mutableStateOf(words.random()) }
 
-    var guesses by remember { mutableStateOf(List(maxGuesses) { List(wordLength) { LetterBox(null) } }) }
-    var currentGuess by remember { mutableStateOf("") }
-    var currentRow by remember { mutableStateOf(0) }
-    var isFinished by remember { mutableStateOf(false) }
-    var isWin by remember { mutableStateOf(false) }
+    var guesses by remember(resetKey) { mutableStateOf(List(maxGuesses) { List(wordLength) { LetterBox(null) } }) }
+    var currentGuess by remember(resetKey) { mutableStateOf("") }
+    var currentRow by remember(resetKey) { mutableStateOf(0) }
+    var isFinished by remember(resetKey) { mutableStateOf(false) }
+    var isWin by remember(resetKey) { mutableStateOf(false) }
     var showExitDialog by remember { mutableStateOf(false) }
     var showInvalidWord by remember { mutableStateOf(false) }
-    var keyboardState by remember { mutableStateOf(mutableMapOf<Char, LetterState>()) }
+    var keyboardState by remember(resetKey) { mutableStateOf(mutableMapOf<Char, LetterState>()) }
+    var showTryAgain by remember { mutableStateOf(false) }
 
     LaunchedEffect(isFinished) {
         if (isFinished && isWin) {
             sessionRepo.addXPAndCoins(numOfXP, numOfSunCoins)
             sessionRepo.setGameCompletedToday()
+        }
+        if (isFinished && !isWin) {
+            showTryAgain = true
         }
     }
 
@@ -132,14 +138,17 @@ fun WordleGame(
     }
 
     if (isFinished) {
-        WinScreen(
-            currentStreak = if (isWin) 5 else 0,
-            numOfXP = if (isWin) numOfXP else 0,
-            numOfSunCoins = if (isWin) numOfSunCoins else 0,
-            onCollect = onExit,
+        if (isWin) {
+            WinScreen(
+                currentStreak = 5,
+                numOfXP = numOfXP,
+                numOfSunCoins = numOfSunCoins,
+                onCollect = onExit,
                 gameEnum = ChallengeEnum.Wordle
-        )
-    } else {
+            )
+        }
+    }
+    if (!isFinished || (isFinished && !isWin)) {
         if (showExitDialog) {
             AlertDialog(
                 onDismissRequest = { showExitDialog = false },
@@ -204,7 +213,7 @@ fun WordleGame(
                             val color = when (box.state) {
                                 LetterState.CORRECT -> Green19
                                 LetterState.PRESENT -> Yellow19
-                                LetterState.ABSENT -> Color.LightGray
+                                LetterState.ABSENT -> GrayColor
                                 else -> WhiteColor
                             }
                             Surface(
@@ -220,157 +229,177 @@ fun WordleGame(
                                         text = box.letter?.toString() ?: "",
                                         fontSize = 32.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = if (box.state == LetterState.UNSET) Color.Black else Color.White
+                                        color = if (box.state == LetterState.UNSET) BlackColor else WhiteColor
                                     )
                                 }
                             }
                         }
                     }
                 }
-                // Keyboard
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Spacer(modifier = Modifier.height(100.dp))
-                    for (row in KEYBOARD_ROWS) {
-                        Row(
-                            horizontalArrangement = Arrangement.Center,
-                            modifier = Modifier.padding(bottom = 4.dp)
+                //failure UI
+                if (isFinished && !isWin) {
+                    Spacer(modifier = Modifier.height(40.dp))
+                    Text("The word was: $answer", fontSize = 18.sp, color = BlackColor)
+                    Spacer(modifier = Modifier.height(24.dp))
+                    if (showTryAgain) {
+                        Button(
+                            onClick = {
+                                resetKey++
+                                showTryAgain = false
+                            },
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = WhiteColor,
+                                contentColor = BlackColor
+                            ),
+                            modifier = Modifier.shadow(10.dp, RoundedCornerShape(16.dp))
                         ) {
-                            for (key in row) {
-                                val state = keyboardState[key] ?: LetterState.UNSET
-                                val color = when (state) {
-                                    LetterState.CORRECT -> Green19
-                                    LetterState.PRESENT -> Yellow19
-                                    LetterState.ABSENT -> Color.LightGray
-                                    else -> Color.White
-                                }
-                                Surface(
-                                    modifier = Modifier
-                                        .padding(1.dp)
-                                        .size(36.dp)
-                                        .shadow(4.dp, RoundedCornerShape(6.dp))
-                                        .let {
-                                            if (!isFinished && currentGuess.length < wordLength) {
-                                                it.then(Modifier
-                                                    .clickable {
-                                                        if (!isFinished && currentGuess.length < wordLength) {
-                                                            currentGuess += key
-                                                        }
-                                                    }
-                                                )
-                                            } else it
-                                        },
-                                    color = color,
-                                    shape = RoundedCornerShape(6.dp)
-                                ) {
-                                    Box(
-                                        contentAlignment = Alignment.Center,
-                                        modifier = Modifier.fillMaxSize()
-                                    ) {
-                                        Text(
-                                            key.toString(),
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 18.sp,
-                                            color = if (state == LetterState.UNSET) BlackColor else WhiteColor
-                                        )
+                            Text("TRY AGAIN", fontSize = 22.sp)
+                        }
+                    }
+                } else {
+                    //Keyboard
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Spacer(modifier = Modifier.height(100.dp))
+                        for (row in KEYBOARD_ROWS) {
+                            Row(
+                                horizontalArrangement = Arrangement.Center,
+                                modifier = Modifier.padding(bottom = 4.dp)
+                            ) {
+                                for (key in row) {
+                                    val state = keyboardState[key] ?: LetterState.UNSET
+                                    val color = when (state) {
+                                        LetterState.CORRECT -> Green19
+                                        LetterState.PRESENT -> Yellow19
+                                        LetterState.ABSENT -> GrayColor
+                                        
+                                        else -> WhiteColor
                                     }
-                                }
-                            }
-                            if (row == "ZXCVBNM") {
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Surface(
-                                    modifier = Modifier
-                                        .padding(1.dp)
-                                        .size(54.dp, 36.dp)
-                                        .shadow(4.dp, RoundedCornerShape(6.dp)),
-                                    color = MainColor,
-                                    shape = RoundedCornerShape(6.dp)
-                                ) {
-                                    Box(
-                                        contentAlignment = Alignment.Center,
-                                        modifier = Modifier.fillMaxSize()
-                                    ) {
-                                        Button(
-                                            onClick = {
-                                                if (currentGuess.isNotEmpty() && !isFinished) {
-                                                    currentGuess = currentGuess.dropLast(1)
-                                                }
+                                    Surface(
+                                        modifier = Modifier
+                                            .padding(1.dp)
+                                            .size(36.dp)
+                                            .shadow(4.dp, RoundedCornerShape(6.dp))
+                                            .let {
+                                                if (!isFinished && currentGuess.length < wordLength) {
+                                                    it.then(Modifier
+                                                        .clickable {
+                                                            if (!isFinished && currentGuess.length < wordLength) {
+                                                                currentGuess += key
+                                                            }
+                                                        }
+                                                    )
+                                                } else it
                                             },
-                                            enabled = !isFinished && currentGuess.isNotEmpty(),
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .size(54.dp, 36.dp)
-                                                .padding(1.dp),
-                                            contentPadding = PaddingValues(0.dp),
-                                            shape = RoundedCornerShape(6.dp),
-                                            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent, disabledContainerColor = Color.Transparent)
+                                        color = color,
+                                        shape = RoundedCornerShape(6.dp)
+                                    ) {
+                                        Box(
+                                            contentAlignment = Alignment.Center,
+                                            modifier = Modifier.fillMaxSize()
                                         ) {
-                                            Text("⌫", fontWeight = FontWeight.Bold, fontSize = 18.sp,color = WhiteColor)
+                                            Text(
+                                                key.toString(),
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 18.sp,
+                                                color = if (state == LetterState.UNSET) BlackColor else WhiteColor
+                                            )
                                         }
                                     }
                                 }
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Surface(
-                                    modifier = Modifier
-                                        .padding(1.dp)
-                                        .size(54.dp, 36.dp)
-                                        .shadow(4.dp, RoundedCornerShape(6.dp)),
-                                    color = MainColor,
-                                    shape = RoundedCornerShape(6.dp)
-                                ) {
-                                    Box(
-                                        contentAlignment = Alignment.Center,
-                                        modifier = Modifier.fillMaxSize()
+                                if (row == "ZXCVBNM") {
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Surface(
+                                        modifier = Modifier
+                                            .padding(1.dp)
+                                            .size(54.dp, 36.dp)
+                                            .shadow(4.dp, RoundedCornerShape(6.dp)),
+                                        color = MainColor,
+                                        shape = RoundedCornerShape(6.dp)
                                     ) {
-                                        Button(
-                                            onClick = {
-                                                if (currentGuess.length == wordLength && !isFinished) {
-                                                    val guessUpper = currentGuess.uppercase()
-                                                    if (words.contains(guessUpper)) {
-                                                        val guessResult = checkGuess(guessUpper)
-                                                        val newGuesses = guesses.toMutableList()
-                                                        newGuesses[currentRow] = guessResult
-                                                        guesses = newGuesses
-                                                        updateKeyboard(guessResult)
-                                                        if (guessUpper == answer) {
-                                                            isWin = true
-                                                            isFinished = true
-                                                        } else if (currentRow == maxGuesses - 1) {
-                                                            isWin = false
-                                                            isFinished = true
-                                                        } else {
-                                                            currentRow += 1
-                                                            currentGuess = ""
-                                                        }
-                                                    } else {
-                                                        showInvalidWord = true
-                                                    }
-                                                }
-                                            },
-                                            enabled = !isFinished && currentGuess.length == wordLength,
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .size(54.dp, 36.dp)
-                                                .padding(1.dp),
-                                            contentPadding = PaddingValues(0.dp),
-                                            shape = RoundedCornerShape(6.dp),
-                                            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent, disabledContainerColor =Color.Transparent )
+                                        Box(
+                                            contentAlignment = Alignment.Center,
+                                            modifier = Modifier.fillMaxSize()
                                         ) {
-                                            Text("ENTER", fontWeight = FontWeight.Bold, fontSize = 14.sp,color = WhiteColor)
+                                            Button(
+                                                onClick = {
+                                                    if (currentGuess.isNotEmpty() && !isFinished) {
+                                                        currentGuess = currentGuess.dropLast(1)
+                                                    }
+                                                },
+                                                enabled = !isFinished && currentGuess.isNotEmpty(),
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .size(54.dp, 36.dp)
+                                                    .padding(1.dp),
+                                                contentPadding = PaddingValues(0.dp),
+                                                shape = RoundedCornerShape(6.dp),
+                                                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent, disabledContainerColor = Color.Transparent)
+                                            ) {
+                                                Text("⌫", fontWeight = FontWeight.Bold, fontSize = 18.sp,color = WhiteColor)
+                                            }
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Surface(
+                                        modifier = Modifier
+                                            .padding(1.dp)
+                                            .size(54.dp, 36.dp)
+                                            .shadow(4.dp, RoundedCornerShape(6.dp)),
+                                        color = MainColor,
+                                        shape = RoundedCornerShape(6.dp)
+                                    ) {
+                                        Box(
+                                            contentAlignment = Alignment.Center,
+                                            modifier = Modifier.fillMaxSize()
+                                        ) {
+                                            Button(
+                                                onClick = {
+                                                    if (currentGuess.length == wordLength && !isFinished) {
+                                                        val guessUpper = currentGuess.uppercase()
+                                                        if (words.contains(guessUpper)) {
+                                                            val guessResult = checkGuess(guessUpper)
+                                                            val newGuesses = guesses.toMutableList()
+                                                            newGuesses[currentRow] = guessResult
+                                                            guesses = newGuesses
+                                                            updateKeyboard(guessResult)
+                                                            if (guessUpper == answer) {
+                                                                isWin = true
+                                                                isFinished = true
+                                                            } else if (currentRow == maxGuesses - 1) {
+                                                                isWin = false
+                                                                isFinished = true
+                                                            } else {
+                                                                currentRow += 1
+                                                                currentGuess = ""
+                                                            }
+                                                        } else {
+                                                            showInvalidWord = true
+                                                        }
+                                                    }
+                                                },
+                                                enabled = !isFinished && currentGuess.length == wordLength,
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .size(54.dp, 36.dp)
+                                                    .padding(1.dp),
+                                                contentPadding = PaddingValues(0.dp),
+                                                shape = RoundedCornerShape(6.dp),
+                                                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent, disabledContainerColor =Color.Transparent )
+                                            ) {
+                                                Text("ENTER", fontWeight = FontWeight.Bold, fontSize = 14.sp,color = WhiteColor)
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
                     }
-                }
-                if (isFinished && !isWin) {
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text("The word was: $answer", fontSize = 18.sp, color = Color.Gray)
                 }
             }
         }
