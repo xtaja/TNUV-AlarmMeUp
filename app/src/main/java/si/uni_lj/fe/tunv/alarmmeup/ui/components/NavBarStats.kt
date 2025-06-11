@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
@@ -68,41 +69,45 @@ fun NavBarStats(
             // XP row
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    text = "XP",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = textColor
-                )
-                Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = numOfXP.toString(),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Normal,
                     color = textColor
                 )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "XP",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = textColor
+                )
             }
             Spacer(modifier = Modifier.height(2.dp))
-            // Suncoin row
+// Suncoin row
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_suncoin),
-                    contentDescription = "suncoin",
-                    modifier = Modifier.size(28.dp),
-                    tint = textColor
-                )
-                Spacer(modifier = Modifier.width(4.dp))
+                Spacer(modifier = Modifier.width(2.dp))
                 Text(
                     text = numOfSunCoins.toString(),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Normal,
                     color = textColor
                 )
+                Spacer(modifier = Modifier.width(4.dp))
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_suncoin),
+                    contentDescription = "suncoin",
+                    modifier = Modifier.size(27.dp),
+                    tint = textColor
+                )
+
             }
         }
 

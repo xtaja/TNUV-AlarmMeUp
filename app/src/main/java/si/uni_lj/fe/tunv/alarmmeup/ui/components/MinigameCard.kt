@@ -22,9 +22,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import si.uni_lj.fe.tunv.alarmmeup.ui.theme.AccentColor
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.BlackColor
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.GrayColor
-import si.uni_lj.fe.tunv.alarmmeup.ui.theme.MainColor
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.WhiteColor
 
 @Composable
@@ -56,12 +56,12 @@ fun MinigameCard(
                     painter = painterResource(id = iconRes),
                     contentDescription = name,
                     modifier = Modifier.size(48.dp),
-                    tint = MainColor
+                    tint = GrayColor
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(name, fontWeight = FontWeight.Normal, fontSize = 16.sp, color = BlackColor)
                 Spacer(modifier = Modifier.height(4.dp))
-                Text("+ $xp XP", fontSize = 14.sp, color = GrayColor, fontWeight = FontWeight.Bold)
+                Text("+ $xp XP", fontSize = 14.sp, color = AccentColor, fontWeight = FontWeight.Bold)
             }
         }
     }
