@@ -36,7 +36,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
@@ -53,7 +52,6 @@ import si.uni_lj.fe.tunv.alarmmeup.ui.ProfileSettingsScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.SettingsScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.StoreScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.StreakScreen
-import si.uni_lj.fe.tunv.alarmmeup.ui.WakeUpScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.NavBar
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.NavBarButton
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.NavBarStats
@@ -355,34 +353,58 @@ fun MainScreen(modifier: Modifier = Modifier, onGoogleClick: () -> Unit) {
                     goToAuthorizationScreen = { selectedScreen = "Auth" }
                 )
                 "MathGame" -> MathGame(
-                    onExit = {
-                        forceHomeScreen = true
-                        showMorningScreen = false
-                        selectedScreen = "Home"
+                    onExit = { fromWinScreen ->
+                        if (fromWinScreen) {
+                            forceHomeScreen = true
+                            showMorningScreen = false
+                            selectedScreen = "Home"
+                        } else {
+                            forceHomeScreen = false
+                            showMorningScreen = true
+                            selectedScreen = "Home"
+                        }
                     },
                     sessionRepo = sessionRepo
                 )
                 "TypingGame" -> TypingGame(
-                    onExit = {
-                        forceHomeScreen = true
-                        showMorningScreen = false
-                        selectedScreen = "Home"
+                    onExit = { fromWinScreen ->
+                        if (fromWinScreen) {
+                            forceHomeScreen = true
+                            showMorningScreen = false
+                            selectedScreen = "Home"
+                        } else {
+                            forceHomeScreen = false
+                            showMorningScreen = true
+                            selectedScreen = "Home"
+                        }
                     },
                     sessionRepo = sessionRepo
                 )
                 "MemoryGame" -> MemoryGame(
-                    onExit = {
-                        forceHomeScreen = true
-                        showMorningScreen = false
-                        selectedScreen = "Home"
+                    onExit = { fromWinScreen ->
+                        if (fromWinScreen) {
+                            forceHomeScreen = true
+                            showMorningScreen = false
+                            selectedScreen = "Home"
+                        } else {
+                            forceHomeScreen = false
+                            showMorningScreen = true
+                            selectedScreen = "Home"
+                        }
                     },
                     sessionRepo = sessionRepo
                 )
                 "WordleGame" -> WordleGame(
-                    onExit = {
-                        forceHomeScreen = true
-                        showMorningScreen = false
-                        selectedScreen = "Home"
+                    onExit = { fromWinScreen ->
+                        if (fromWinScreen) {
+                            forceHomeScreen = true
+                            showMorningScreen = false
+                            selectedScreen = "Home"
+                        } else {
+                            forceHomeScreen = false
+                            showMorningScreen = true
+                            selectedScreen = "Home"
+                        }
                     },
                     sessionRepo = sessionRepo
                 )

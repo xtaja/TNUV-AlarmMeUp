@@ -43,7 +43,6 @@ import si.uni_lj.fe.tunv.alarmmeup.ui.data.SessionRepo
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.BlackColor
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.Green19
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.MainColor
-import si.uni_lj.fe.tunv.alarmmeup.ui.theme.Orange19
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.WhiteColor
 import si.uni_lj.fe.tunv.alarmmeup.ui.theme.Yellow19
 
@@ -60,7 +59,7 @@ data class LetterBox(val letter: Char?, val state: LetterState = LetterState.UNS
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun WordleGame(
-    onExit: () -> Unit,
+    onExit: (fromWinScreen: Boolean) -> Unit,
     sessionRepo: SessionRepo
 ) {
     val numOfXP = 50
@@ -136,7 +135,7 @@ fun WordleGame(
             currentStreak = if (isWin) 5 else 0,
             numOfXP = if (isWin) numOfXP else 0,
             numOfSunCoins = if (isWin) numOfSunCoins else 0,
-            onCollect = onExit
+            onCollect = { onExit(true) }
         )
     } else {
         if (showExitDialog) {
@@ -145,7 +144,7 @@ fun WordleGame(
                 title = { Text("Exit Game?") },
                 text = { Text("If you exit now, you will lose all your progress in this minigame.") },
                 confirmButton = {
-                    TextButton(onClick = { showExitDialog = false; onExit() }) {
+                    TextButton(onClick = { showExitDialog = false; onExit(false) }) {
                         Text("Exit")
                     }
                 },

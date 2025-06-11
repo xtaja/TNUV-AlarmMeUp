@@ -36,14 +36,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.launch
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 import si.uni_lj.fe.tunv.alarmmeup.AlarmReceiver
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.RadialTimePicker
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.SessionRepo
@@ -168,7 +167,7 @@ fun HomeScreen(
                             painter = painterResource(iconResId),
                             contentDescription = null,
                             modifier = Modifier
-                                .size(30.dp)
+                                .size(35.dp)
                                 .align(Alignment.CenterVertically)
                                 .padding(end = 8.dp),
                             tint = AccentColor

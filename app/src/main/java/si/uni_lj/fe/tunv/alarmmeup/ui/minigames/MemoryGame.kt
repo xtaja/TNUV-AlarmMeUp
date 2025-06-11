@@ -38,7 +38,7 @@ data class MemoryCard(val id: Int, val symbol: String, var isRevealed: Boolean =
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MemoryGame(
-    onExit: () -> Unit,
+    onExit: (fromWinScreen: Boolean) -> Unit,
     sessionRepo: SessionRepo
 ) {
     var numOfXP = 50
@@ -92,7 +92,7 @@ fun MemoryGame(
             currentStreak = 5,
             numOfXP = numOfXP,
             numOfSunCoins = numOfSunCoins,
-            onCollect = onExit
+            onCollect = { onExit(true) }
         )
     } else {
         if (showExitDialog) {
@@ -101,7 +101,7 @@ fun MemoryGame(
                 title = { Text("Exit Game?") },
                 text = { Text("If you exit now, you will lose all your progress in this minigame.") },
                 confirmButton = {
-                    TextButton(onClick = { showExitDialog = false; onExit() }) {
+                    TextButton(onClick = { showExitDialog = false; onExit(false) }) {
                         Text("Exit")
                     }
                 },
@@ -180,3 +180,4 @@ fun MemoryGrid(cards: List<MemoryCard>, onCardClick: (Int) -> Unit) {
         }
     }
 }
+

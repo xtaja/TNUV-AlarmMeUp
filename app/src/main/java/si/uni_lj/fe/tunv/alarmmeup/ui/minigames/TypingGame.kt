@@ -1,5 +1,7 @@
 package si.uni_lj.fe.tunv.alarmmeup.ui.minigames
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -23,9 +25,10 @@ import si.uni_lj.fe.tunv.alarmmeup.ui.WinScreen
 import si.uni_lj.fe.tunv.alarmmeup.ui.components.ExitButton
 import si.uni_lj.fe.tunv.alarmmeup.ui.data.SessionRepo
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TypingGame(
-    onExit: () -> Unit,
+    onExit: (fromWinScreen: Boolean) -> Unit,
     sessionRepo: SessionRepo
 ) {
     var numOfXP = 50
@@ -43,7 +46,7 @@ fun TypingGame(
             currentStreak = 5,
             numOfXP = numOfXP,
             numOfSunCoins = numOfSunCoins,
-            onCollect = onExit
+            onCollect = { onExit(true) }
         )
     } else {
         if (showExitDialog) {
@@ -52,7 +55,7 @@ fun TypingGame(
                 title = { Text("Exit Game?") },
                 text = { Text("If you exit now, you will lose all your progress in this minigame.") },
                 confirmButton = {
-                    TextButton(onClick = { showExitDialog = false; onExit() }) {
+                    TextButton(onClick = { showExitDialog = false; onExit(false) }) {
                         Text("Exit")
                     }
                 },
